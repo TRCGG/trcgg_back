@@ -1,5 +1,5 @@
 const axios = require('axios');
-const { champion_dic } = require('../constants/champions');
+const champion_dic  = require('../constants/champions');
 const managementService = require('./managementService');
 const { DateTime } = require('luxon');
 const { Readable } = require("stream");
@@ -29,40 +29,26 @@ const save = async (fileUrl, fileName, createUser, guildId) => {
 };
 
 /**
- * 바이트 배열로 변환하는 함수
- * @param {Readable} rawStream - 읽을 수 있는 스트림
- * @returns {Promise<Buffer|null>} - 변환된 Buffer 또는 null
- */
-const changeByteArray = async (rawStream) => {
-    try {
-        const chunks = [];
-        for await (const chunk of rawStream) {
-            if (chunk) {
-                chunks.push(chunk);
-            }
-        }
-        return Buffer.concat(chunks);
-    } catch (error) {
-        console.error(`Byte 변환 에러: ${error}`);
-        return null;
-    }
-};
-
-/**
  * 리플레이 데이터 파싱
  * @param {*} byte 
  * @returns 
  */
 const parseReplayData = async (byte) => {
-    const startIndex = byte.indexOf('{"gameLength":');
-    const endIndex = byte.lastIndexOf('"}');
+    // Buffer를 문자열로 변환
+    const byteString = byte.toString('utf-8');
 
-    if (!byte || byte.length === 0) {
+    const startIndex = byteString.indexOf('{"gameLength":');
+    const endIndex = byteString.lastIndexOf('"}');
+
+    if (!byteString || byteString.length === 0) {
         throw new Error("파싱 데이터가 없습니다");
     }
 
     try {
-        const data = byte.slice(startIndex, endIndex + 2).replace(/\\/g, '').replace(/"\[/g, '[').replace(/\]"/g, ']');
+        const data = byteString.slice(startIndex, endIndex + 2)
+            .replace(/\\/g, '')
+            .replace(/"\[/g, '[')
+            .replace(/\]"/g, ']');
         const rootNode = JSON.parse(data);
         const statsArray = rootNode.statsJson;
 
@@ -81,7 +67,7 @@ const parseReplayData = async (byte) => {
 const getInputStreamDiscordFile = async (fileUrl) => {
     try {
         const response = await axios.get(fileUrl, { responseType: 'arraybuffer' });
-        return BchangeByteArray(response.data);
+        return Buffer.from(response.data);
     } catch (error) {
         console.error(`파일 가져오기 에러: ${error}`);
         return null;
@@ -112,6 +98,8 @@ const saveData = async (statsArray, fileName, createUser, guildId) => {
     const resList = [];
     statsArray = JSON.parse(statsArray);
 
+    // TO-DO setMappingName 
+
     for (const d of statsArray) {
         try {
             resList.push({
@@ -119,7 +107,7 @@ const saveData = async (statsArray, fileName, createUser, guildId) => {
                 death: d['NUM_DEATHS'],
                 kill: d['CHAMPIONS_KILLED'],
                 position: d['TEAM_POSITION'].replace('JUNGLE', 'JUG').replace('BOTTOM', 'ADC').replace('UTILITY', 'SUP').replace('MIDDLE', 'MID'),
-                riot_name: setMappingName(d['NAME'].replace(' ', '').replace('й', 'n').trim(), guildId),
+                riot_name: await setMappingName(d['NAME'].replace(' ', '').replace('й', 'n').trim(), guildId),
                 game_result: d['WIN'].replace('Win', '승').replace('Fail', '패'),
                 champ_name: champion_dic[d['SKIN'].toLowerCase().trim()] || d['SKIN'].toLowerCase().trim(),
                 game_team: d['TEAM'].replace('100', 'blue').replace('200', 'red'),
@@ -143,7 +131,7 @@ const saveData = async (statsArray, fileName, createUser, guildId) => {
         }
     }
 
-    await managementService.postRecord(guildId, resList);
+    await managementService.postRecord(resList);
 };
 
 /**
@@ -152,8 +140,8 @@ const saveData = async (statsArray, fileName, createUser, guildId) => {
  * @param {*} guildId 
  * @returns 
  */
-const setMappingName = (name, guildId) => {
-    const mappings = managementService.getSubAccountName(guildId);
+const setMappingName = async (name, guildId) => {
+    const mappings = await managementService.getSubAccountName(guildId);
 
     for (const mapping of mappings) {
         if (name === mapping.sub_name) {

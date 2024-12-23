@@ -256,10 +256,8 @@ const postRecord = async (params) => {
       item.puuid,
       item.guild_id,
     ]);
-
-  for (const value of values) {
-    return await db.query(query, value);
-  }
+    await Promise.all(values.map(value => db.query(query, value)));
+  
 };
 
 /**

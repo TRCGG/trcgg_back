@@ -31,8 +31,8 @@ const postGuild = async (guild_id, guild_name) => {
   return await managementMapper.postGuild(guild_id, guild_name);
 };
 
-const postRecord = async (guild_id, riot_name, game_date, game_result, game_team, kill, death, assist, total_damage_champions, vision_bought) => {
-  return await managementMapper.postRecord(guild_id, riot_name, game_date, game_result, game_team, kill, death, assist, total_damage_champions, vision_bought);
+const postRecord = async (records) => {
+  return await managementMapper.postRecord(records);
 };
 
 const deleteRecord = async (guild_id, riot_name) => {
