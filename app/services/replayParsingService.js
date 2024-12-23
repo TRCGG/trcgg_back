@@ -2,6 +2,7 @@ const axios = require('axios');
 const { champion_dic } = require('../constants/champions');
 const managementService = require('./managementService');
 const { DateTime } = require('luxon');
+const { Readable } = require("stream");
 
 /**
  * 리플레이 저장
@@ -24,6 +25,26 @@ const save = async (fileUrl, fileName, createUser, guildId) => {
         }
     } else {
         return `:red_circle:등록실패: ${fileName} 중복된 리플 파일 등록`;
+    }
+};
+
+/**
+ * 바이트 배열로 변환하는 함수
+ * @param {Readable} rawStream - 읽을 수 있는 스트림
+ * @returns {Promise<Buffer|null>} - 변환된 Buffer 또는 null
+ */
+const changeByteArray = async (rawStream) => {
+    try {
+        const chunks = [];
+        for await (const chunk of rawStream) {
+            if (chunk) {
+                chunks.push(chunk);
+            }
+        }
+        return Buffer.concat(chunks);
+    } catch (error) {
+        console.error(`Byte 변환 에러: ${error}`);
+        return null;
     }
 };
 
@@ -60,7 +81,7 @@ const parseReplayData = async (byte) => {
 const getInputStreamDiscordFile = async (fileUrl) => {
     try {
         const response = await axios.get(fileUrl, { responseType: 'arraybuffer' });
-        return Buffer.from(response.data);
+        return BchangeByteArray(response.data);
     } catch (error) {
         console.error(`파일 가져오기 에러: ${error}`);
         return null;
