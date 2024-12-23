@@ -3,36 +3,36 @@
  */
 const recordMapper = require('../db/mapper/recordMapper');
 
-const getAllRecord = async (guild_id) => {
-  return await recordMapper.getAllRecord(guild_id);
+const getAllRecord = async (riot_name, guild_id) => {
+  return await recordMapper.getAllRecord(riot_name, guild_id);
 };
 
-const getRecentMonthRecord = async (guild_id) => {
-  return await recordMapper.getRecentMonthRecord(guild_id);
+const getRecentMonthRecord = async (riot_name, guild_id) => {
+  return await recordMapper.getRecentMonthRecord(riot_name, guild_id);
 };
 
 const getStatisticOfGame = async (guild_id, year, month) => {
   return await recordMapper.getStatisticOfGame(guild_id, year, month);
 };
 
-const getSynergisticTeammates = async (guild_id) => {
-  return await recordMapper.getSynergisticTeammates(guild_id);
+const getSynergisticTeammates = async (riot_name, guild_id) => {
+  return await recordMapper.getSynergisticTeammates(riot_name, guild_id);
 };
 
-const getNemesis = async (guild_id) => {
-  return await recordMapper.getNemesis(guild_id);
+const getNemesis = async (riot_name, guild_id) => {
+  return await recordMapper.getNemesis(riot_name, guild_id);
 };
 
-const getWinRateByPosition = async (guild_id) => {
-  return await recordMapper.getWinRateByPosition(guild_id);
+const getWinRateByPosition = async (riot_name, guild_id) => {
+  return await recordMapper.getWinRateByPosition(riot_name, guild_id);
 };
 
 const getRecordByGame = async (guild_id) => {
   return await recordMapper.getRecordByGame(guild_id);
 };
 
-const getRecentTenGamesByRiotName = async (guild_id, riot_name) => {
-  return await recordMapper.getRecentTenGamesByRiotName(guild_id, riot_name);
+const getRecentTenGamesByRiotName = async (riot_name, guild_id) => {
+  return await recordMapper.getRecentTenGamesByRiotName(riot_name, guild_id);
 };
 
 module.exports = {

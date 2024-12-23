@@ -25,6 +25,23 @@ const testConnection = async () => {
 };
 
 /**
+ * 데이터베이스 쿼리 결과값중 숫자 형태의 문자열을 숫자로 변환
+ * @param {Array} data - 쿼리 결과
+ * @returns {Array} - 숫자로 변환된 데이터
+ */
+const jsonify = (data) => {
+  return data.map(row => {
+    Object.keys(row).forEach(key => {
+      if (typeof row[key] === "string") {
+        const num = Number(row[key]);
+        row[key] = isNaN(num) ? row[key] : num;
+      }
+    });
+    return row;
+  });
+};
+
+/**
  * 데이터베이스 쿼리 실행
  * @param {string} text - SQL 쿼리
  * @param {Array} params - 쿼리 파라미터
@@ -33,7 +50,9 @@ const testConnection = async () => {
 const query = async (text, params) => {
   try {
     const res = await pool.query(text, params);
-    return { status: 200, data: res.rows };
+    const rows = res.rows;
+    rows["status"] = 200;
+    return jsonify(rows);
   } catch (error) {
     console.error('Database query error:', error);
     return { status: 500, message: 'Internal Server Error' };

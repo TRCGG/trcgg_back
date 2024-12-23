@@ -3,8 +3,8 @@
  */
 const championMapper = require('../db/mapper/championMapper');
 
-const getMostPicks = async (guild_id) => {
-  return await championMapper.getMostPicks(guild_id);
+const getMostPicks = async (riot_name, guild_id) => {
+  return await championMapper.getMostPicks(riot_name, guild_id);
 };
 
 const getMasterOfChampion = async (champ_name, guild_id) => {
