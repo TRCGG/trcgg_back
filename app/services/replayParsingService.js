@@ -158,7 +158,7 @@ const setMappingName = (name, mappings) => {
  * @returns 
  */
 const checkDuplicate = async (fileName, guildId) => {
-    const result = await managementService.getDuplicateReplay(guildId);
+    const result = await managementService.getDuplicateReplay(fileName, guildId);
     return result[0].count === 0;
 };
 

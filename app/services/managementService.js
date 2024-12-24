@@ -19,8 +19,8 @@ const deleteSubAccountName = async (guild_id, riot_name) => {
   return await managementMapper.deleteSubAccountName(guild_id, riot_name);
 };
 
-const getDuplicateReplay = async (guild_id) => {
-  return await managementMapper.getDuplicateReplay(guild_id);
+const getDuplicateReplay = async (guild_id, game_id) => {
+  return await managementMapper.getDuplicateReplay(guild_id, game_id);
 };
 
 const getGuild = async (guild_id) => {

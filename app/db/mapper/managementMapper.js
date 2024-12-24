@@ -107,7 +107,7 @@ const deleteSubAccountName = async (riot_name, guild_id) => {
  * @returns number
  * @description 중복 리플레이 조회
  */
-const getDuplicateReplay = async (game_id,guild_id) => {
+const getDuplicateReplay = async (game_id, guild_id) => {
   const result = await db.query(
     `
       SELECT
