@@ -23,8 +23,8 @@ const getNemesis = async (riot_name, guild_id) => {
   return await recordMapper.getNemesis(riot_name, guild_id);
 };
 
-const getWinRateByPosition = async (riot_name, guild_id) => {
-  return await recordMapper.getWinRateByPosition(riot_name, guild_id);
+const getWinRateByPosition = async (position, guild_id) => {
+  return await recordMapper.getWinRateByPosition(position, guild_id);
 };
 
 const getRecordByGame = async (game_id, guild_id) => {
