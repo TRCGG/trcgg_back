@@ -99,8 +99,7 @@ const saveData = async (statsArray, fileName, createUser, guildId) => {
     statsArray = JSON.parse(statsArray);
 
     // 부캐닉네임 매핑
-    const mappings = []
-    mappings.push(await managementService.getSubAccountName(guildId));
+    const mappings = await managementService.getSubAccountName(guildId);
 
     for (const d of statsArray) {
         try {
@@ -109,7 +108,7 @@ const saveData = async (statsArray, fileName, createUser, guildId) => {
                 death: d['NUM_DEATHS'],
                 kill: d['CHAMPIONS_KILLED'],
                 position: d['TEAM_POSITION'].replace('JUNGLE', 'JUG').replace('BOTTOM', 'ADC').replace('UTILITY', 'SUP').replace('MIDDLE', 'MID'),
-                riot_name: setMappingName(d['NAME'].replace(' ', '').replace('й', 'n').trim(), mappings),
+                riot_name: setMappingName(d['NAME'].replace(/\s/g, "").replace('й', 'n').trim(), mappings),
                 game_result: d['WIN'].replace('Win', '승').replace('Fail', '패'),
                 champ_name: champion_dic[d['SKIN'].toLowerCase().trim()] || d['SKIN'].toLowerCase().trim(),
                 game_team: d['TEAM'].replace('100', 'blue').replace('200', 'red'),
