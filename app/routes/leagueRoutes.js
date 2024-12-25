@@ -92,7 +92,7 @@ router.get("/getRecordOtherTeam/:riot_name/:guild_id", async (req, res) => {
 router.get("/master/:champ_name/:guild_id", async (req, res) => {
   const { champ_name, guild_id } = req.params;
   try {
-    const master_info = await championService.getMasterInfo(
+    const master_info = await championService.getMasterOfChampion(
       champ_name,
       guild_id
     );
@@ -238,6 +238,7 @@ router.post("/saveGuild", async (req, res) => {
 });
 
 // PUT =====================
+
 // 클랜원 탈퇴/복귀 처리
 router.put("/deleteYn", async (req, res) => {
   const { delete_yn, riot_name, guild_id } = req.body;
@@ -298,6 +299,8 @@ router.put("/mapping/riotName", async (req, res) => {
   }
 });
 
+// DELETE =====================
+
 // 리플 삭제
 router.delete("/game", async (req, res) => {
   const { game_id, guild_id } = req.body;
@@ -308,8 +311,6 @@ router.delete("/game", async (req, res) => {
     res.status(404).send(error.message);
   }
 });
-
-// DELETE =====================
 
 // 부캐 삭제
 router.delete("/mapping/subName", async (req, res) => {
