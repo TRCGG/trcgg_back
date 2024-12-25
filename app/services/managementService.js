@@ -35,8 +35,8 @@ const postRecord = async (records) => {
   return await managementMapper.postRecord(records);
 };
 
-const deleteRecord = async (guild_id, riot_name) => {
-  return await managementMapper.deleteRecord(guild_id, riot_name);
+const deleteRecord = async (game_id, guild_id) => {
+  return await managementMapper.deleteRecord(game_id, guild_id);
 };
 
 const putUserDeleteYN = async (guild_id, riot_name, delete_yn) => {
