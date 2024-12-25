@@ -48,8 +48,25 @@ const jsonify = (data) => {
  * @returns {Promise} - 쿼리 결과
  */
 const query = async (text, params) => {
+
   try {
+
+    // console.log('Executing Query:', {
+    //   text: text,
+    //   params: params
+    // });
+    
     const res = await pool.query(text, params);
+
+    if (['DELETE', 'UPDATE'].includes(res.command)) {
+      return res.rowCount;
+    }
+      
+    // console.log('Query Result:', {
+    //   rowCount: res.rowCount,
+    //   command: res.command
+    // });
+    
     const rows = res.rows;
     rows["status"] = 200;
     return jsonify(rows);
