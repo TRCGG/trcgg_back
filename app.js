@@ -3,6 +3,7 @@
  */
 const express = require("express");
 const cors = require("cors");
+const compression = require('compression');
 require('dotenv').config();
 const leagueRoutes = require('./app/routes/leagueRoutes');
 const db = require('./app/db/db');
@@ -12,7 +13,7 @@ const HOST = process.env.HOST || "localhost";
 const app = express();
 
 app.use(express.json());
-
+app.use(compression());
 app.use(cors({
   origin: '*',
   credentials: false,
