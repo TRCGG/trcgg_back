@@ -190,10 +190,6 @@ const postRecord = async (params) => {
              game_result,
              game_team,
              game_date,
-             create_date,
-             update_date,
-             delete_yn,
-             create_user,
              gold,
              ccing,
              time_played,
@@ -201,6 +197,12 @@ const postRecord = async (params) => {
              total_damage_taken,
              vision_score,
              vision_bought,
+             quadra_kills,
+             penta_kills,
+             create_date,
+             update_date,
+             delete_yn,
+             create_user,
              puuid,
              guild_id
            )
@@ -228,7 +230,9 @@ const postRecord = async (params) => {
              $20,
              $21,
              $22,
-             $23
+             $23,
+             $24,
+             $25
            )
     `;
     const values = params.map((item) => [
@@ -242,10 +246,6 @@ const postRecord = async (params) => {
       item.game_result,
       item.game_team,
       item.game_date,
-      new Date(),
-      new Date(),
-      item.delete_yn,
-      item.create_user,
       item.gold,
       item.ccing,
       item.time_played,
@@ -253,6 +253,12 @@ const postRecord = async (params) => {
       item.total_damage_taken,
       item.vision_score,
       item.vision_bought,
+      item.quadra_kills,
+      item.penta_kills,
+      new Date(),
+      new Date(),
+      item.delete_yn,
+      item.create_user,
       item.puuid,
       item.guild_id,
     ]);
