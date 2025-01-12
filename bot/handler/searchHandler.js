@@ -11,7 +11,7 @@ const botUtils = require('../botUtils');
 /**
  * !전적
  * @param {*} riot_name 
- * @param {*} guildId 
+ * @param {*} guild_Id 
  * @returns 
  */
 const searchRecord = async (riot_name, guild_id) => {
@@ -202,7 +202,7 @@ const searchRecord = async (riot_name, guild_id) => {
 /**
  * !최근전적 
  * @param {*} riot_name 
- * @param {*} guildId 
+ * @param {*} guild_Id 
  * @returns 
  */
 const searchRecentRecord = async (riot_name, guild_id) => {
@@ -235,7 +235,7 @@ const searchRecentRecord = async (riot_name, guild_id) => {
 /**
  * !결과 
  * @param {*} game_id 
- * @param {*} guildId 
+ * @param {*} guild_Id 
  * @returns 
  */
 
@@ -277,7 +277,7 @@ const searchGameResult = async (game_id, guild_id) => {
 /**
  * !장인 
  * @param {*} game_id 
- * @param {*} guildId 
+ * @param {*} guild_Id 
  * @returns 
  */
 const searchChampMaster = async (champ_name, guild_id) => {

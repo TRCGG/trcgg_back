@@ -7,28 +7,28 @@ const getSubAccountName = async (guild_id) => {
   return await managementMapper.getSubAccountName(guild_id);
 };
 
-const postSubAccountName = async (guild_id, riot_name, sub_account_name) => {
-  return await managementMapper.postSubAccountName(guild_id, riot_name, sub_account_name);
+const postSubAccountName = async (sub_account_name, riot_name, guild_id) => {
+  return await managementMapper.postSubAccountName(sub_account_name, riot_name, guild_id);
 };
 
-const putSubAccountName = async (guild_id, riot_name, sub_account_name) => {
-  return await managementMapper.putSubAccountName(guild_id, riot_name, sub_account_name);
+const putSubAccountName = async (riot_name, sub_account_name, guild_id) => {
+  return await managementMapper.putSubAccountName(riot_name, sub_account_name, guild_id);
 };
 
-const deleteSubAccountName = async (guild_id, riot_name) => {
-  return await managementMapper.deleteSubAccountName(guild_id, riot_name);
+const deleteSubAccountName = async (riot_name, guild_id) => {
+  return await managementMapper.deleteSubAccountName(riot_name, guild_id);
 };
 
-const getDuplicateReplay = async (guild_id, game_id) => {
-  return await managementMapper.getDuplicateReplay(guild_id, game_id);
+const getDuplicateReplay = async (game_id, guild_id) => {
+  return await managementMapper.getDuplicateReplay(game_id, guild_id);
 };
 
 const getGuild = async (guild_id) => {
   return await managementMapper.getGuild(guild_id);
 };
 
-const postGuild = async (guild_id, guild_name) => {
-  return await managementMapper.postGuild(guild_id, guild_name);
+const postGuild = async (guild_name, guild_id) => {
+  return await managementMapper.postGuild(guild_name, guild_id);
 };
 
 const postRecord = async (records) => {
@@ -39,16 +39,16 @@ const deleteRecord = async (game_id, guild_id) => {
   return await managementMapper.deleteRecord(game_id, guild_id);
 };
 
-const putUserDeleteYN = async (guild_id, riot_name, delete_yn) => {
-  return await managementMapper.putUserDeleteYN(guild_id, riot_name, delete_yn);
+const putUserDeleteYN = async (delete_yn, riot_name, guild_id) => {
+  return await managementMapper.putUserDeleteYN(delete_yn, riot_name, guild_id);
 };
 
-const putUserSubAccountDeleteYN = async (guild_id, riot_name, delete_yn) => {
-  return await managementMapper.putUserSubAccountDeleteYN(guild_id, riot_name, delete_yn);
+const putUserSubAccountDeleteYN = async (delete_yn, riot_name, guild_id) => {
+  return await managementMapper.putUserSubAccountDeleteYN(delete_yn, riot_name, guild_id);
 };
 
-const putName = async (guild_id, old_name, new_name) => {
-  return await managementMapper.putName(guild_id, old_name, new_name);
+const putName = async (new_name, old_name, guild_id) => {
+  return await managementMapper.putName(new_name, old_name, guild_id);
 };
 
 module.exports = {
