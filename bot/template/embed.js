@@ -9,20 +9,20 @@ const createEmbed = (jsonData) => {
     return ({embeds: [embed]});
 }
 
-// 라인 header 설정
-function setLineFieldHeader(dto, team) {
+// !라인 header 설정
+const setLineFieldHeader = (dto, team) => {
     let result = "";
 
     if (team === "blue") {
         result += ":blue_circle: 블루 ";
-        // 블루 팀이면서 승리한 경우
+        // 블루가 승리한 경우
         if (dto.game_team === "blue" && dto.game_result === "승") {
             result += ":v:";
         }
     } else {
         result += ":red_circle: 레드 ";
-        // 레드 팀이면서 패배한 경우
-        if (dto.game_team === "red" && dto.game_result === "패") {
+        // 블루가 패배한 경우
+        if (dto.game_team === "blue" && dto.game_result === "패") {
             result += ":v:";
         }
     }
@@ -30,13 +30,33 @@ function setLineFieldHeader(dto, team) {
     return result;
 }
 
+// !라인 value set
+const setLineValue = (records, team) => {
+    let result = [];
+
+    records.forEach(record => {
+        if (team === "blue" && record.game_team === "blue") {
+            // 블루 팀인 경우
+            result.push(` ${record.riot_name}   ${record.champ_name} ${record.kill}/${record.death}/${record.assist} `
+                        + `피해량: ${record.total_damage_champions} 핑와: ${record.vision_bought}\n`);
+        } else if (team === "red" && record.game_team === "red") {
+            // 레드 팀인 경우
+            result.push(` ${record.riot_name}   ${record.champ_name} ${record.kill}/${record.death}/${record.assist} `
+                        + `피해량: ${record.total_damage_champions} 핑와: ${record.vision_bought}\n`);
+        }
+    });
+
+    // 배열을 하나의 문자열로 반환
+    return result.join('');
+}
+
 // prefix: 승/패 - 승률 form
-function makeTeamStat(prefix, win, lose, win_rate) {
+const makeTeamStat = (prefix, win, lose, win_rate) => {
     return `${prefix}: ${win}승/${lose}패 ${win_rate}%\n`;
 }
 
 // prefix - 승/승률 - kda form
-function makeStat(prefix, win, win_rate, kda) {
+const makeStat = (prefix, win, win_rate, kda) => {
     let stats = `${prefix} - ${win}승/${win_rate}%`;
 
     if (kda !== 9999) {
@@ -49,7 +69,7 @@ function makeStat(prefix, win, win_rate, kda) {
 }
 
 // 통계 챔프/게임 form
-function makeStatsList(stats_list, type) {
+const makeStatsList = (stats_list, type) => {
     let result = [];
     let i = 1;
 
@@ -74,7 +94,7 @@ function makeStatsList(stats_list, type) {
 }
 
 // 필터링 및 정렬 함수
-function filterAndSortByWinRate(records, win_rate, greater_than, limit) {
+const filterAndSortByWinRate = (records, win_rate, greater_than, limit) => {
     let sorted_records;
     let filtered_records;
 
@@ -92,6 +112,7 @@ function filterAndSortByWinRate(records, win_rate, greater_than, limit) {
 module.exports = {
     createEmbed,
     setLineFieldHeader,
+    setLineValue,
     makeTeamStat,
     makeStat,
     makeStatsList,

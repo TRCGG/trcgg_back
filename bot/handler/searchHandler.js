@@ -1,10 +1,19 @@
 const recordService = require('../../app/services/recordService');
 const championService = require('../../app/services/championService');
 const embedUtil = require('../template/embed');
+const botUtils = require('../botUtils');
 
-// to-do 팀워크,맞라인 테스트 필요
+// TO-DO 팀워크,맞라인 테스트 필요
+// 장인 테스트 필요
 
-// !전적 조회
+// 전적 검색 관련 handler 모음
+
+/**
+ * !전적
+ * @param {*} riot_name 
+ * @param {*} guildId 
+ * @returns 
+ */
 const searchRecord = async (riot_name, guild_id) => {
 
     const allData = {
@@ -23,7 +32,7 @@ const searchRecord = async (riot_name, guild_id) => {
     };
 
     if (allData.record_data.length === 0) {
-        return "등록된 전적이 없습니다.";
+        return botUtils.notFoundResponse();
     }
 
     // 통합 전적
@@ -190,6 +199,133 @@ const searchRecord = async (riot_name, guild_id) => {
     return embedUtil.createEmbed(jsonData);
 };
 
+/**
+ * !최근전적 
+ * @param {*} riot_name 
+ * @param {*} guildId 
+ * @returns 
+ */
+const searchRecentRecord = async (riot_name, guild_id) => {
+    const recent_data = await recordService.getRecentTenGamesByRiotName(riot_name, guild_id);
+    if (recent_data.length === 0) {
+        return botUtils.notFoundResponse();
+    }   
+
+    let title = riot_name + "최근 상세 전적";
+    let desc_value = ""
+
+    recent_data.forEach(data => {
+        if(data.game_result === "승") {
+            desc_value += ":blue_circle:";
+        } else {
+            desc_value += ":red_circle:";
+        }
+        desc_value += `${data.game_id} ${data.game_team} ${data.position} ${data.champ_name} ${data.kill}/${data.death}/${data.assist} 핑와:${data.vision_bought} 피해량:${data.total_damage_champions} \n`;
+    })
+
+    jsonData = {
+        title: title,
+        description: desc_value,
+        fields: [],
+    }
+
+    return embedUtil.createEmbed(jsonData);
+};
+
+/**
+ * !결과 
+ * @param {*} game_id 
+ * @param {*} guildId 
+ * @returns 
+ */
+
+const searchGameResult = async (game_id, guild_id) => {
+    const game_data = await recordService.getRecordByGame(game_id, guild_id);
+    if (game_data.length === 0) {
+        return botUtils.notFoundResponse();
+    }
+
+    let dto = game_data[0];
+
+    let title = game_id;
+    let blue_team_field = embedUtil.setLineFieldHeader(dto, "blue");
+    let red_team_field = embedUtil.setLineFieldHeader(dto, "red");
+
+    let blue_team_value = embedUtil.setLineValue(game_data, "blue");
+    let red_team_value = embedUtil.setLineValue(game_data, "red");
+
+    jsonData = {
+        title: title,
+        description: undefined,
+        fields: [
+            {
+                name: blue_team_field,
+                value: blue_team_value,
+                inline: false,
+            },
+            {
+                name: red_team_field,
+                value: red_team_value,
+                inline: false,
+            },
+        ],
+    }
+
+    return embedUtil.createEmbed(jsonData);
+};
+
+/**
+ * !장인 
+ * @param {*} game_id 
+ * @param {*} guildId 
+ * @returns 
+ */
+const searchChampMaster = async (champ_name, guild_id) => {
+    const champ_data = await championService.getMasterOfChampion(champ_name, guild_id);
+    if (champ_data.length === 0) {
+        return botUtils.notFoundResponse();
+    }
+
+    let title = champ_name;
+    let field_one_name = "판수(10판 이상)"
+    let field_one_value = ""
+    
+    let field_two_name = "승률(50% 이상)"
+    let field_two_value = ""
+
+    champ_data.forEach(data => {
+        field_one_value += embedUtil.makeTeamStat(data.riot_name, data.win, data.lose, data.win_rate);
+    })
+
+    let high_records = champ_data.filter(record => record.win_rate >= 50 );
+    high_records = high_records.sort((a, b) => b.win_rate - a.win_rate).slice(0, 10);
+
+    high_records.forEach(data => {
+        field_two_value += embedUtil.makeTeamStat(data.riot_name, data.win, data.lose, data.win_rate);
+    })
+
+    jsonData = {
+        title: title,
+        description: desc_value,
+        fields: [
+            {
+                name: field_one_name,
+                value: field_one_value,
+                inline: True,
+            },
+            {
+                name: field_two_name,
+                value: field_two_value,
+                inline: false,
+            },
+        ],
+    }
+    return embedUtil.createEmbed(jsonData);
+}
+
 module.exports = { 
     searchRecord,
+    searchRecentRecord,
+    searchGameResult,
+    searchChampMaster,
 };
