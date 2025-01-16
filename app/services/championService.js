@@ -2,7 +2,7 @@
  * 챔피언 관련 Service
  */
 const championMapper = require("../db/mapper/championMapper");
-const botUtil = require("../utils");
+const appUtil = require("../appUtils");
 const embedUtil = require("../embed");
 
 // 모스트픽 10
@@ -22,7 +22,7 @@ const getMasterOfChampion = async (champ_name, guild_id) => {
     guild_id
   );
   if (champ_data.length === 0) {
-    return botUtil.notFoundResponse();
+    return appUtil.notFoundResponse();
   }
 
   let title = champ_name;

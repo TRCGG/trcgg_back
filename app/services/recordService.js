@@ -3,7 +3,7 @@
  */
 const recordMapper = require("../db/mapper/recordMapper");
 const championMapper = require("../db/mapper/championMapper");
-const botUtil = require("../utils");
+const appUtil = require("../appUtils");
 const embedUtil = require('../embed');
 
 /**
@@ -29,7 +29,7 @@ const getAllRecord = async (riot_name, guild_id) => {
   };
 
   if (allData.record_data.length === 0) {
-    return botUtil.notFoundResponse();
+    return appUtil.notFoundResponse();
   }
 
   // 통합 전적
@@ -294,7 +294,7 @@ const getWinRateByPosition = async (position, guild_id) => {
 const getRecordByGame = async (game_id, guild_id) => {
   const game_data = await recordMapper.getRecordByGame(game_id, guild_id);
   if (game_data.length === 0) {
-    return botUtil.notFoundResponse();
+    return appUtil.notFoundResponse();
   }
 
   let dto = game_data[0];
@@ -337,7 +337,7 @@ const getRecentTenGamesByRiotName = async (riot_name, guild_id) => {
     guild_id
   );
   if (recent_data.length === 0) {
-    return botUtil.notFoundResponse();
+    return appUtil.notFoundResponse();
   }
 
   let title = riot_name + "최근 상세 전적";
