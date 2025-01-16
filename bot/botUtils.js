@@ -26,13 +26,28 @@ const notFoundResponse = () => {
     return "해당 기록이 없습니다";
 }
 
-const splitStr = (command) => {
-    if (command === undefined) {
+const splitStr = (str) => {
+    if (str === undefined) {
         return "잘못된 형식";
     } else {
         try {
-            let sub_name, main_name = command.split('/');
+            let sub_name, main_name = str.split('/');
             return sub_name,main_name;
+        }
+        catch (err) {
+            console.log(err);
+            return "잘못된 형식";
+        }
+    }
+}
+
+const splitTag = (str) => {
+    if (str === undefined) {
+        return "잘못된 형식";
+    } else {
+        try {
+            let name, name_tag = str.split('#');
+            return name,name_tag;
         }
         catch (err) {
             console.log(err);
@@ -46,4 +61,5 @@ module.exports = {
     notFoundResponse,
     checkAuth,
     splitStr,
+    splitTag,
 };
