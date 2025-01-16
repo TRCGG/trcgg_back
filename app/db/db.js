@@ -58,18 +58,19 @@ const query = async (text, params) => {
     
     const res = await pool.query(text, params);
 
-    if (['DELETE', 'UPDATE'].includes(res.command)) {
-      return res.rowCount;
-    }
-      
     // console.log('Query Result:', {
     //   rowCount: res.rowCount,
     //   command: res.command
     // });
-    
+
+    if (['DELETE', 'UPDATE'].includes(res.command)) {
+      const rows = res.rowCount;
+      return rows;
+    }
+      
     const rows = res.rows;
-    rows["status"] = 200;
     return jsonify(rows);
+
   } catch (error) {
     console.error('Database query error:', error);
     return { status: 500, message: 'Internal Server Error' };
