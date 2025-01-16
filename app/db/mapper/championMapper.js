@@ -53,7 +53,6 @@ const getMasterOfChampion = async (champ_name, guild_id) => {
          AND guild_id = $2
          AND delete_yn = 'N'
        GROUP BY riot_name 
-      HAVING COUNT(riot_name) >= 10
        ORDER BY total_count DESC
     `,
     [champ_name, guild_id]
