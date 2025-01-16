@@ -10,31 +10,18 @@ const championService = require("../services/championService");
 router.get("/getAllRecord/:riot_name/:guild_id", async (req, res) => {
   const { riot_name, guild_id } = req.params;
   try {
-    const data = {
-      record_data: await recordService.getAllRecord(riot_name, guild_id),
-      month_data: await recordService.getRecentMonthRecord(riot_name, guild_id),
-      recent_data: await recordService.getRecentTenGamesByRiotName(
-        riot_name,
-        guild_id
-      ),
-      with_team_data: await recordService.getSynergisticTeammates(
-        riot_name,
-        guild_id
-      ),
-      other_team_data: await recordService.getNemesis(riot_name, guild_id),
-      most_pick_data: await championService.getMostPicks(riot_name, guild_id),
-    };
+    const data = recordService.getAllRecord(riot_name, guild_id);
     res.json(data);
   } catch (error) {
     res.status(404).send(error.message);
   }
 });
 
-// 전체 전적 조회
-router.get("/getRecord/:riot_name/:guild_id", async (req, res) => {
+// 라인별 전적 조회
+router.get("/getLineRecord/:riot_name/:guild_id", async (req, res) => {
   const { riot_name, guild_id } = req.params;
   try {
-    const game = await recordService.getAllRecord(riot_name, guild_id);
+    const game = await recordService.getLineRecord(riot_name, guild_id);
     res.json(game);
   } catch (error) {
     res.status(404).send(error.message);

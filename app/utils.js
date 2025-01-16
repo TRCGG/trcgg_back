@@ -21,6 +21,15 @@ const checkAuth = (msg) => {
     }
 }
 
+// 태그 체크 
+const checkTag = (str) => {
+    const pattern = /^[가-힣a-zA-Z0-9]{1,16}#[가-힣a-zA-Z0-9]{1,16}$/;
+    if (pattern.test(str)){
+        return true;
+    }
+    return false;
+}
+
 // data 없을 경우 응답 메시지
 const notFoundResponse = () => {
     return "해당 기록이 없습니다";
@@ -60,6 +69,7 @@ module.exports = {
     getMemberNick,
     notFoundResponse,
     checkAuth,
+    checkTag,
     splitStr,
     splitTag,
 };

@@ -1,5 +1,5 @@
 const recordHandler = require('../handler/searchHandler');
-const { getMemberNick } = require('../botUtils');   
+const { getMemberNick } = require('../botUtil');   
 
 // 전적 검색 명령어
 module.exports = [
