@@ -13,18 +13,23 @@ const { Readable } = require("stream");
  * @returns 
  */
 const save = async (fileUrl, fileName, createUser, guildId) => {
-    if (await checkDuplicate(fileName, guildId)) {
-        const bytesData = await getInputStreamDiscordFile(fileUrl);
+    try {
+        if (await checkDuplicate(fileName, guildId)) {
+            const bytesData = await getInputStreamDiscordFile(fileUrl);
 
-        if (bytesData) {
-            const statsArray = await parseReplayData(bytesData);
-            await saveData(statsArray, fileName, createUser, guildId);
-            return `:green_circle:등록완료: ${fileName} 반영 완료`;
+            if (bytesData) {
+                const statsArray = await parseReplayData(bytesData);
+                await saveData(statsArray, fileName, createUser, guildId);
+                return `:green_circle:등록완료: ${fileName} 반영 완료`;
+            } else {
+                throw new Error("디스코드 파일 데이터 가져오기 실패");
+            }
         } else {
-            throw new Error("파일 데이터 저장 중 에러.");
+            return `:red_circle:등록실패: ${fileName} 중복된 리플 파일 등록`;
         }
-    } else {
-        return `:red_circle:등록실패: ${fileName} 중복된 리플 파일 등록`;
+    } catch (e) {
+        console.log(e)
+        return ":red_circle: 저장 실패";
     }
 };
 
@@ -98,8 +103,8 @@ const saveData = async (statsArray, fileName, createUser, guildId) => {
     const resList = [];
     statsArray = JSON.parse(statsArray);
 
-    // 부캐닉네임 매핑
-    const mappings = await managementService.getSubAccountName(guildId);
+    // 부캐닉네임 매핑 DB트리거로 변경
+    // const mappings = await managementService.getSubAccountName(guildId);
 
     for (const d of statsArray) {
         try {
@@ -108,7 +113,8 @@ const saveData = async (statsArray, fileName, createUser, guildId) => {
                 death: d['NUM_DEATHS'],
                 kill: d['CHAMPIONS_KILLED'],
                 position: d['TEAM_POSITION'].replace('JUNGLE', 'JUG').replace('BOTTOM', 'ADC').replace('UTILITY', 'SUP').replace('MIDDLE', 'MID'),
-                riot_name: setMappingName(d['RIOT_ID_GAME_NAME'].replace(/\s/g, "").replace('й', 'n').trim(), mappings),
+                riot_name: d['RIOT_ID_GAME_NAME'].replace(/\s/g, "").replace('й', 'n').trim(),
+                riot_name_tag: d['RIOT_ID_TAG_LINE'].replace(/\s/g, "").replace('й', 'n').trim(),
                 game_result: d['WIN'].replace('Win', '승').replace('Fail', '패'),
                 champ_name: champion_dic[d['SKIN'].toLowerCase().trim()] || d['SKIN'].toLowerCase().trim(),
                 game_team: d['TEAM'].replace('100', 'blue').replace('200', 'red'),
@@ -119,7 +125,6 @@ const saveData = async (statsArray, fileName, createUser, guildId) => {
                 total_damage_taken: d['TOTAL_DAMAGE_TAKEN'],
                 vision_score: d['VISION_SCORE'],
                 vision_bought: d['VISION_WARDS_BOUGHT_IN_GAME'],
-                quadra_kills: d['QUADRA_KILLS'],
                 penta_kills: d['PENTA_KILLS'],
                 puuid: d['PUUID'],
                 game_date: gameDate,
@@ -138,19 +143,21 @@ const saveData = async (statsArray, fileName, createUser, guildId) => {
 };
 
 /**
- * 매핑 이름 처리
+ * 매핑 이름 처리 
+ * 사용하지 않는 로직
  * @param {*} name 
- * @param {*} guildId 
+ * @param {*} tag
+ * @param {*} mappings
  * @returns 
  */
-const setMappingName = (name, mappings) => {
-    for (const mapping of mappings) {
-        if (name === mapping.sub_name) {
-            return mapping.main_name;
-        }
-    }
-    return name;
-};
+// const setMappingName = (name, tag, mappings) => {
+//     for (const mapping of mappings) {
+//         if (name === mapping.sub_name || tag === mapping.sub_name_tag ) {
+//             return { main_name: mapping.main_name, main_name_tag: mapping.main_name_tag}
+//         }
+//     }
+//     return { main_name: name, main_name_tag: tag };
+// };
 
 /**
  * 리플 파일명 중복 확인
