@@ -1,6 +1,6 @@
 const recordService = require("../../app/services/recordService");
 const champService = require("../../app/services/championService");
-const { getMemberNick } = require("../botUtils");
+const { getMemberNick, createEmbed } = require("../botUtils");
 
 // 전적 검색 명령어
 module.exports = [
@@ -14,7 +14,7 @@ module.exports = [
         .getAllRecord(riot_name, guild_id)
         .then((result) => {
           // msg.channel.send({embeds: [result]});
-          msg.reply(result);
+          msg.reply(createEmbed(result));
         })
         .catch((err) => {
           console.log(err);
@@ -31,7 +31,7 @@ module.exports = [
       await recordService
         .getRecentTenGamesByRiotName(riot_name, guild_id)
         .then((result) => {
-          msg.reply(result);
+          msg.reply(createEmbed(result));
         })
         .catch((err) => {
           console.log(err);
@@ -48,7 +48,7 @@ module.exports = [
       await recordService
         .getRecordByGame(game_id, guild_id)
         .then((result) => {
-          msg.reply(result);
+          msg.reply(createEmbed(result));
         })
         .catch((err) => {
           console.log(err);

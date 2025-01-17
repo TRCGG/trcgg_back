@@ -12,7 +12,7 @@ module.exports = [
       await championService
         .getMasterOfChampion(champ_name, guild_id)
         .then((result) => {
-          msg.reply(result);
+          msg.reply(botUtils.createEmbed(result));
         })
         .catch((err) => {
           console.log(err);

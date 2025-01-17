@@ -1,14 +1,3 @@
-const { EmbedBuilder  } = require('discord.js');
-
-const createEmbed = (jsonData) => {
-    const embed = {
-        title: jsonData.title,
-        description: jsonData.description,
-        fields: jsonData.fields,
-    }
-    return ({embeds: [embed]});
-}
-
 // !라인 header 설정
 const setLineFieldHeader = (dto, team) => {
     let result = "";
@@ -48,6 +37,11 @@ const setLineValue = (records, team) => {
 
     // 배열을 하나의 문자열로 반환
     return result.join('');
+}
+
+// prefix: 판 승 패 승률 form
+const makeAllStat = (prefix, total_count, win, lose, win_rate) => {
+    return `${prefix}: ${total_count}판 ${win}승 ${lose}패 ${win_rate}%\n`;
 }
 
 // prefix: 승/패 - 승률 form
@@ -110,9 +104,9 @@ const filterAndSortByWinRate = (records, win_rate, greater_than, limit) => {
 }
 
 module.exports = {
-    createEmbed,
     setLineFieldHeader,
     setLineValue,
+    makeAllStat,
     makeTeamStat,
     makeStat,
     makeStatsList,

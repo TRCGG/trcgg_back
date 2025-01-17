@@ -35,8 +35,9 @@ const getMasterOfChampion = async (champ_name, guild_id) => {
   let count_records = champ_data.slice(0, 10);
 
   count_records.forEach((data) => {
-    field_one_value += embedUtil.makeTeamStat(
+    field_one_value += embedUtil.makeAllStat(
       data.riot_name,
+      data.total_count,
       data.win,
       data.lose,
       data.win_rate
@@ -48,8 +49,9 @@ const getMasterOfChampion = async (champ_name, guild_id) => {
     .slice(0, 10);
 
   high_records.forEach((data) => {
-    field_two_value += embedUtil.makeTeamStat(
+    field_two_value += embedUtil.makeAllStat(
       data.riot_name,
+      data.total_count,
       data.win,
       data.lose,
       data.win_rate
@@ -58,7 +60,7 @@ const getMasterOfChampion = async (champ_name, guild_id) => {
 
   jsonData = {
     title: title,
-    description: desc_value,
+    description: undefined,
     fields: [
       {
         name: field_one_name,
@@ -68,7 +70,7 @@ const getMasterOfChampion = async (champ_name, guild_id) => {
       {
         name: field_two_name,
         value: field_two_value,
-        inline: false,
+        inline: true,
       },
     ],
   };

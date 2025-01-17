@@ -8,6 +8,7 @@ const validateTag = (str) => {
             throw new Error("잘못된 형식");
         }
     } catch (e) {
+        console.log(str);
         throw new Error("잘못된 형식");
     }
 }
@@ -26,6 +27,7 @@ const splitStr = (str) => {
         return [sub_name,main_name];
     }
     catch (err) {
+        console.log(str);
         throw new Error("잘못된 형식");
     }
 }
@@ -39,6 +41,7 @@ const splitTag = (str) => {
         return [name,name_tag];
     }
     catch (err) {
+        console.log(str);
         throw new Error("잘못된 형식");
     }
 }

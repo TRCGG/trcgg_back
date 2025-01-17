@@ -1,3 +1,16 @@
+const createEmbed = (jsonData) => {
+    if(typeof jsonData === "string"){
+        return jsonData;
+    } else {
+        const embed = {
+            title: jsonData.title,
+            description: jsonData.description,
+            fields: jsonData.fields,
+        }
+        return ({embeds: [embed]});
+    }
+}
+
 // discord 별명 닉네임 가져오기
 const getMemberNick = (msg, args) => {
     let riot_name = "";
@@ -26,6 +39,7 @@ const checkAuth = (msg) => {
 }
 
 module.exports = {
+    createEmbed,
     getMemberNick,
     checkAuth,
 };
