@@ -1,8 +1,7 @@
 const manageService = require("../../app/services/managementService");
 const botUtils = require("../botUtils");
 
-// 전적 검색 명령어
-
+// 관리자 명령어
 module.exports = [
   {
     name: "doc",

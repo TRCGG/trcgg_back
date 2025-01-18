@@ -1,7 +1,7 @@
 const championService = require("../../app/services/championService");
 const botUtils = require("../botUtils");
 
-// 전적 검색 명령어
+// 챔피언 관련 명령어
 module.exports = [
   {
     name: "장인",

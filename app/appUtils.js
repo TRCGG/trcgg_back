@@ -46,9 +46,51 @@ const splitTag = (str) => {
     }
 }
 
+// 포지션 이름 설정
+const dictPosition = (position) => {
+    let realPosition = ""
+    switch (position) {
+        case "탑":
+            return realPosition = "TOP";
+        case "정글":
+            return realPosition = "JUG";
+        case "미드":
+            return realPosition = "MID";            
+        case "원딜":
+            return realPosition = "ADC";
+        case "서폿":
+            return realPosition = "SUP";
+        default:
+            throw new Error("잘못된 값:" + position);
+    }
+}
+
+// 날짜 분류
+const splitDate = (date) => {
+    if(date === undefined) {
+        const now = new Date();
+        const year = now.getFullYear().toString();
+        const month = (now.getMonth() + 1).toString().padStart(2, '0');
+        return [year, month];
+    } else {
+        try {
+            const [year, month] = date.split('-'); 
+            if (!year || !month || isNaN(year) || isNaN(month) || month.length !== 2) {
+                throw new Error("잘못된 형식");
+            }
+            return [year, month];
+        } catch (error) {
+          console.error(error.message);
+          throw new Error("날짜 형식 오류");
+        }
+    }
+}
+
 module.exports = {
     notFoundResponse,
     validateTag,
     splitStr,
     splitTag,
+    dictPosition,
+    splitDate,
 };

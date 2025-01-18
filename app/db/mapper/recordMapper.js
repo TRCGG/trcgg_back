@@ -226,7 +226,7 @@ const getWinRateByPosition = async (position, guild_id) => {
          AND guild_id = $2
          AND delete_yn = 'N'
        GROUP BY position, riot_name 
-      HAVING COUNT(riot_name) >= 30
+      HAVING COUNT(riot_name) >= 20
        ORDER BY win_rate DESC
        LIMIT 15   
     `,

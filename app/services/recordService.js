@@ -257,13 +257,83 @@ const getRecentMonthRecord = async (riot_name, guild_id) => {
 /**
  * !통계 게임
  * @param {*} guild_id
- * @param {*} year
- * @param {*} month
+ * @param {*} type
+ * @param {*} date
  * @returns
  */
-const getStatisticOfGame = async (guild_id, year, month) => {
-  return await recordMapper.getStatisticOfGame(guild_id, year, month);
+const getStatisticOfGame = async (guild_id, type, date) => {
+  const [year,month] = appUtil.splitDate(date);
+  const title = `${year}-${month} ${type} 통계`;
+  const records = await recordMapper.getStatisticOfGame(guild_id, year, month);
+  if(records.length === 0){
+    return appUtil.notFoundResponse();
+  }
+  const field_one_header = "판수 20위";
+  const field_one_value = embedUtil.makeStatsList(records.slice(0,20), "game");
+
+  const field_two_header = "승률 20위";
+  const top20high = records
+  .filter(record => record.total_count >= 20)
+  .sort((a,b) => b.win_rate - a.win_rate ).slice(0,20);
+  
+  let field_two_value = embedUtil.makeStatsList(top20high, "game_high");
+
+  jsonData = {
+    title:title,
+    description:"",
+    fields: [
+      {
+        name: field_one_header,
+        value: field_one_value,
+        inline: true,
+      },
+      {
+        name: field_two_header,
+        value: field_two_value,
+        inline: true,
+      }
+    ]
+  }
+  return jsonData;
 };
+
+/**
+ * !클랜통계
+ * @param {*} guild_id
+ * @param {*} date
+ * @returns
+ */
+const getStatisticOfGameAllMember = async (guild_id, date, msg) => {
+  const [year,month] = appUtil.splitDate(date);
+  const title = `${year}-${month} \n`;
+  let str = ""
+  const records = await recordMapper.getStatisticOfGame(guild_id, year, month);
+  if(records.length === 0){
+    return appUtil.notFoundResponse();
+  }
+
+  records.forEach((record, index) => {
+    str += `${record.riot_name} ${record.total_count}판 \n`;
+  });
+
+  str = title + str;
+  const rows = str.split('\n');
+
+  const maxLength = 500;
+  let currentMessage = '';
+  rows.forEach(row => {
+    if (currentMessage.length + row.length + 1 <= maxLength) {  
+      currentMessage += row + '\n';
+    } else {
+      msg.reply(currentMessage);
+      currentMessage = row + '\n';  
+    }
+  });
+
+  if (currentMessage.length > 0) {
+    msg.reply(currentMessage);
+  }
+}
 
 // 팀워크
 const getSynergisticTeammates = async (riot_name, guild_id) => {
@@ -282,7 +352,45 @@ const getNemesis = async (riot_name, guild_id) => {
  * @returns
  */
 const getWinRateByPosition = async (position, guild_id) => {
-  return await recordMapper.getWinRateByPosition(position, guild_id);
+  position = appUtil.dictPosition(position);
+  const records = await recordMapper.getWinRateByPosition(position, guild_id);
+  if (records.length === 0 ){
+    return appUtil.notFoundResponse();
+  }
+
+  const title = `${position} 라인`;
+  let desc = "";
+
+  records.forEach((record, index) => {
+    let prefix = "";
+    switch (index + 1) {
+      case 1:
+        prefix = ":one: ";
+        break;
+      case 2:
+        prefix = ":two: ";
+        break;
+      case 3:
+        prefix = ":three: ";
+        break;
+      case 4:
+        prefix = ":four: ";
+        break;
+      case 5:
+        prefix = ":five: ";
+        break;
+      default:
+        prefix = `${index + 1}. `;
+    }
+    desc += `${prefix}${record.riot_name}${embedUtil.makeStat('', record.win, record.win_rate, record.kda)}\n`;
+});
+
+  jsonData = {
+    title: title,
+    description: desc,
+    fields: []
+  }
+  return jsonData;
 };
 
 /**
@@ -365,6 +473,7 @@ module.exports = {
   getLineRecord,
   getRecentMonthRecord,
   getStatisticOfGame,
+  getStatisticOfGameAllMember,
   getSynergisticTeammates,
   getNemesis,
   getWinRateByPosition,

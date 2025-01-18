@@ -29,7 +29,7 @@ const getMasterOfChampion = async (champ_name, guild_id) => {
   let field_one_name = "판수 순";
   let field_one_value = "";
 
-  let field_two_name = "승률 순";
+  let field_two_name = "승률 순(10판 이상)";
   let field_two_value = "";
 
   let count_records = champ_data.slice(0, 10);
@@ -45,16 +45,16 @@ const getMasterOfChampion = async (champ_name, guild_id) => {
   });
 
   let high_records = champ_data
+    .filter(record => record.total_count >= 10)
     .sort((a, b) => b.win_rate - a.win_rate)
     .slice(0, 10);
 
   high_records.forEach((data) => {
-    field_two_value += embedUtil.makeAllStat(
+    field_two_value += embedUtil.makeStat(
       data.riot_name,
-      data.total_count,
       data.win,
-      data.lose,
-      data.win_rate
+      data.win_rate,
+      data.kda
     );
   });
 
@@ -80,12 +80,49 @@ const getMasterOfChampion = async (champ_name, guild_id) => {
 /**
  * !통계 챔프
  * @param {*} guild_id
- * @param {*} year
- * @param {*} month
+ * @param {*} type
+ * @param {*} date
  * @returns
  */
-const getStatisticOfChampion = async (guild_id, year, month) => {
-  return await championMapper.getStatisticOfChampion(guild_id, year, month);
+const getStatisticOfChampion = async (guild_id, type, date) => {
+  const [year,month] = appUtil.splitDate(date);
+  const title = `${year}-${month} ${type} 통계`;
+  const records = await championMapper.getStatisticOfChampion(guild_id, year, month);
+  if(records.length === 0){
+    return appUtil.notFoundResponse();
+  }
+
+  let field_one_header = "인기 챔프:star:";
+  let field_one_value = embedUtil.makeStatsList(records.slice(0,15), "champ");
+
+  let field_two_header = "1티어:partying_face:";
+  let field_two_value = embedUtil.makeStatsList(records.filter(record => record.total_count >= 20).sort((a,b) => (b.win_rate - a.win_rate)).slice(0,15), "champ");
+
+  let field_three_header = "5티어:scream:"
+  let field_three_value = embedUtil.makeStatsList(records.filter(record => record.total_count >= 20).sort((a,b) => (a.win_rate - b.win_rate)).slice(0,15), "champ");
+
+  jsonData = {
+    title:title,
+    description:"",
+    fields: [
+      {
+        name: field_one_header,
+        value: field_one_value,
+        inline: true,
+      },
+      {
+        name: field_two_header,
+        value: field_two_value,
+        inline: true,
+      },
+      {
+        name: field_three_header,
+        value: field_three_value,
+        inline: true,
+      }
+    ]
+  }
+  return jsonData;
 };
 
 module.exports = {
