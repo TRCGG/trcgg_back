@@ -319,7 +319,7 @@ const getStatisticOfGameAllMember = async (guild_id, date, msg) => {
   str = title + str;
   const rows = str.split('\n');
 
-  const maxLength = 500;
+  const maxLength = 2000;
   let currentMessage = '';
   rows.forEach(row => {
     if (currentMessage.length + row.length + 1 <= maxLength) {  
