@@ -9,6 +9,7 @@ const leagueRoutes = require('./app/routes/leagueRoutes');
 const db = require('./app/db/db');
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || "localhost";
+const bot = require('./bot/bot');
 
 const app = express();
 

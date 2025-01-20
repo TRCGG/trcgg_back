@@ -10,31 +10,18 @@ const championService = require("../services/championService");
 router.get("/getAllRecord/:riot_name/:guild_id", async (req, res) => {
   const { riot_name, guild_id } = req.params;
   try {
-    const data = {
-      record_data: await recordService.getAllRecord(riot_name, guild_id),
-      month_data: await recordService.getRecentMonthRecord(riot_name, guild_id),
-      recent_data: await recordService.getRecentTenGamesByRiotName(
-        riot_name,
-        guild_id
-      ),
-      with_team_data: await recordService.getSynergisticTeammates(
-        riot_name,
-        guild_id
-      ),
-      other_team_data: await recordService.getNemesis(riot_name, guild_id),
-      most_pick_data: await championService.getMostPicks(riot_name, guild_id),
-    };
+    const data = recordService.getAllRecord(riot_name, guild_id);
     res.json(data);
   } catch (error) {
     res.status(404).send(error.message);
   }
 });
 
-// 전체 전적 조회
-router.get("/getRecord/:riot_name/:guild_id", async (req, res) => {
+// 라인별 전적 조회
+router.get("/getLineRecord/:riot_name/:guild_id", async (req, res) => {
   const { riot_name, guild_id } = req.params;
   try {
-    const game = await recordService.getAllRecord(riot_name, guild_id);
+    const game = await recordService.getLineRecord(riot_name, guild_id);
     res.json(game);
   } catch (error) {
     res.status(404).send(error.message);
@@ -196,134 +183,134 @@ router.get("/getGuild/:guild_id", async (req, res) => {
 // Post =====================
 
 // 리플레이 저장
-router.post("/parse", async (req, res) => {
-  const { file_url, file_name, create_user, guild_id } = req.body;
-  try {
-    const result = await replayParsingService.save(
-      file_url,
-      file_name,
-      create_user,
-      guild_id
-    );
-    res.json(result);
-  } catch (error) {
-    res.status(404).send(error.message);
-  }
-});
+// router.post("/parse", async (req, res) => {
+//   const { file_url, file_name, create_user, guild_id } = req.body;
+//   try {
+//     const result = await replayParsingService.save(
+//       file_url,
+//       file_name,
+//       create_user,
+//       guild_id
+//     );
+//     res.json(result);
+//   } catch (error) {
+//     res.status(404).send(error.message);
+//   }
+// });
 
 // 부캐 저장
-router.post("/mapping", async (req, res) => {
-  const { sub_name, main_name, guild_id } = req.body;
-  try {
-    const result = await managementService.postSubAccountName(
-      sub_name,
-      main_name,
-      guild_id
-    );
-    res.json(result);
-  } catch (error) {
-    res.status(404).send(error.message);
-  }
-});
+// router.post("/mapping", async (req, res) => {
+//   const { sub_name, main_name, guild_id } = req.body;
+//   try {
+//     const result = await managementService.postSubAccountName(
+//       sub_name,
+//       main_name,
+//       guild_id
+//     );
+//     res.json(result);
+//   } catch (error) {
+//     res.status(404).send(error.message);
+//   }
+// });
 
 // 길드 저장
-router.post("/saveGuild", async (req, res) => {
-  const { guild_id, guild_name } = req.body;
-  try {
-    const result = await managementService.postGuild(guild_id, guild_name);
-    res.json(result);
-  } catch (error) {
-    res.status(404).send(error.message);
-  }
-});
+// router.post("/saveGuild", async (req, res) => {
+//   const { guild_id, guild_name } = req.body;
+//   try {
+//     const result = await managementService.postGuild(guild_id, guild_name);
+//     res.json(result);
+//   } catch (error) {
+//     res.status(404).send(error.message);
+//   }
+// });
 
 // PUT =====================
 
 // 클랜원 탈퇴/복귀 처리
-router.put("/deleteYn", async (req, res) => {
-  const { delete_yn, riot_name, guild_id } = req.body;
-  try {
-    const result = await managementService.putUserDeleteYN(
-      delete_yn,
-      riot_name,
-      guild_id
-    );
-    res.json(result);
-  } catch (error) {
-    res.status(404).send(error.message);
-  }
-});
+// router.put("/deleteYn", async (req, res) => {
+//   const { delete_yn, riot_name, guild_id } = req.body;
+//   try {
+//     const result = await managementService.putUserDeleteYN(
+//       delete_yn,
+//       riot_name,
+//       guild_id
+//     );
+//     res.json(result);
+//   } catch (error) {
+//     res.status(404).send(error.message);
+//   }
+// });
 
 // 클랜원 탈퇴/복귀처리(부계정)
-router.put("/mapping/deleteYn", async (req, res) => {
-  const { delete_yn, riot_name, guild_id } = req.body;
-  try {
-    const result = await managementService.putUserSubAccountDeleteYN(
-      delete_yn,
-      riot_name,
-      guild_id
-    );
-    res.json(result);
-  } catch (error) {
-    res.status(404).send(error.message);
-  }
-});
+// router.put("/mapping/deleteYn", async (req, res) => {
+//   const { delete_yn, riot_name, guild_id } = req.body;
+//   try {
+//     const result = await managementService.putUserSubAccountDeleteYN(
+//       delete_yn,
+//       riot_name,
+//       guild_id
+//     );
+//     res.json(result);
+//   } catch (error) {
+//     res.status(404).send(error.message);
+//   }
+// });
 
 // 닉네임변경
-router.put("/riotName", async (req, res) => {
-  const { new_name, old_name, guild_id } = req.body;
-  try {
-    const result = await managementService.putName(
-      new_name,
-      old_name,
-      guild_id
-    );
-    res.json(result);
-  } catch (error) {
-    res.status(404).send(error.message);
-  }
-});
+// router.put("/riotName", async (req, res) => {
+//   const { new_name, old_name, guild_id } = req.body;
+//   try {
+//     const result = await managementService.putName(
+//       new_name,
+//       old_name,
+//       guild_id
+//     );
+//     res.json(result);
+//   } catch (error) {
+//     res.status(404).send(error.message);
+//   }
+// });
 
 // 닉네임변경(부계정)
-router.put("/mapping/riotName", async (req, res) => {
-  const { new_name, old_name, guild_id } = req.body;
-  try {
-    const result = await managementService.putSubAccountName(
-      new_name,
-      old_name,
-      guild_id
-    );
-    res.json(result);
-  } catch (error) {
-    res.status(404).send(error.message);
-  }
-});
+// router.put("/mapping/riotName", async (req, res) => {
+//   const { new_name, old_name, guild_id } = req.body;
+//   try {
+//     const result = await managementService.putSubAccountName(
+//       new_name,
+//       old_name,
+//       guild_id
+//     );
+//     res.json(result);
+//   } catch (error) {
+//     res.status(404).send(error.message);
+//   }
+// });
 
 // DELETE =====================
 
 // 리플 삭제
-router.delete("/game", async (req, res) => {
-  const { game_id, guild_id } = req.body;
-  try {
-    const result = await managementService.deleteRecord(game_id, guild_id);
-    res.json(result);
-  } catch (error) {
-    res.status(404).send(error.message);
-  }
-});
+// router.delete("/game", async (req, res) => {
+//   const { game_id, guild_id } = req.body;
+//   try {
+//     const result = await managementService.deleteRecord(game_id, guild_id);
+//     res.json(result);
+//   } catch (error) {
+//     res.status(404).send(error.message);
+//   }
+// });
 
 // 부캐 삭제
-router.delete("/mapping/subName", async (req, res) => {
-  const { riot_name, guild_id } = req.body;
-  try {
-    const result = await managementService.deleteSubAccountName(
-      riot_name,
-      guild_id
-    );
-    res.json(result);
-  } catch (error) {
-    res.status(404).send(error.message);
-  }
-});
+// router.delete("/mapping/subName", async (req, res) => {
+//   const { riot_name, guild_id } = req.body;
+//   try {
+//     const result = await managementService.deleteSubAccountName(
+//       riot_name,
+//       guild_id
+//     );
+//     res.json(result);
+//   } catch (error) {
+//     res.status(404).send(error.message);
+//   }
+// });
 
 module.exports = router;

@@ -13,7 +13,9 @@ const getSubAccountName = async (guild_id) => {
     `
       SELECT 
              sub_name,
-             main_name
+             sub_name_tag,
+             main_name,
+             main_name_tag
         FROM mapping_name
        WHERE delete_yn = 'N'
          AND guild_id = $1
@@ -26,18 +28,22 @@ const getSubAccountName = async (guild_id) => {
 
 /**
  * @param {*} sub_name 
+ * @param {*} sub_name_tag 
  * @param {*} main_name 
+ * @param {*} main_name_tag 
  * @param {*} guild_id 
  * @returns 
  * @description 부계정 추가
  */
-const postSubAccountName = async (sub_name, main_name, guild_id) => {
+const postSubAccountName = async (sub_name, sub_name_tag, main_name, main_name_tag, guild_id) => {
   const query = `
     INSERT 
       INTO mapping_name 
            (
              sub_name,
+             sub_name_tag,
              main_name,
+             main_name_tag,
              create_date,
              update_date,
              delete_yn,
@@ -47,56 +53,66 @@ const postSubAccountName = async (sub_name, main_name, guild_id) => {
            (
              $1,
              $2,
+             $3,
+             $4,
              CURRENT_TIMESTAMP,
              CURRENT_TIMESTAMP,
              'N',
-             $3
+             $5
            )
   `;
   const result = await db.query(query, [
     sub_name,
+    sub_name_tag,
     main_name,
+    main_name_tag,
     guild_id,
   ]);
   return result;
 };
 
 /**
- * @param {*} new_name 
  * @param {*} old_name 
+ * @param {*} old_name_tag
+ * @param {*} new_name 
+ * @param {*} new_name_tag 
  * @param {*} guild_id 
  * @returns 
- * @description 부계정 수정
+ * @description 부계정의 본캐 닉네임 수정
  */
-const putSubAccountName = async (new_name, old_name, guild_id) => {
+const putSubAccountName = async (new_name, new_name_tag, old_name, old_name_tag, guild_id) => {
   const result = await db.query(
     `
       UPDATE mapping_name
          SET main_name = $1,
+             main_name_tag = $2,
              update_date = CURRENT_TIMESTAMP
-     WHERE main_name = $2
-       AND guild_id = $3
+     WHERE main_name = $3
+       AND main_name_tag = $4
+       AND guild_id = $5
   `,
-    [new_name, old_name, guild_id]
+    [new_name, new_name_tag, old_name, old_name_tag, guild_id]
   );
   return result;
 };
 
 /**
- * @param {*} riot_name 
- * @param {*} guild_id 
+ * @param {*} sub_name
+ * @param {*} sub_name_tag
+ * @param {*} guild_id
  * @returns 
  * @description 부계정 삭제
  */
-const deleteSubAccountName = async (riot_name, guild_id) => {
+const deleteSubAccountName = async (sub_name, sub_name_tag, guild_id) => {
   const result = await db.query(
     `
       DELETE 
         FROM mapping_name
      WHERE sub_name = $1
-       AND guild_id = $2
+       AND sub_name_tag = $2
+       AND guild_id = $3
   `,
-    [riot_name, guild_id]
+    [sub_name, sub_name_tag, guild_id]
   );
   return result;
 };
@@ -182,6 +198,7 @@ const postRecord = async (params) => {
            (
              game_id,
              riot_name,
+             riot_name_tag,
              champ_name,
              position,
              kill, 
@@ -190,10 +207,6 @@ const postRecord = async (params) => {
              game_result,
              game_team,
              game_date,
-             create_date,
-             update_date,
-             delete_yn,
-             create_user,
              gold,
              ccing,
              time_played,
@@ -201,6 +214,11 @@ const postRecord = async (params) => {
              total_damage_taken,
              vision_score,
              vision_bought,
+             penta_kills,
+             create_date,
+             update_date,
+             delete_yn,
+             create_user,
              puuid,
              guild_id
            )
@@ -228,12 +246,15 @@ const postRecord = async (params) => {
              $20,
              $21,
              $22,
-             $23
+             $23,
+             $24,
+             $25
            )
     `;
     const values = params.map((item) => [
       item.game_id,
       item.riot_name,
+      item.riot_name_tag,
       item.champ_name,
       item.position,
       item.kill,
@@ -242,10 +263,6 @@ const postRecord = async (params) => {
       item.game_result,
       item.game_team,
       item.game_date,
-      new Date(),
-      new Date(),
-      item.delete_yn,
-      item.create_user,
       item.gold,
       item.ccing,
       item.time_played,
@@ -253,6 +270,11 @@ const postRecord = async (params) => {
       item.total_damage_taken,
       item.vision_score,
       item.vision_bought,
+      item.penta_kills,
+      new Date(),
+      new Date(),
+      item.delete_yn,
+      item.create_user,
       item.puuid,
       item.guild_id,
     ]);
@@ -282,62 +304,70 @@ const deleteRecord = async (game_id, guild_id) => {
 /**
  * @param {*} delete_yn 
  * @param {*} riot_name 
+ * @param {*} riot_name_tag
  * @param {*} guild_id 
  * @returns 
  * @description 사용자 삭제 여부 수정
  */
-const putUserDeleteYN = async (delete_yn, riot_name, guild_id) => {
+const putUserDeleteYN = async (delete_yn, riot_name, riot_name_tag, guild_id) => {
   const result = await db.query(
     `
       UPDATE league
          SET delete_yn = $1,
              update_date = CURRENT_TIMESTAMP
      WHERE riot_name = $2
-       AND guild_id = $3
+       AND riot_name_tag = $3
+       AND guild_id = $4
   `,
-    [delete_yn, riot_name, guild_id]
+    [delete_yn, riot_name, riot_name_tag, guild_id]
   );
   return result;
 };
 
 /**
  * @param {*} delete_yn 
- * @param {*} riot_name 
+ * @param {*} main_name 
+ * @param {*} main_name_tag
  * @param {*} guild_id 
  * @returns 
  * @description 부계정 삭제 여부 수정
  */
-const putUserSubAccountDeleteYN = async (delete_yn, riot_name, guild_id) => {
+const putUserSubAccountDeleteYN = async (delete_yn, main_name, main_name_tag, guild_id) => {
   const result = await db.query(
     `
       UPDATE mapping_name
          SET delete_yn = $1,
              update_date = CURRENT_TIMESTAMP
      WHERE main_name = $2
-       AND guild_id = $3
+       AND main_name_tag = $3
+       AND guild_id = $4
   `,
-    [delete_yn, riot_name, guild_id]
+    [delete_yn, main_name, main_name_tag, guild_id]
   );
   return result;
 };
 
 /**
  * @param {*} new_name 
- * @param {*} old_name 
+ * @param {*} new_name_tag 
+ * @param {*} old_name
+ * @param {*} old_name_tag 
  * @param {*} guild_id 
  * @returns 
  * @description 닉네임 수정
  */
-const putName = async (new_name, old_name, guild_id) => {
+const putName = async (new_name, new_name_tag, old_name, old_name_tag, guild_id) => {
   const result = await db.query(
     `
       UPDATE league
          SET riot_name = $1,
+             riot_name_tag = $2,
              update_date = CURRENT_TIMESTAMP
-     WHERE riot_name = $2
-       AND guild_id = $3
+     WHERE riot_name = $3
+       AND riot_name_tag = $4
+       AND guild_id = $5
   `,
-    [new_name, old_name, guild_id]
+    [new_name, new_name_tag, old_name, old_name_tag, guild_id]
   );
   return result;
 };

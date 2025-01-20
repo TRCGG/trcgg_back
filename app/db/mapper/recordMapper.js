@@ -9,7 +9,7 @@ const db = require('../db');
  * @returns List<league>
  * @description 전체 전적 조회
  */
-const getAllRecord = async (riot_name, guild_id) => {
+const getLineRecord = async (riot_name, guild_id) => {
   const result = await db.query(
     `
       SELECT 
@@ -226,7 +226,7 @@ const getWinRateByPosition = async (position, guild_id) => {
          AND guild_id = $2
          AND delete_yn = 'N'
        GROUP BY position, riot_name 
-      HAVING COUNT(riot_name) >= 30
+      HAVING COUNT(riot_name) >= 20
        ORDER BY win_rate DESC
        LIMIT 15   
     `,
@@ -308,7 +308,7 @@ const getRecentTenGamesByRiotName = async (riot_name, guild_id) => {
 };
 
 module.exports = {
-  getAllRecord,
+  getLineRecord,
   getRecentMonthRecord,
   getStatisticOfGame,
   getSynergisticTeammates,
