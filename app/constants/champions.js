@@ -88,6 +88,7 @@ const myData = {
   masteryi: "마스터이",
   malzahar: "말자하",
   milio: "밀리오",
+  mel: "멜",
   nami: "나미",
   nasus: "나서스",
   naafiri: "나피리",
