@@ -382,7 +382,7 @@ const getWinRateByPosition = async (position, guild_id) => {
       default:
         prefix = `${index + 1}. `;
     }
-    desc += `${prefix}${record.riot_name}${embedUtil.makeStat('', record.win, record.win_rate, record.kda)}\n`;
+    desc += `${prefix}${record.riot_name}${embedUtil.makeStat('', record.win, record.win_rate, record.kda)}`;
 });
 
   jsonData = {

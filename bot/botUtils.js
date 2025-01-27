@@ -31,7 +31,7 @@ const getMemberNick = (msg, args) => {
 const checkAuth = (msg) => {
     const roles = msg.member.roles.cache;
     const role_names = roles.map(role => role.name);
-    if (role_names.includes("난민디코관리자") || role_names.includes("TRC관리자") || role_names.includes("난민운영진")) {
+    if (role_names.includes("난민개발부") || role_names.includes("TRC관리자") || role_names.includes("난민운영진")) {
         return true;
     } else {
         return false;
