@@ -192,35 +192,18 @@ const postGuild = async (guild_id, guild_name) => {
  * @description 전적 추가
  */
 const postRecord = async (params) => {
-  const query = `
+  const result = await db.query(
+    `
       INSERT 
-        INTO league
+        INTO League
            (
              game_id,
-             riot_name,
-             riot_name_tag,
-             champ_name,
-             position,
-             kill, 
-             death, 
-             assist,
-             game_result,
-             game_team,
+             raw_data,
+             hash_data,
+             guild_id,
              game_date,
-             gold,
-             ccing,
-             time_played,
-             total_damage_champions,
-             total_damage_taken,
-             vision_score,
-             vision_bought,
-             penta_kills,
-             create_date,
-             update_date,
-             delete_yn,
-             create_user,
-             puuid,
-             guild_id
+             game_type,
+             create_user
            )
       VALUES 
            (
@@ -230,55 +213,12 @@ const postRecord = async (params) => {
              $4,
              $5,
              $6,
-             $7,
-             $8,
-             $9,
-             $10,
-             $11,
-             $12,
-             $13,
-             $14,
-             $15,
-             $16,
-             $17,
-             $18,
-             $19,
-             $20,
-             $21,
-             $22,
-             $23,
-             $24,
-             $25
+             $7
            )
-    `;
-    const values = params.map((item) => [
-      item.game_id,
-      item.riot_name,
-      item.riot_name_tag,
-      item.champ_name,
-      item.position,
-      item.kill,
-      item.death,
-      item.assist,
-      item.game_result,
-      item.game_team,
-      item.game_date,
-      item.gold,
-      item.ccing,
-      item.time_played,
-      item.total_damage_champions,
-      item.total_damage_taken,
-      item.vision_score,
-      item.vision_bought,
-      item.penta_kills,
-      new Date(),
-      new Date(),
-      item.delete_yn,
-      item.create_user,
-      item.puuid,
-      item.guild_id,
-    ]);
-    await Promise.all(values.map(value => db.query(query, value)));
+    `,
+    params
+  )
+    return result;
   
 };
 
