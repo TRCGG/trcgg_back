@@ -70,15 +70,20 @@ module.exports = [
         const date = args[0];
         const guild_id = msg.guild.id;
 
-        await recordService
-        .getStatisticOfGameAllMember(guild_id, date, msg)
-        .then((result) => {
-            // msg.reply(result);
-        })
-        .catch((err) => {
-          console.log(err);
-          msg.reply(err.message);
-        });
+        if(botUtils.checkAuth(msg)) {
+          await recordService
+          .getStatisticOfGameAllMember(guild_id, date, msg)
+          .then((result) => {
+              // msg.reply(result);
+          })
+          .catch((err) => {
+            console.log(err);
+            msg.reply(err.message);
+          });
+        } else {
+          return msg.reply("권한 없음");
+        }
+
     },
   },
   
