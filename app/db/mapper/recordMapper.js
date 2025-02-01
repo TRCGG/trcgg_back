@@ -13,28 +13,21 @@ const getLineRecord = async (riot_name, guild_id) => {
   const result = await db.query(
     `
       SELECT 
-              position,
-              COUNT(*) AS total_count,
-              COUNT(CASE WHEN game_result = '승' THEN 1 END) AS win,
-              COUNT(CASE WHEN game_result = '패' THEN 1 END) AS lose,
-              CASE WHEN COUNT(*) = 0 THEN 0
-                   ELSE ROUND(COUNT(CASE WHEN game_result = '승' THEN 1 END)::NUMERIC / NULLIF(COUNT(*), 0) * 100 ,2)
-               END AS win_rate,
-              CASE WHEN SUM(death) = 0 THEN 9999
-                   ELSE ROUND((SUM(kill) + SUM(assist))::NUMERIC / NULLIF(SUM(death), 0), 2) 
-               END AS kda
-        FROM league
-       WHERE LOWER(riot_name) = LOWER($1)
-         AND guild_id = $2
-         AND delete_yn = 'N'
-       GROUP BY position
-       ORDER BY CASE position
-                     WHEN 'TOP' THEN 1
-                     WHEN 'JUG' THEN 2
-                     WHEN 'MID' THEN 3
-                     WHEN 'ADC' THEN 4
-                     WHEN 'SUP' THEN 5
-                 END
+             pg.position,
+             ${selectWinRateAndKdaSql('pg',true)}
+        FROM Player_game pg
+        LEFT JOIN Player p ON pg.player_id = p.player_id
+       WHERE LOWER(p.riot_name) = LOWER(?1)
+         AND p.guild_id = ?2
+         AND pg.delete_yn = 'N'
+       GROUP BY pg.position
+       ORDER BY CASE pg.position
+                    WHEN 'TOP' THEN 1
+                    WHEN 'JUG' THEN 2
+                    WHEN 'MID' THEN 3
+                    WHEN 'ADC' THEN 4
+                    WHEN 'SUP' THEN 5
+                END
     `,
     [riot_name, guild_id]
   );
@@ -52,21 +45,13 @@ const getRecentMonthRecord = async (riot_name, guild_id) => {
   const result = await db.query(
     `
       SELECT 
-             COUNT(*) AS total_count,
-             COUNT(CASE WHEN game_result = '승' THEN 1 END) AS win,
-             COUNT(CASE WHEN game_result = '패' THEN 1 END) AS lose,
-             CASE WHEN COUNT(*) = 0 THEN 0
-                  ELSE ROUND(COUNT(CASE WHEN game_result = '승' THEN 1 END)::NUMERIC / NULLIF(COUNT(*), 0) * 100 ,2)
-              END AS win_rate,
-             CASE WHEN SUM(death) = 0 THEN 9999
-                  ELSE ROUND((SUM(kill) + SUM(assist))::NUMERIC / NULLIF(SUM(death), 0), 2) 
-              END AS kda
-        FROM league
-       WHERE LOWER(riot_name) = LOWER($1)
-         AND guild_id = $2 
-         AND delete_yn = 'N'
-         AND game_date >= DATE_TRUNC('month', CURRENT_TIMESTAMP)
-         AND game_date < DATE_TRUNC('month', CURRENT_TIMESTAMP) + INTERVAL '1 month'
+             ${selectWinRateAndKdaSql('pg',true)}
+        FROM Player_game pg
+        JOIN Player p ON pg.player_id = p.player_id
+       WHERE LOWER(p.riot_name) = LOWER(?)
+         AND p.guild_id = ?
+         AND pg.delete_yn = 'N'
+         AND strftime('%Y-%m', pg.game_date) = strftime('%Y-%m', 'now', 'localtime')
     `,
     [riot_name, guild_id]
   );
@@ -85,21 +70,16 @@ const getStatisticOfGame = async (guild_id, year, month) => {
   const result = await db.query(
     `
       SELECT 
-             riot_name,
-             COUNT(riot_name) AS total_count,
-             COUNT(CASE WHEN game_result = '승' THEN 1 END) AS win,
-             COUNT(CASE WHEN game_result = '패' THEN 1 END) AS lose,
-             ROUND(COUNT(CASE WHEN game_result = '승' THEN 1 END)::numeric / COUNT(*)*100,2) AS win_rate,
-             CASE WHEN SUM(death) = 0 THEN 9999
-                  ELSE ROUND((SUM(kill) + SUM(assist))::NUMERIC / NULLIF(SUM(death), 0), 2) 
-              END AS kda
-        FROM LEAGUE 
-       WHERE delete_yn = 'N'
-         AND guild_id = $1
-         AND EXTRACT(YEAR FROM game_date) = $2
-         AND EXTRACT(MONTH FROM game_date) = $3
-       GROUP BY riot_name
-       ORDER BY total_count DESC
+             p.riot_name,
+             ${selectWinRateAndKdaSql('pg',true)}
+        FROM Player_game pg
+        JOIN Player p ON pg.player_id = p.player_id
+       WHERE pg.delete_yn = 'N'
+         AND p.guild_id = ?
+         AND strftime('%Y', pg.game_date) = ?
+         AND strftime('%m', pg.game_date) = ?
+       GROUP BY p.riot_name
+       ORDER BY total_count DESC;
     `,
     [guild_id, year, month]
   );
@@ -116,37 +96,29 @@ const getSynergisticTeammates = async (riot_name, guild_id) => {
   const result = await db.query(
     `
       SELECT 
-             A.riot_name,
-             COUNT(A.riot_name) AS total_count,
-             COUNT(CASE WHEN B.game_result = '승' THEN 1 END) AS win,
-             COUNT(CASE WHEN B.game_result = '패' THEN 1 END) AS lose,
-             ROUND(COUNT(CASE WHEN B.game_result = '승' THEN 1 END)::NUMERIC / COUNT(*)*100,2) AS win_rate
-        FROM league A 
-       INNER JOIN  
-            (
-              SELECT * 
-              FROM league 
-               WHERE LOWER(riot_name) = LOWER($1)
-                 AND guild_id = $2
-                 AND (
-                         (
-                           EXTRACT(YEAR FROM game_date) = EXTRACT(YEAR FROM CURRENT_DATE)
-                           AND EXTRACT(MONTH FROM game_date) = EXTRACT(MONTH FROM CURRENT_DATE)
+             K.riot_name,
+             ${selectWinRateAndKdaSql('B', null)}
+        FROM Player_game A
+        JOIN Player K ON A.player_id = K.player_id
+       INNER JOIN (
+                  SELECT pg.game_id, pg.game_team, pg.game_result, p.guild_id
+                    FROM Player_game pg
+                    JOIN Player p ON pg.player_id = p.player_id
+                   WHERE LOWER(p.riot_name) = LOWER(?1)
+                     AND p.guild_id = ?2
+                     AND (
+                          (strftime('%Y-%m', pg.game_date) = strftime('%Y-%m', 'now', 'localtime')) 
+                          OR 
+                          (strftime('%Y-%m', pg.game_date) = strftime('%Y-%m', 'now', 'localtime', '-1 month'))
                          )
-                      OR
-                         (
-                           EXTRACT(YEAR FROM game_date) = EXTRACT(YEAR FROM CURRENT_DATE - INTERVAL '1 month')
-                           AND EXTRACT(MONTH FROM game_date) = EXTRACT(MONTH FROM CURRENT_DATE - INTERVAL '1 month')
-                         )
-                     )
-            ) B
+                  ) B
           ON A.game_team = B.game_team 
-         AND A.guild_id = B.guild_id
+         AND K.guild_id = B.guild_id
          AND A.game_id = B.game_id 
-         AND LOWER(A.riot_name) != LOWER($1)
+         AND LOWER(K.riot_name) != LOWER(?1)
          AND A.delete_yn = 'N'
-       GROUP BY A.riot_name
-      HAVING COUNT(A.riot_name) >= 5
+       GROUP BY K.riot_name
+      HAVING COUNT(K.riot_name) >= 5
        ORDER BY win_rate DESC
     `,
     [riot_name, guild_id]
@@ -164,38 +136,31 @@ const getNemesis = async (riot_name, guild_id) => {
   const result = await db.query(
     `
       SELECT 
-             A.riot_name,
-             COUNT(A.riot_name) AS total_count,
-             COUNT(CASE WHEN B.game_result = '승' THEN 1 END) AS win,
-             COUNT(CASE WHEN B.game_result = '패' THEN 1 END) AS lose,
-             ROUND(COUNT(CASE WHEN B.game_result = '승' THEN 1 END)::NUMERIC / COUNT(*)*100,2) AS win_rate
-        FROM league A 
-       INNER JOIN  
-            (
-              SELECT * 
-                FROM league 
-               WHERE LOWER(riot_name) = LOWER($1)
-                 AND guild_id = $2
-                 AND (
-                         (
-                           EXTRACT(YEAR FROM game_date) = EXTRACT(YEAR FROM CURRENT_DATE)
-                           AND EXTRACT(MONTH FROM game_date) = EXTRACT(MONTH FROM CURRENT_DATE)
+              K.riot_name,
+              ${selectWinRateAndKdaSql('B', null)}
+        FROM Player_game A
+        JOIN Player K ON A.player_id = K.player_id
+       INNER JOIN (
+                  SELECT pg.game_id, pg.game_team, pg.game_result, p.guild_id, pg.position
+                    FROM Player_game pg
+                    JOIN Player p ON pg.player_id = p.player_id
+                   WHERE LOWER(p.riot_name) = LOWER(?1)
+                     AND p.guild_id = ?2
+                     AND (
+                          (strftime('%Y-%m', pg.game_date) = strftime('%Y-%m', 'now', 'localtime')) 
+                          OR 
+                          (strftime('%Y-%m', pg.game_date) = strftime('%Y-%m', 'now', 'localtime', '-1 month'))
                          )
-                      OR
-                         (
-                           EXTRACT(YEAR FROM game_date) = EXTRACT(YEAR FROM CURRENT_DATE - INTERVAL '1 month')
-                           AND EXTRACT(MONTH FROM game_date) = EXTRACT(MONTH FROM CURRENT_DATE - INTERVAL '1 month')
-                         )
-                     )
-            ) B
-            ON A.game_team != B.game_team 
-            AND A.game_id = B.game_id 
-            AND LOWER(A.riot_name) != LOWER($1)
-            AND A.delete_yn = 'N'
-            AND A.position = B.position
-            GROUP BY A.riot_name
-            HAVING  COUNT(A.riot_name) >= 5
-            ORDER BY win_rate DESC
+                  ) B
+          ON A.game_team != B.game_team 
+         AND K.guild_id = B.guild_id
+         AND A.game_id = B.game_id 
+         AND LOWER(K.riot_name) != LOWER(?1)
+         AND A.delete_yn = 'N'
+         AND A.position = B.position
+       GROUP BY K.riot_name
+      HAVING COUNT(K.riot_name) >= 5
+       ORDER BY win_rate DESC
     `,
     [riot_name, guild_id]
   );
@@ -212,21 +177,16 @@ const getWinRateByPosition = async (position, guild_id) => {
   const result = await db.query(
     `
       SELECT 	
-             position,
-             riot_name,
-             COUNT(riot_name) AS total_count,
-             COUNT(CASE WHEN game_result = '승' THEN 1 END) AS win,
-             COUNT(CASE WHEN game_result = '패' THEN 1 END) AS lose,
-             ROUND(COUNT(CASE WHEN game_result = '승' THEN 1 END)::NUMERIC / COUNT(*)*100,2) AS win_rate,
-             CASE WHEN SUM(death) = 0 THEN 9999
-                  ELSE ROUND((SUM(kill) + SUM(assist))::NUMERIC / NULLIF(SUM(death), 0), 2) 
-              END AS kda
-        FROM league  
-       WHERE position = $1
-         AND guild_id = $2
-         AND delete_yn = 'N'
-       GROUP BY position, riot_name 
-      HAVING COUNT(riot_name) >= 20
+             pg.position,
+             p.riot_name,
+             ${selectWinRateAndKdaSql('pg',true)}
+        FROM Player_game pg  
+        JOIN Player p ON pg.player_id = p.player_id
+       WHERE pg.position = ?
+         AND p.guild_id = ?
+         AND pg.delete_yn = 'N'
+       GROUP BY pg.position, p.riot_name 
+      HAVING COUNT(p.riot_name) >= 20
        ORDER BY win_rate DESC
        LIMIT 15   
     `,
@@ -245,23 +205,26 @@ const getRecordByGame = async (game_id, guild_id) => {
   const result = await db.query(
     `
       SELECT 
-             game_id, 
-             riot_name, 
-             champ_name, 
-             position, 
-             kill, 
-             death, 
-             assist, 
-             game_result, 
-             game_team,
-             total_damage_champions,
-             vision_bought
-        FROM league
-       WHERE LOWER(game_id) = LOWER($1)
-         AND guild_id = $2
-         AND delete_yn = 'N'
-       ORDER BY game_team,
-             CASE position
+             pg.game_id, 
+             p.riot_name, 
+             c.champ_name, 
+             pg.position, 
+             pg.kill, 
+             pg.death, 
+             pg.assist, 
+             pg.game_result, 
+             pg.game_team,
+             pg.total_damage_champions,
+             pg.vision_bought,
+             pg.penta_kills
+        FROM Player_game pg  
+        JOIN Player p ON pg.player_id = p.player_id
+        JOIN Champion c ON pg.champion_id = c.champion_id
+       WHERE LOWER(pg.game_id) = LOWER(?)
+         AND p.guild_id = ?
+         AND pg.delete_yn = 'N'
+       ORDER BY pg.game_team,
+             CASE pg.position
                   WHEN 'TOP' THEN 1
                   WHEN 'JUG' THEN 2
                   WHEN 'MID' THEN 3
@@ -284,28 +247,56 @@ const getRecentTenGamesByRiotName = async (riot_name, guild_id) => {
   const result = await db.query(
     `
       SELECT 
-             game_id, 
-             riot_name, 
-             champ_name, 
-             position, 
-             kill, 
-             death, 
-             assist, 
-             game_result, 
-             game_team,
-             total_damage_champions,
-             vision_bought
-        FROM league
-       WHERE LOWER(riot_name) = LOWER($1)
-         AND guild_id = $2
-         AND delete_yn = 'N'
-       ORDER BY game_date DESC
+             pg.game_id, 
+             p.riot_name, 
+             c.champ_name, 
+             pg.position, 
+             pg.kill, 
+             pg.death, 
+             pg.assist, 
+             pg.game_result, 
+             pg.game_team,
+             pg.total_damage_champions,
+             pg.vision_bought,
+             pg.penta_kills
+        FROM Player_game pg  
+        JOIN Player p ON pg.player_id = p.player_id
+        JOIN Champion c ON pg.champion_id = c.champion_id
+       WHERE LOWER(p.riot_name) = LOWER($1)
+         AND p.guild_id = $2
+         AND pg.delete_yn = 'N'
+       ORDER BY pg.game_date DESC
        LIMIT 10
     `,
     [riot_name, guild_id]
   );
   return result;
 };
+
+// 공용 쿼리
+const selectWinRateAndKdaSql = (table, kda) => {
+  let sql = 
+  `
+      COUNT(1) AS total_count,
+      COUNT(CASE WHEN ${table}.game_result = '승' THEN 1 END) AS win,
+      COUNT(CASE WHEN ${table}.game_result = '패' THEN 1 END) AS lose,
+      CASE 
+        WHEN COUNT(1) = 0 THEN 0
+        ELSE ROUND(COUNT(CASE WHEN ${table}.game_result = '승' THEN 1 END) * 100.0 / NULLIF(COUNT(1), 0), 2) 
+      END AS win_rate
+  `;
+  if(kda){
+    sql += 
+    ` 
+      ,
+      CASE 
+        WHEN COALESCE(SUM(${table}.death), 0) = 0 THEN 9999
+        ELSE ROUND((COALESCE(SUM(${table}.kill), 0) + COALESCE(SUM(${table}.assist), 0)) * 1.0 / NULLIF(COALESCE(SUM(${table}.death), 0), 0), 2) 
+      END AS kda
+    `
+  }
+  return sql;
+}
 
 module.exports = {
   getLineRecord,
