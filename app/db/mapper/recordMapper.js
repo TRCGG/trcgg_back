@@ -15,8 +15,8 @@ const getLineRecord = async (riot_name, guild_id) => {
       SELECT 
              pg.position,
              ${selectWinRateAndKdaSql('pg',true)}
-        FROM Player_game pg
-        LEFT JOIN Player p ON pg.player_id = p.player_id
+        FROM Player_game AS pg
+        LEFT JOIN Player AS p ON pg.player_id = p.player_id
        WHERE LOWER(p.riot_name) = LOWER(?1)
          AND p.guild_id = ?2
          AND pg.delete_yn = 'N'
@@ -46,8 +46,8 @@ const getRecentMonthRecord = async (riot_name, guild_id) => {
     `
       SELECT 
              ${selectWinRateAndKdaSql('pg',true)}
-        FROM Player_game pg
-        JOIN Player p ON pg.player_id = p.player_id
+        FROM Player_game AS pg
+        JOIN Player AS p ON pg.player_id = p.player_id
        WHERE LOWER(p.riot_name) = LOWER(?)
          AND p.guild_id = ?
          AND pg.delete_yn = 'N'
@@ -72,8 +72,8 @@ const getStatisticOfGame = async (guild_id, year, month) => {
       SELECT 
              p.riot_name,
              ${selectWinRateAndKdaSql('pg',true)}
-        FROM Player_game pg
-        JOIN Player p ON pg.player_id = p.player_id
+        FROM Player_game AS pg
+        JOIN Player AS p ON pg.player_id = p.player_id
        WHERE pg.delete_yn = 'N'
          AND p.guild_id = ?
          AND strftime('%Y', pg.game_date) = ?
@@ -98,12 +98,12 @@ const getSynergisticTeammates = async (riot_name, guild_id) => {
       SELECT 
              K.riot_name,
              ${selectWinRateAndKdaSql('B', null)}
-        FROM Player_game A
-        JOIN Player K ON A.player_id = K.player_id
+        FROM Player_game AS A
+        JOIN Player AS K ON A.player_id = K.player_id
        INNER JOIN (
                   SELECT pg.game_id, pg.game_team, pg.game_result, p.guild_id
-                    FROM Player_game pg
-                    JOIN Player p ON pg.player_id = p.player_id
+                    FROM Player_game AS pg
+                    JOIN Player AS p ON pg.player_id = p.player_id
                    WHERE LOWER(p.riot_name) = LOWER(?1)
                      AND p.guild_id = ?2
                      AND (
@@ -138,12 +138,12 @@ const getNemesis = async (riot_name, guild_id) => {
       SELECT 
               K.riot_name,
               ${selectWinRateAndKdaSql('B', null)}
-        FROM Player_game A
-        JOIN Player K ON A.player_id = K.player_id
+        FROM Player_game AS A
+        JOIN Player AS K ON A.player_id = K.player_id
        INNER JOIN (
                   SELECT pg.game_id, pg.game_team, pg.game_result, p.guild_id, pg.position
-                    FROM Player_game pg
-                    JOIN Player p ON pg.player_id = p.player_id
+                    FROM Player_game AS pg
+                    JOIN Player AS p ON pg.player_id = p.player_id
                    WHERE LOWER(p.riot_name) = LOWER(?1)
                      AND p.guild_id = ?2
                      AND (
@@ -180,8 +180,8 @@ const getWinRateByPosition = async (position, guild_id) => {
              pg.position,
              p.riot_name,
              ${selectWinRateAndKdaSql('pg',true)}
-        FROM Player_game pg  
-        JOIN Player p ON pg.player_id = p.player_id
+        FROM Player_game AS pg  
+        JOIN Player AS p ON pg.player_id = p.player_id
        WHERE pg.position = ?
          AND p.guild_id = ?
          AND pg.delete_yn = 'N'
@@ -217,8 +217,8 @@ const getRecordByGame = async (game_id, guild_id) => {
              pg.total_damage_champions,
              pg.vision_bought,
              pg.penta_kills
-        FROM Player_game pg  
-        JOIN Player p ON pg.player_id = p.player_id
+        FROM Player_game AS pg  
+        JOIN Player AS p ON pg.player_id = p.player_id
         JOIN Champion c ON pg.champion_id = c.champion_id
        WHERE LOWER(pg.game_id) = LOWER(?)
          AND p.guild_id = ?
@@ -259,8 +259,8 @@ const getRecentTenGamesByRiotName = async (riot_name, guild_id) => {
              pg.total_damage_champions,
              pg.vision_bought,
              pg.penta_kills
-        FROM Player_game pg  
-        JOIN Player p ON pg.player_id = p.player_id
+        FROM Player_game AS pg  
+        JOIN Player AS p ON pg.player_id = p.player_id
         JOIN Champion c ON pg.champion_id = c.champion_id
        WHERE LOWER(p.riot_name) = LOWER($1)
          AND p.guild_id = $2
