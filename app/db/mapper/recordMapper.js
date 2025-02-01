@@ -2,6 +2,7 @@
  * 전적 Mapper
  */
 const db = require('../db');
+const commonQuery = require('./commonSql')
 
 /**
  * @param {*} riot_name 
@@ -14,7 +15,7 @@ const getLineRecord = async (riot_name, guild_id) => {
     `
       SELECT 
              pg.position,
-             ${selectWinRateAndKdaSql('pg',true)}
+             ${commonQuery.selectWinRateAndKdaSql('pg',true)}
         FROM Player_game AS pg
         LEFT JOIN Player AS p ON pg.player_id = p.player_id
        WHERE LOWER(p.riot_name) = LOWER(?1)
@@ -45,7 +46,7 @@ const getRecentMonthRecord = async (riot_name, guild_id) => {
   const result = await db.query(
     `
       SELECT 
-             ${selectWinRateAndKdaSql('pg',true)}
+             ${commonQuery.selectWinRateAndKdaSql('pg',true)}
         FROM Player_game AS pg
         JOIN Player AS p ON pg.player_id = p.player_id
        WHERE LOWER(p.riot_name) = LOWER(?)
@@ -71,7 +72,7 @@ const getStatisticOfGame = async (guild_id, year, month) => {
     `
       SELECT 
              p.riot_name,
-             ${selectWinRateAndKdaSql('pg',true)}
+             ${commonQuery.selectWinRateAndKdaSql('pg',true)}
         FROM Player_game AS pg
         JOIN Player AS p ON pg.player_id = p.player_id
        WHERE pg.delete_yn = 'N'
@@ -97,7 +98,7 @@ const getSynergisticTeammates = async (riot_name, guild_id) => {
     `
       SELECT 
              K.riot_name,
-             ${selectWinRateAndKdaSql('B', null)}
+             ${commonQuery.selectWinRateAndKdaSql('B', null)}
         FROM Player_game AS A
         JOIN Player AS K ON A.player_id = K.player_id
        INNER JOIN (
@@ -137,7 +138,7 @@ const getNemesis = async (riot_name, guild_id) => {
     `
       SELECT 
               K.riot_name,
-              ${selectWinRateAndKdaSql('B', null)}
+              ${commonQuery.selectWinRateAndKdaSql('B', null)}
         FROM Player_game AS A
         JOIN Player AS K ON A.player_id = K.player_id
        INNER JOIN (
@@ -179,7 +180,7 @@ const getWinRateByPosition = async (position, guild_id) => {
       SELECT 	
              pg.position,
              p.riot_name,
-             ${selectWinRateAndKdaSql('pg',true)}
+             ${commonQuery.selectWinRateAndKdaSql('pg',true)}
         FROM Player_game AS pg  
         JOIN Player AS p ON pg.player_id = p.player_id
        WHERE pg.position = ?
@@ -272,31 +273,6 @@ const getRecentTenGamesByRiotName = async (riot_name, guild_id) => {
   );
   return result;
 };
-
-// 공용 쿼리
-const selectWinRateAndKdaSql = (table, kda) => {
-  let sql = 
-  `
-      COUNT(1) AS total_count,
-      COUNT(CASE WHEN ${table}.game_result = '승' THEN 1 END) AS win,
-      COUNT(CASE WHEN ${table}.game_result = '패' THEN 1 END) AS lose,
-      CASE 
-        WHEN COUNT(1) = 0 THEN 0
-        ELSE ROUND(COUNT(CASE WHEN ${table}.game_result = '승' THEN 1 END) * 100.0 / NULLIF(COUNT(1), 0), 2) 
-      END AS win_rate
-  `;
-  if(kda){
-    sql += 
-    ` 
-      ,
-      CASE 
-        WHEN COALESCE(SUM(${table}.death), 0) = 0 THEN 9999
-        ELSE ROUND((COALESCE(SUM(${table}.kill), 0) + COALESCE(SUM(${table}.assist), 0)) * 1.0 / NULLIF(COALESCE(SUM(${table}.death), 0), 0), 2) 
-      END AS kda
-    `
-  }
-  return sql;
-}
 
 module.exports = {
   getLineRecord,

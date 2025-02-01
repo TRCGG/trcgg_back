@@ -2,6 +2,7 @@
  * 챔피언 관련 Mapper
  */
 const db = require('../db');
+const commonQuery = require('./commonSql')
 /**
  * @param {*} riot_name 
  * @param {*} guild_id 
@@ -12,21 +13,16 @@ const getMostPicks = async (riot_name, guild_id) => {
   const result = await db.query(
     `
       SELECT 
-             champ_name,
-             COUNT(champ_name) AS total_count,
-             COUNT(CASE WHEN game_result = '승' THEN 1 END) AS win,
-             COUNT(CASE WHEN game_result = '패' THEN 1 END) AS lose,
-             ROUND(COUNT(CASE WHEN game_result = '승' THEN 1 END)::numeric / COUNT(*) * 100 ,2) AS win_rate,
-             CASE WHEN SUM(death) = 0 THEN 9999
-                  ELSE ROUND((SUM(kill) + SUM(assist))::NUMERIC / NULLIF(SUM(death), 0), 2) 
-              END AS kda
-        FROM league
-       WHERE LOWER(riot_name) = LOWER($1)
-         AND guild_id = $2
-         AND delete_yn = 'N'
-       GROUP BY champ_name
+             c.champ_name,
+             ${commonQuery.selectWinRateAndKdaSql('pg',true)}
+        FROM Player_game AS pg  
+        JOIN Player AS p ON pg.player_id = p.player_id
+        JOIN Champion c ON pg.champion_id = c.champion_id
+       WHERE LOWER(p.riot_name) = LOWER(?)
+         AND p.guild_id = ?
+         AND pg.delete_yn = 'N'
+       GROUP BY c.champ_name
        ORDER BY total_count DESC 
-       LIMIT 10
     `,
     [riot_name, guild_id]
   );
@@ -43,19 +39,15 @@ const getMasterOfChampion = async (champ_name, guild_id) => {
   const result = await db.query(
     `
       SELECT 
-             riot_name, 
-             COUNT(riot_name) AS total_count,
-             COUNT(CASE WHEN game_result = '승' THEN 1 END) AS win,
-             COUNT(CASE WHEN game_result = '패' THEN 1 END) AS lose,
-             ROUND(COUNT(CASE WHEN game_result = '승' THEN 1 END)::NUMERIC / COUNT(*) * 100 ,2) AS win_rate,
-             CASE WHEN SUM(death) = 0 THEN 9999
-                ELSE ROUND((SUM(kill) + SUM(assist))::NUMERIC / NULLIF(SUM(death), 0), 2) 
-              END AS kda
-        FROM league 
-       WHERE champ_name = $1
-         AND guild_id = $2
-         AND delete_yn = 'N'
-       GROUP BY riot_name 
+             p.riot_name, 
+             ${commonQuery.selectWinRateAndKdaSql('pg',true)}
+        FROM Player_game AS pg  
+        JOIN Player AS p ON pg.player_id = p.player_id
+        JOIN Champion c ON pg.champion_id = c.champion_id 
+       WHERE c.champ_name = ?
+         AND p.guild_id = ?
+         AND pg.delete_yn = 'N'
+       GROUP BY p.riot_name 
        ORDER BY total_count DESC
     `,
     [champ_name, guild_id]
@@ -74,17 +66,16 @@ const getStatisticOfChampion = async (guild_id, year, month) => {
   const result = await db.query(
     `
       SELECT 
-             champ_name,
-             COUNT(champ_name) AS total_count,
-             COUNT(CASE WHEN game_result = '승' THEN 1 END) AS win,
-             COUNT(CASE WHEN game_result = '패' THEN 1 END) AS lose,
-             ROUND(COUNT(CASE WHEN game_result = '승' THEN 1 END)::numeric / COUNT(*)*100,2) AS win_rate
-        FROM LEAGUE 
-       WHERE delete_yn = 'N'
-         AND guild_id = $1
-         AND EXTRACT(YEAR FROM game_date) = $2
-         AND EXTRACT(MONTH FROM game_date) = $3
-       GROUP BY champ_name
+             c.champ_name,
+             ${commonQuery.selectWinRateAndKdaSql('pg', null)}
+        FROM Player_game AS pg  
+        JOIN Player AS p ON pg.player_id = p.player_id
+        JOIN Champion c ON pg.champion_id = c.champion_id
+       WHERE pg.delete_yn = 'N'
+         AND p.guild_id = ?
+         AND strftime('%Y', pg.game_date) = ?
+         AND strftime('%m', pg.game_date) = ?
+       GROUP BY c.champ_name
        ORDER BY total_count DESC
     `,
     [guild_id, year, month]
