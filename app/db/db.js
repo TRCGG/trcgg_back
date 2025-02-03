@@ -66,7 +66,7 @@ const queryOne = (text, params = []) => {
         console.error('Database query error:', err.message);
         reject({ status: 500, message: 'Internal Server Error' });
       } else {
-        console.log('Query Result:', row);
+        // console.log('Query Result:', row);
         resolve(row);
       }
     });
@@ -82,7 +82,7 @@ const queryUpdate = (text, params = []) => {
         console.error('Database update/delete error:', err.message);
         reject({ status: 500, message: 'Internal Server Error' });
       } else {
-        console.log('Affected Result:', this.changes);
+        // console.log('Affected Result:', this.changes);
         resolve(this.changes);
       }
     });

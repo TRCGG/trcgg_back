@@ -6,22 +6,63 @@ const commonQuery = require('./commonSql')
 
 /**
  * @param {*} riot_name 
+ * @param {*} riot_name_tag 
  * @param {*} guild_id 
- * @returns List<league>
- * @description 전체 전적 조회
+ * @returns List<Player>
+ * @description 전적 검색을 위한 계정 조회
  */
-const getLineRecord = async (riot_name, guild_id) => {
-  const result = await db.query(
+const getPlayerForSearch = async (riot_name, riot_name_tag, guild_id) => {
+  let query = 
+    `
+      SELECT
+             p.player_id,
+             p.riot_name,
+             p.riot_name_tag,
+             p.guild_id,
+             p.puuid
+        FROM Player AS p
+       WHERE p.delete_yn = 'N'
+         AND LOWER(p.riot_name) = LOWER(?)
+         AND p.guild_id = ?
+         AND p.main_player_id IS NULL
+    `
+  const params = [riot_name, guild_id];
+
+  if(riot_name_tag) {
+    query += `AND LOWER(p.riot_name_tag) = LOWER(?) `
+    params.push(riot_name_tag);
+  }
+  const result = await db.query(query, params);
+  return result;
+}
+
+/**
+ * @param {*} riot_name 
+ * @param {*} riot_name_tag 
+ * @param {*} guild_id 
+ * @returns List<Player_game>
+ * @description 전체 라인별 전적 조회
+ */
+const getLineRecord = async (riot_name, riot_name_tag, guild_id) => {
+  let query = 
     `
       SELECT 
              pg.position,
              ${commonQuery.selectWinRateAndKdaSql('pg',true)}
         FROM Player_game AS pg
         LEFT JOIN Player AS p ON pg.player_id = p.player_id
-       WHERE LOWER(p.riot_name) = LOWER(?1)
-         AND p.guild_id = ?2
+       WHERE p.riot_name = ?
+         AND p.guild_id = ?
          AND p.delete_yn = 'N'
          AND pg.delete_yn = 'N'
+    `
+  const params = [riot_name, guild_id];
+  if(riot_name_tag) {
+    query += `AND p.riot_name_tag = ? `;
+    params.push(riot_name_tag);
+  }
+  query += 
+  `
        GROUP BY pg.position
        ORDER BY CASE pg.position
                     WHEN 'TOP' THEN 1
@@ -30,35 +71,39 @@ const getLineRecord = async (riot_name, guild_id) => {
                     WHEN 'ADC' THEN 4
                     WHEN 'SUP' THEN 5
                 END
-    `,
-    [riot_name, guild_id]
-  );
-
-  return result; // 상태 코드와 데이터를 반환
+  `;
+    
+  const result = await db.query(query, params);
+  return result;
 };
 
 /**
  * @param {*} riot_name 
+ * @param {*} riot_name_tag 
  * @param {*} guild_id 
- * @returns List<league>
+ * @returns List<Player_game>
  * @description 최근 한 달 전적 조회
  */
-const getRecentMonthRecord = async (riot_name, guild_id) => {
-  const result = await db.query(
+const getRecentMonthRecord = async (riot_name, riot_name_tag, guild_id) => {
+  let query = 
     `
       SELECT 
              ${commonQuery.selectWinRateAndKdaSql('pg',true)}
         FROM Player_game AS pg
         JOIN Player AS p ON pg.player_id = p.player_id
-       WHERE LOWER(p.riot_name) = LOWER(?)
+       WHERE p.riot_name = ?
          AND p.guild_id = ?
          AND p.delete_yn = 'N'
          AND pg.delete_yn = 'N'
          AND strftime('%Y-%m', pg.game_date) = strftime('%Y-%m', 'now', 'localtime')
-    `,
-    [riot_name, guild_id]
-  );
+         `
+  const params = [riot_name, guild_id]
+  if(riot_name_tag) {
+    query += `AND p.riot_name_tag = ? `;
+    params.push(riot_name_tag);
+  }
 
+  const result = await db.query(query, params);
   return result;
 };
 
@@ -66,7 +111,7 @@ const getRecentMonthRecord = async (riot_name, guild_id) => {
  * @param {*} guild_id 
  * @param {*} year 
  * @param {*} month 
- * @returns List<league>
+ * @returns List<Player_game>
  * @description 게임 통계 조회
  */
 const getStatisticOfGame = async (guild_id, year, month) => {
@@ -92,12 +137,14 @@ const getStatisticOfGame = async (guild_id, year, month) => {
 
 /**
  * @param {*} riot_name 
+ * @param {*} riot_name_tag 
  * @param {*} guild_id 
- * @returns List<league>
+ * @returns List<Player_game>
  * @description 시너지 팀원 조회 (최근 2 달)
  */
-const getSynergisticTeammates = async (riot_name, guild_id) => {
-  const result = await db.query(
+const getSynergisticTeammates = async (riot_name, riot_name_tag, guild_id) => {
+  const params = [riot_name, guild_id];
+  let query = 
     `
       SELECT 
              K.riot_name,
@@ -108,10 +155,18 @@ const getSynergisticTeammates = async (riot_name, guild_id) => {
                   SELECT pg.game_id, pg.game_team, pg.game_result, p.guild_id
                     FROM Player_game AS pg
                     JOIN Player AS p ON pg.player_id = p.player_id
-                   WHERE LOWER(p.riot_name) = LOWER(?1)
+                   WHERE p.riot_name = ?1
                      AND p.guild_id = ?2
                      AND p.delete_yn = 'N'
                      AND pg.delete_yn = 'N'
+
+    `
+  if(riot_name_tag) {
+    query += `       AND p.riot_name_tag = ?3 `;
+  }
+  
+  query += 
+    `
                      AND (
                           (strftime('%Y-%m', pg.game_date) = strftime('%Y-%m', 'now', 'localtime')) 
                           OR 
@@ -121,26 +176,33 @@ const getSynergisticTeammates = async (riot_name, guild_id) => {
           ON A.game_team = B.game_team 
          AND K.guild_id = B.guild_id
          AND A.game_id = B.game_id 
-         AND LOWER(K.riot_name) != LOWER(?1)
+         AND K.riot_name != ?1
          AND K.delete_yn = 'N'
-         AND A.delete_yn = 'N'
+    `
+  if(riot_name_tag) {
+    query += `AND K.riot_name_tag != ?3 `;
+    params.push(riot_name_tag);
+  }
+  query +=
+    `
        GROUP BY K.riot_name
       HAVING COUNT(K.riot_name) >= 5
        ORDER BY win_rate DESC
-    `,
-    [riot_name, guild_id]
-  );
+    `;
+  const result = await db.query(query, params);
   return result;
 };
 
 /**
  * @param {*} riot_name 
+ * @param {*} riot_name_tag
  * @param {*} guild_id 
- * @returns List<league>
+ * @returns List<Player_game>
  * @description 인간상성 조회 (맞라이너)
  */
-const getNemesis = async (riot_name, guild_id) => {
-  const result = await db.query(
+const getNemesis = async (riot_name, riot_name_tag, guild_id) => {
+  const params = [riot_name, guild_id];
+  let query = 
     `
       SELECT 
               K.riot_name,
@@ -151,36 +213,51 @@ const getNemesis = async (riot_name, guild_id) => {
                   SELECT pg.game_id, pg.game_team, pg.game_result, p.guild_id, pg.position
                     FROM Player_game AS pg
                     JOIN Player AS p ON pg.player_id = p.player_id
-                   WHERE LOWER(p.riot_name) = LOWER(?1)
+                   WHERE p.riot_name = ?1
                      AND p.guild_id = ?2
                      AND p.delete_yn = 'N'
                      AND pg.delete_yn = 'N'
+
+                  
+    `
+  if(riot_name_tag) {
+    query += `       AND p.riot_name_tag = ?3 `;
+  }
+  query += 
+    `
                      AND (
                           (strftime('%Y-%m', pg.game_date) = strftime('%Y-%m', 'now', 'localtime')) 
                           OR 
                           (strftime('%Y-%m', pg.game_date) = strftime('%Y-%m', 'now', 'localtime', '-1 month'))
                          )
-                  ) B
+                    ) B
           ON A.game_team != B.game_team 
          AND K.guild_id = B.guild_id
          AND A.game_id = B.game_id 
-         AND LOWER(K.riot_name) != LOWER(?1)
+         AND K.riot_name != ?1
          AND K.delete_yn = 'N'
          AND A.delete_yn = 'N'
          AND A.position = B.position
+
+    `
+  if(riot_name_tag) {
+    query += `AND K.riot_name_tag != ?3 `;
+    params.push(riot_name_tag);
+  }
+  query +=
+    `
        GROUP BY K.riot_name
       HAVING COUNT(K.riot_name) >= 5
-       ORDER BY win_rate DESC
-    `,
-    [riot_name, guild_id]
-  );
+       ORDER BY win_rate DESC    
+    `
+  const result = await db.query(query, params);
   return result;
 };
 
 /**
- * @param {*} riot_name 
+ * @param {*} position 
  * @param {*} guild_id 
- * @returns List<league>
+ * @returns List<Player_game>
  * @description 포지션별 승률 조회
  */
 const getWinRateByPosition = async (position, guild_id) => {
@@ -209,7 +286,7 @@ const getWinRateByPosition = async (position, guild_id) => {
 /**
  * @param {*} game_id 
  * @param {*} guild_id 
- * @returns List<league>
+ * @returns List<Player_game>
  * @description 게임 상세 조회
  */
 const getRecordByGame = async (game_id, guild_id) => {
@@ -251,12 +328,14 @@ const getRecordByGame = async (game_id, guild_id) => {
 
 /**
  * @param {*} riot_name 
+ * @param {*} riot_name_tag
  * @param {*} guild_id 
- * @returns List<league>
- * @description 최근 10 게임 조회
+ * @returns List<Player_game>
+ * @description 최근 20 게임 조회
  */
-const getRecentTenGamesByRiotName = async (riot_name, guild_id) => {
-  const result = await db.query(
+const getRecentGamesByRiotName = async (riot_name, riot_name_tag, guild_id) => {
+
+  let query = 
     `
       SELECT 
              pg.game_id, 
@@ -274,19 +353,28 @@ const getRecentTenGamesByRiotName = async (riot_name, guild_id) => {
         FROM Player_game AS pg  
         JOIN Player AS p ON pg.player_id = p.player_id
         JOIN Champion c ON pg.champion_id = c.champion_id
-       WHERE LOWER(p.riot_name) = LOWER($1)
-         AND p.guild_id = $2
+       WHERE p.riot_name = ?1
+    `;
+  const params = [riot_name, guild_id];
+  if(riot_name_tag) {
+    query += `AND p.riot_name_tag = ?3 `;
+    params.push(riot_name_tag);
+  }
+  query +=
+    `
+         AND p.guild_id = ?2
          AND p.delete_yn = 'N'         
          AND pg.delete_yn = 'N'
        ORDER BY pg.game_date DESC
-       LIMIT 10
-    `,
-    [riot_name, guild_id]
-  );
+       LIMIT 20
+    `;    
+    
+  const result = await db.query(query, params);  
   return result;
 };
 
 module.exports = {
+  getPlayerForSearch,
   getLineRecord,
   getRecentMonthRecord,
   getStatisticOfGame,
@@ -294,5 +382,5 @@ module.exports = {
   getNemesis,
   getWinRateByPosition,
   getRecordByGame,
-  getRecentTenGamesByRiotName,
+  getRecentGamesByRiotName,
 }; 

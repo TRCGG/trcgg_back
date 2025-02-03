@@ -6,26 +6,38 @@ const championMapper = require("../db/mapper/championMapper");
 const appUtil = require("../appUtils");
 const embedUtil = require('../embed');
 
+// 검색용 계정 조회
+const getPlayerForSearch = async (riot_name, riot_name_tag, guild_id) => {
+  const accounts = await recordMapper.getPlayerForSearch(riot_name, riot_name_tag, guild_id);
+  if(accounts.length === 0){
+    throw new Error(appUtil.notFoundResponse());
+  }
+  return accounts;
+}
+
 /**
  * !전적
  * @param {*} riot_name
+ * @param {*} riot_name_tag
  * @param {*} guild_Id
  * @returns
  */
-const getAllRecord = async (riot_name, guild_id) => {
+const getAllRecord = async (riot_name, riot_name_tag, guild_id) => {
   const allData = {
-    record_data: await recordMapper.getLineRecord(riot_name, guild_id),
-    month_data: await recordMapper.getRecentMonthRecord(riot_name, guild_id),
-    recent_data: await recordMapper.getRecentTenGamesByRiotName(
+    record_data: await recordMapper.getLineRecord(riot_name, riot_name_tag, guild_id),
+    month_data: await recordMapper.getRecentMonthRecord(riot_name, riot_name_tag, guild_id),
+    recent_data: await recordMapper.getRecentGamesByRiotName(
       riot_name,
+      riot_name_tag,
       guild_id
     ),
     with_team_data: await recordMapper.getSynergisticTeammates(
       riot_name,
+      riot_name_tag,
       guild_id
     ),
-    other_team_data: await recordMapper.getNemesis(riot_name, guild_id),
-    most_pick_data: await championMapper.getMostPicks(riot_name, guild_id),
+    other_team_data: await recordMapper.getNemesis(riot_name, riot_name_tag, guild_id),
+    most_pick_data: await championMapper.getMostPicks(riot_name, riot_name_tag, guild_id),
   };
 
   if (allData.record_data.length === 0) {
@@ -91,7 +103,9 @@ const getAllRecord = async (riot_name, guild_id) => {
   let recent_value = "";
   let recent_header = "";
 
-  allData.recent_data.forEach((data) => {
+  const ten_recent_data = allData.recent_data.slice(0,10);
+
+  ten_recent_data.forEach((data) => {
     recent_total += 1;
     if (data.game_result === "승") {
       recent_win += 1;
@@ -192,7 +206,7 @@ const getAllRecord = async (riot_name, guild_id) => {
   let most_pick_header = "MostPick 10:star:";
   let most_pick_value = "";
 
-  let most_pick_data = allData.most_pick_data;
+  let most_pick_data = allData.most_pick_data.slice(0,10);
   most_pick_data.forEach((data) => {
     most_pick_value += `${data.champ_name}: ${data.total_count}판 ${data.win_rate}% kda:${data.kda}\n`;
   });
@@ -205,7 +219,7 @@ const getAllRecord = async (riot_name, guild_id) => {
   }
 
   jsonData = {
-    title: riot_name,
+    title: `${riot_name}#${riot_name_tag}`,
     description: desc,
     fields: [
       {
@@ -245,13 +259,13 @@ const getAllRecord = async (riot_name, guild_id) => {
 };
 
 // 라인별 전적 조회
-const getLineRecord = async (riot_name, guild_id) => {
-  return await recordMapper.getLineRecord(riot_name, guild_id);
+const getLineRecord = async (riot_name, riot_name_tag, guild_id) => {
+  return await recordMapper.getLineRecord(riot_name, riot_name_tag, guild_id);
 };
 
 // 이번달 전적 조회
-const getRecentMonthRecord = async (riot_name, guild_id) => {
-  return await recordMapper.getRecentMonthRecord(riot_name, guild_id);
+const getRecentMonthRecord = async (riot_name, riot_name_tag, guild_id) => {
+  return await recordMapper.getRecentMonthRecord(riot_name, riot_name_tag, guild_id);
 };
 
 /**
@@ -336,13 +350,13 @@ const getStatisticOfGameAllMember = async (guild_id, date, msg) => {
 }
 
 // 팀워크
-const getSynergisticTeammates = async (riot_name, guild_id) => {
-  return await recordMapper.getSynergisticTeammates(riot_name, guild_id);
+const getSynergisticTeammates = async (riot_name, riot_name_tag, guild_id) => {
+  return await recordMapper.getSynergisticTeammates(riot_name, riot_name_tag, guild_id);
 };
 
 // 맞라인
-const getNemesis = async (riot_name, guild_id) => {
-  return await recordMapper.getNemesis(riot_name, guild_id);
+const getNemesis = async (riot_name, riot_name_tag, guild_id) => {
+  return await recordMapper.getNemesis(riot_name, riot_name_tag, guild_id);
 };
 
 /**
@@ -436,12 +450,14 @@ const getRecordByGame = async (game_id, guild_id) => {
 /**
  * !최근전적
  * @param {*} riot_name
+ * @param {*} riot_name_tag
  * @param {*} guild_Id
  * @returns
  */
-const getRecentTenGamesByRiotName = async (riot_name, guild_id) => {
-  const recent_data = await recordMapper.getRecentTenGamesByRiotName(
+const getRecentGamesByRiotName = async (riot_name, riot_name_tag, guild_id) => {
+  const recent_data = await recordMapper.getRecentGamesByRiotName(
     riot_name,
+    riot_name_tag,
     guild_id
   );
   if (recent_data.length === 0) {
@@ -451,7 +467,7 @@ const getRecentTenGamesByRiotName = async (riot_name, guild_id) => {
   let title = riot_name + "최근 상세 전적";
   let desc_value = "";
 
-  recent_data.forEach((data) => {
+  recent_data.slice(0,10).forEach((data) => {
     if (data.game_result === "승") {
       desc_value += ":blue_circle:";
     } else {
@@ -469,6 +485,7 @@ const getRecentTenGamesByRiotName = async (riot_name, guild_id) => {
 };
 
 module.exports = {
+  getPlayerForSearch,
   getAllRecord,
   getLineRecord,
   getRecentMonthRecord,
@@ -478,5 +495,5 @@ module.exports = {
   getNemesis,
   getWinRateByPosition,
   getRecordByGame,
-  getRecentTenGamesByRiotName,
+  getRecentGamesByRiotName,
 };

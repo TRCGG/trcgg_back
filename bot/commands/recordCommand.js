@@ -1,42 +1,67 @@
 const recordService = require("../../app/services/recordService");
-const champService = require("../../app/services/championService");
-const { getMemberNick, createEmbed } = require("../botUtils");
+const { getMemberNick, createEmbed, getPlayersEmbed } = require("../botUtils");
 
 // 전적 검색 명령어
 module.exports = [
   {
     name: "전적",
     run: async (client, msg, args) => {
-      const riot_name = getMemberNick(msg, args);
+      const [riot_name, riot_name_tag] = getMemberNick(msg, args);
       const guild_id = msg.guild.id;
 
       await recordService
-        .getAllRecord(riot_name, guild_id)
-        .then((result) => {
-          // msg.channel.send({embeds: [result]});
+      .getPlayerForSearch(riot_name, riot_name_tag, guild_id)
+      .then(async (players) => {
+        if(players.length > 1){
+          const result = getPlayersEmbed(players);
           msg.reply(createEmbed(result));
-        })
-        .catch((err) => {
-          console.log(err);
-          msg.reply(err.message);
-        });
+        } else {
+          await recordService
+            .getAllRecord(players[0].riot_name, players[0].riot_name_tag, guild_id)
+            .then((record) => {
+              // msg.channel.send({embeds: [record]});
+              msg.reply(createEmbed(record));
+            })
+            .catch((err) => {
+              console.log(err);
+              msg.reply(err.message);
+          });
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        msg.reply(err.message);
+      })
     },
   },
   {
     name: "최근전적",
     run: async (client, msg, args) => {
-      const riot_name = getMemberNick(msg, args);
+      const [riot_name, riot_name_tag] = getMemberNick(msg, args);
       const guild_id = msg.guild.id;
 
       await recordService
-        .getRecentTenGamesByRiotName(riot_name, guild_id)
-        .then((result) => {
+      .getPlayerForSearch(riot_name, riot_name_tag, guild_id)
+      .then(async (players) => {
+        if(players.length > 1){
+          const result = getPlayersEmbed(players);
           msg.reply(createEmbed(result));
-        })
-        .catch((err) => {
-          console.log(err);
-          msg.reply(err.message);
-        });
+        } else {
+          await recordService
+            .getRecentGamesByRiotName(players[0].riot_name, players[0].riot_name_tag, guild_id)
+            .then((record) => {
+              msg.reply(createEmbed(record));
+            })
+            .catch((err) => {
+              console.log(err);
+              msg.reply(err.message);
+          });          
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        msg.reply(err.message);
+      })
     },
   },
   {

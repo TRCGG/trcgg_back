@@ -1,3 +1,16 @@
+// const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+
+// // 이벤트 버튼 생성
+// const makeEventButton = (command) => {
+//     const row = new ActionRowBuilder().addComponents(
+//         new ButtonBuilder()
+//           .setCustomId(command)
+//           .setLabel(`${command}`)
+//           .setStyle(ButtonStyle.Primary)
+//     );
+//     return row;
+// }
+
 // !라인 header 설정
 const setLineFieldHeader = (dto, team) => {
     let result = "";
