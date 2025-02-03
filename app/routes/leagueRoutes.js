@@ -5,6 +5,8 @@ const replayParsingService = require("../services/replayParsingService");
 const recordService = require("../services/recordService");
 const championService = require("../services/championService");
 
+// TO-DO: route 전체 수정, 검토 필요
+
 // 전적 조회에 필요한 서비스들
 // 전체 전적 조회
 router.get("/getAllRecord/:riot_name/:guild_id", async (req, res) => {
@@ -148,7 +150,7 @@ router.get("/gameResult/:game_id/:guild_id", async (req, res) => {
 router.get("/getTopTen/:riot_name/:guild_id", async (req, res) => {
   const { riot_name, guild_id } = req.params;
   try {
-    const game = await recordService.getRecentTenGamesByRiotName(
+    const game = await recordService.getRecentGamesByRiotName(
       riot_name,
       guild_id
     );
