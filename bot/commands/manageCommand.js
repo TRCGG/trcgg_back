@@ -16,7 +16,7 @@ module.exports = [
       const guild_id = msg.guild.id;
 
       await manageService
-        .getSubAccountName(guild_id)
+        .getSubAccountList(guild_id)
         .then((result) => {
           msg.reply(botUtils.createEmbed(result));
         })
@@ -33,7 +33,7 @@ module.exports = [
       const guild_id = msg.guild.id;
 
       if (botUtils.checkAuth(msg)) {
-        await manageService.postSubAccountName(command, guild_id)
+        await manageService.postSubAccount(command, guild_id)
           .then((result) => {
             msg.reply(result);
           })
@@ -53,7 +53,7 @@ module.exports = [
       const guild_id = msg.guild.id;
 
       if (botUtils.checkAuth(msg)) {
-        await manageService.deleteSubAccountName(full_sub_name, guild_id)
+        await manageService.deleteSubAccount(full_sub_name, guild_id)
           .then((result) => {
             msg.reply(result);
           })
@@ -132,7 +132,7 @@ module.exports = [
       const guild_id = msg.guild.id;
 
       if (botUtils.checkAuth(msg)) {
-        await manageService.putNameAndSubAccountName(command_str, guild_id)
+        await manageService.putPlayerName(command_str, guild_id)
           .then((result) => {
             msg.reply(result);
           })

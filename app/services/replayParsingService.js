@@ -179,9 +179,8 @@ const saveData = async (statsArray, fileName, createUser, guildId) => {
  * @returns 
  */
 const checkDuplicate = async (fileName, guildId) => {
-    // const result = await managementService.getDuplicateReplay(fileName, guildId);
-    // return result[0].count === 0;
-    return true;
+    const result = await managementService.getDuplicateReplay(fileName, guildId);
+    return result.count === 0;
 };
 
 module.exports = {

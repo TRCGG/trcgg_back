@@ -18,6 +18,10 @@ const notFoundResponse = () => {
     return "해당 기록이 없습니다";
 }
 
+const notFoundAccount = (name, tag) => {
+    return `${name}#${tag} 계정이 게임 기록에 존재하지 않습니다.`;
+}
+
 const splitStr = (str) => {
     try {
         const [sub_name, main_name]= str.split('/');
@@ -88,6 +92,7 @@ const splitDate = (date) => {
 
 module.exports = {
     notFoundResponse,
+    notFoundAccount,
     validateTag,
     splitStr,
     splitTag,

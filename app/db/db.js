@@ -31,23 +31,6 @@ const testConnection = async () => {
   })
 };
 
-// /**
-//  * 데이터베이스 쿼리 결과값중 숫자 형태의 문자열을 숫자로 변환
-//  * @param {Array} data - 쿼리 결과
-//  * @returns {Array} - 숫자로 변환된 데이터
-//  */
-// const jsonify = (data) => {
-//   return data.map(row => {
-//     Object.keys(row).forEach(key => {
-//       if (typeof row[key] === "string") {
-//         const num = Number(row[key]);
-//         row[key] = isNaN(num) ? row[key] : num;
-//       }
-//     });
-//     return row;
-//   });
-// };
-
 /**
  * 데이터베이스 쿼리 실행
  * @param {string} text - SQL 쿼리
@@ -67,24 +50,44 @@ const query = (text, params = []) => {
         console.error('Database query error:', err.message);
         reject({ status: 500, message: 'Internal Server Error' });
       } else {
-        // console.log('Query Result:', rows);
+        console.log('Query Results:', rows);
         resolve(rows);
       }
     });
   });
 };
 
-(async () => {
+// 단건 조회
+const queryOne = (text, params = []) => {
+  return new Promise((resolve, reject) => {
 
-  // 예제: 새로운 플레이어 추가
-  // await query("INSERT INTO Player (player_id, main_riot_name, main_riot_name_tag, guild_id, puuid) VALUES (?, ?, ?, ?, ?)", ["PLR_1", "TestPlayer","TestTag","01001","puu-id-efg"]);
-  const aa = await query("SELECT COUNT(*) from LEAGUE");
-  console.log('aa',aa);
+    db.get(text, params, (err, row) => {
+      if (err) {
+        console.error('Database query error:', err.message);
+        reject({ status: 500, message: 'Internal Server Error' });
+      } else {
+        console.log('Query Result:', row);
+        resolve(row);
+      }
+    });
+  });
+};
 
-  // 예제: 플레이어 조회
-  const players = await query("SELECT * FROM Player");
-  console.log("LOGS",players);
-})();
+// delete, update
+const queryUpdate = (text, params = []) => {
+  return new Promise((resolve, reject) => {
+
+    db.run(text, params, function(err) {
+      if (err) {
+        console.error('Database update/delete error:', err.message);
+        reject({ status: 500, message: 'Internal Server Error' });
+      } else {
+        console.log('Affected Result:', this.changes);
+        resolve(this.changes);
+      }
+    });
+  });
+};
 
 // db.close((err) => {
 //   if (err) {
@@ -96,5 +99,7 @@ const query = (text, params = []) => {
 
 module.exports = {
   query,
+  queryOne,
+  queryUpdate,
   testConnection, // 연결 테스트 함수 내보내기
 }; 

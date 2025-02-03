@@ -4,115 +4,87 @@
 const db = require('../db');
 
 /**
+ * @param {*} delete_yn 
+ * @param {*} riot_name 
+ * @param {*} riot_name_tag 
  * @param {*} guild_id 
- * @returns List<mapping_name>
- * @description 부계정 조회
+ * @returns Player
+ * @description 계정 조회
  */
-const getSubAccountName = async (guild_id) => {
+const getPlayer = async (delete_yn, riot_name, riot_name_tag, guild_id) => {
+  let query = 
+    `
+      SELECT
+             p.player_id,
+             p.riot_name,
+             p.riot_name_tag,
+             p.guild_id,
+             p.puuid,
+             p.main_player_id
+        FROM Player AS p
+       WHERE p.delete_yn = ?
+         AND p.riot_name = ?
+         AND p.guild_id = ?
+    `
+  const params = [delete_yn, riot_name, guild_id];
+
+  if(riot_name_tag) {
+    query += `AND p.riot_name_tag = ? `
+    params.push(riot_name_tag);
+  }
+
+  const result = await db.queryOne(query, params);
+  return result;
+}
+
+// /**
+//  * @param {*} delete_yn 
+//  * @param {*} main_player_id 
+//  * @param {*} guild_id 
+//  * @returns List<Player>
+//  * @description 부계정들 조회
+//  */
+// const getSubPlayers = async (delete_yn, main_player_id, guild_id) => {
+//   const query = 
+//     `
+//       SELECT 
+//              player_id,
+//              riot_name,
+//              riot_name_tag,
+//              guild_id,
+//              puuid,
+//              main_player_id
+//         FROM Player
+//        WHERE delete_yn = ?
+//          AND main_player_id = ?
+//          AND guild_id = ?
+//     `;
+
+//   const params = [delete_yn, main_player_id, guild_id];
+//   const result = await db.query(query, params);
+//   return result;
+// };
+
+/**
+ * @param {*} guild_id 
+ * @returns List<Player>
+ * @description 부계정 목록 조회
+ */
+const getSubAccountList = async (guild_id) => {
   const result = await db.query(
     `
       SELECT 
-             sub_name,
-             sub_name_tag,
-             main_name,
-             main_name_tag
-        FROM mapping_name
-       WHERE delete_yn = 'N'
-         AND guild_id = $1
-       ORDER BY update_date DESC
+             main.riot_name AS main_riot_name,
+             main.riot_name_tag AS main_riot_name_tag,
+             sub.riot_name AS sub_riot_name,
+             sub.riot_name_tag AS sub_riot_name_tag
+        FROM Player AS sub
+        JOIN Player AS main ON sub.main_player_id = main.player_id
+       WHERE sub.delete_yn = 'N'
+         AND sub.guild_id = ?
+       ORDER BY sub.update_date DESC
     `,
     [guild_id]
-  );
-  return result;
-};
-
-/**
- * @param {*} sub_name 
- * @param {*} sub_name_tag 
- * @param {*} main_name 
- * @param {*} main_name_tag 
- * @param {*} guild_id 
- * @returns 
- * @description 부계정 추가
- */
-const postSubAccountName = async (sub_name, sub_name_tag, main_name, main_name_tag, guild_id) => {
-  const query = `
-    INSERT 
-      INTO mapping_name 
-           (
-             sub_name,
-             sub_name_tag,
-             main_name,
-             main_name_tag,
-             create_date,
-             update_date,
-             delete_yn,
-             guild_id
-           )
-      VALUES 
-           (
-             $1,
-             $2,
-             $3,
-             $4,
-             CURRENT_TIMESTAMP,
-             CURRENT_TIMESTAMP,
-             'N',
-             $5
-           )
-  `;
-  const result = await db.query(query, [
-    sub_name,
-    sub_name_tag,
-    main_name,
-    main_name_tag,
-    guild_id,
-  ]);
-  return result;
-};
-
-/**
- * @param {*} old_name 
- * @param {*} old_name_tag
- * @param {*} new_name 
- * @param {*} new_name_tag 
- * @param {*} guild_id 
- * @returns 
- * @description 부계정의 본캐 닉네임 수정
- */
-const putSubAccountName = async (new_name, new_name_tag, old_name, old_name_tag, guild_id) => {
-  const result = await db.query(
-    `
-      UPDATE mapping_name
-         SET main_name = $1,
-             main_name_tag = $2,
-             update_date = CURRENT_TIMESTAMP
-     WHERE main_name = $3
-       AND main_name_tag = $4
-       AND guild_id = $5
-  `,
-    [new_name, new_name_tag, old_name, old_name_tag, guild_id]
-  );
-  return result;
-};
-
-/**
- * @param {*} sub_name
- * @param {*} sub_name_tag
- * @param {*} guild_id
- * @returns 
- * @description 부계정 삭제
- */
-const deleteSubAccountName = async (sub_name, sub_name_tag, guild_id) => {
-  const result = await db.query(
-    `
-      DELETE 
-        FROM mapping_name
-     WHERE sub_name = $1
-       AND sub_name_tag = $2
-       AND guild_id = $3
-  `,
-    [sub_name, sub_name_tag, guild_id]
   );
   return result;
 };
@@ -124,13 +96,14 @@ const deleteSubAccountName = async (sub_name, sub_name_tag, guild_id) => {
  * @description 중복 리플레이 조회
  */
 const getDuplicateReplay = async (game_id, guild_id) => {
-  const result = await db.query(
+  const result = await db.queryOne(
     `
       SELECT
-             COUNT(*)
-        FROM league
+             COUNT(*) AS count
+        FROM League
        WHERE LOWER(game_id) = LOWER($1)
          AND guild_id = $2
+         AND delete_yn = 'N'
     `,
     [game_id, guild_id]
   );
@@ -148,11 +121,53 @@ const getGuild = async (guild_id) => {
       SELECT
              guild_id,
              guild_name
-        FROM guild
+        FROM Guild
        WHERE guild_id = $1
+         AND delete_yn = 'N'
     `,
     [guild_id]
   );
+  return result;
+};
+
+/**
+ * @param {*} riot_name 
+ * @param {*} riot_name_tag 
+ * @param {*} guild_id 
+ * @param {*} puuid 
+ * @param {*} main_player_id
+ * @returns 
+ * @description 부계정 추가
+ */
+const postSubAccount = async (riot_name, riot_name_tag, guild_id, puuid, main_player_id) => {
+  const query = `
+    INSERT 
+      INTO Player 
+           (
+             player_id,
+             riot_name,
+             riot_name_tag,
+             guild_id,
+             puuid,
+             main_player_id
+           )
+    SELECT 
+             'PLR_' || (COALESCE(MAX(CAST(SUBSTR(player_id, 5) AS INTEGER)), 0) + 1) AS player_id,
+             ?1,
+             ?2,
+             ?3,
+             ?4,
+             ?5
+      FROM Player
+  `;
+  const result = await db.query(query, [
+    riot_name,
+    riot_name_tag,
+    guild_id,
+    puuid,
+    main_player_id,
+  ]);
+
   return result;
 };
 
@@ -166,7 +181,7 @@ const postGuild = async (guild_id, guild_name) => {
   const result = await db.query(
     `
       INSERT 
-        INTO guild
+        INTO Guild
            (
              guild_id,
              guild_name,
@@ -188,7 +203,7 @@ const postGuild = async (guild_id, guild_name) => {
 
 /**
  * @param {*} params 
- * @returns league
+ * @returns 
  * @description 전적 추가
  */
 const postRecord = async (params) => {
@@ -207,13 +222,13 @@ const postRecord = async (params) => {
            )
       VALUES 
            (
-             $1,
-             $2,
-             $3,
-             $4,
-             $5,
-             $6,
-             $7
+             ?,
+             ?,
+             ?,
+             ?,
+             ?,
+             ?,
+             ?
            )
     `,
     params
@@ -223,18 +238,85 @@ const postRecord = async (params) => {
 };
 
 /**
+ * @param {*} riot_name 
+ * @param {*} riot_name_tag 
+ * @param {*} puuid
+ * @param {*} main_player_id 
+ * @param {*} delete_yn 
+ * @param {*} target_player_id  
+ * @returns num
+ * @description 계정 수정
+ */
+const putPlayer = async (riot_name, riot_name_tag, puuid, main_player_id, delete_yn, target_player_id) => {
+  const result = await db.queryUpdate(
+    `
+      UPDATE Player
+         SET riot_name = COALESCE(?1, riot_name),
+             riot_name_tag = COALESCE(?2, riot_name_tag),
+             puuid = COALESCE(?3, puuid),
+             main_player_id = COALESCE(?4, main_player_id),
+             delete_yn = COALESCE(?5, delete_yn),
+             update_date = (datetime('now','localtime'))
+       WHERE player_id = ?6
+    `,
+    [riot_name, riot_name_tag, puuid, main_player_id, delete_yn, target_player_id]
+  );
+  return result;
+}
+
+/**
+ * @param {*} delete_yn 
+ * @param {*} main_player_id  
+ * @returns num
+ * @description 부계정 일괄 수정
+ */
+const putSubPlayerDeleteYn = async (delete_yn, main_player_id) => {
+  const result = await db.queryUpdate(
+    `
+      UPDATE Player
+         SET 
+             delete_yn = ?,
+             update_date = (datetime('now','localtime'))
+       WHERE main_player_id = ?
+    `,
+    [delete_yn, main_player_id]
+  );
+  return result;
+}
+
+/**
+ * @param {*} old_player_id 
+ * @param {*} new_player_id 
+ * @returns num
+ * @description 게임기록 player 수정 (닉변, 부캐저장시 사용)
+ */
+const putPlayerGamePlayerId = async (old_player_id, new_player_id) => {
+  const result = await db.queryUpdate(
+    `
+      UPDATE Player_game 
+         SET player_id = ?2,
+             update_date = (datetime('now','localtime'))
+       WHERE player_id = ?1
+  `,
+    [old_player_id, new_player_id]
+  );
+  return result;
+};
+
+/**
+ * @param {*} delete_yn
  * @param {*} game_id 
  * @param {*} guild_id 
- * @returns 
- * @description 전적 삭제
+ * @returns num
+ * @description League 삭제
  */
-const deleteRecord = async (game_id, guild_id) => {
-  const result = await db.query(
+const deleteLeagueByGameId = async (game_id, guild_id) => {
+  const result = await db.queryUpdate(
     `
       DELETE 
-        FROM league
-       WHERE LOWER(game_id) = LOWER($1)
-       AND guild_id = $2
+        FROM League
+       WHERE LOWER(game_id) = LOWER(?)
+         AND guild_id = ?
   `,
     [game_id, guild_id]
   );
@@ -242,87 +324,35 @@ const deleteRecord = async (game_id, guild_id) => {
 };
 
 /**
- * @param {*} delete_yn 
- * @param {*} riot_name 
- * @param {*} riot_name_tag
- * @param {*} guild_id 
- * @returns 
- * @description 사용자 삭제 여부 수정
+ * @param {*} delete_yn
+ * @param {*} game_id 
+ * @returns num
+ * @description Player_game 삭제
  */
-const putUserDeleteYN = async (delete_yn, riot_name, riot_name_tag, guild_id) => {
-  const result = await db.query(
+const deletePlayerGameByGameId = async (game_id) => {
+  const result = await db.queryUpdate(
     `
-      UPDATE league
-         SET delete_yn = $1,
-             update_date = CURRENT_TIMESTAMP
-     WHERE riot_name = $2
-       AND riot_name_tag = $3
-       AND guild_id = $4
+      DELETE
+        FROM Player_Game 
+       WHERE LOWER(game_id) = LOWER(?)
   `,
-    [delete_yn, riot_name, riot_name_tag, guild_id]
-  );
-  return result;
-};
-
-/**
- * @param {*} delete_yn 
- * @param {*} main_name 
- * @param {*} main_name_tag
- * @param {*} guild_id 
- * @returns 
- * @description 부계정 삭제 여부 수정
- */
-const putUserSubAccountDeleteYN = async (delete_yn, main_name, main_name_tag, guild_id) => {
-  const result = await db.query(
-    `
-      UPDATE mapping_name
-         SET delete_yn = $1,
-             update_date = CURRENT_TIMESTAMP
-     WHERE main_name = $2
-       AND main_name_tag = $3
-       AND guild_id = $4
-  `,
-    [delete_yn, main_name, main_name_tag, guild_id]
-  );
-  return result;
-};
-
-/**
- * @param {*} new_name 
- * @param {*} new_name_tag 
- * @param {*} old_name
- * @param {*} old_name_tag 
- * @param {*} guild_id 
- * @returns 
- * @description 닉네임 수정
- */
-const putName = async (new_name, new_name_tag, old_name, old_name_tag, guild_id) => {
-  const result = await db.query(
-    `
-      UPDATE league
-         SET riot_name = $1,
-             riot_name_tag = $2,
-             update_date = CURRENT_TIMESTAMP
-     WHERE riot_name = $3
-       AND riot_name_tag = $4
-       AND guild_id = $5
-  `,
-    [new_name, new_name_tag, old_name, old_name_tag, guild_id]
+    [game_id]
   );
   return result;
 };
 
 module.exports = {
-  getSubAccountName,
-  postSubAccountName,
-  putSubAccountName,
-  deleteSubAccountName,
+  getPlayer,
+  // getSubPlayers,
+  getSubAccountList,
   getDuplicateReplay,
   getGuild,
+  postSubAccount,
   postGuild,
   postRecord,
-  deleteRecord,
-  putUserDeleteYN,
-  putUserSubAccountDeleteYN,
-  putName,
+  putPlayer,
+  putSubPlayerDeleteYn,
+  putPlayerGamePlayerId,
+  deleteLeagueByGameId,
+  deletePlayerGameByGameId,
 }; 

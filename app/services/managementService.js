@@ -55,13 +55,13 @@ const getDoc = async () => {
  * @param {*} guild_Id
  * @returns
  */
-const getSubAccountName = async (guild_id) => {
+const getSubAccountList = async (guild_id) => {
   const title = "부캐목록";
   let desc = "``` \n" + "|  부캐  |  본캐  |\n" + "\n";
   
-  const sub_account_name = await managementMapper.getSubAccountName(guild_id);
+  const sub_account_name = await managementMapper.getSubAccountList(guild_id);
   sub_account_name.forEach((data) => {
-    desc += `| ${data.sub_name}#${data.sub_name_tag} | ${data.main_name}#${data.main_name_tag} \n`;
+    desc += `| ${data.sub_riot_name}#${data.sub_riot_name_tag} | ${data.main_riot_name}#${data.main_riot_name_tag} \n`;
   });
 
   let size = sub_account_name.length;
@@ -84,7 +84,7 @@ const getSubAccountName = async (guild_id) => {
  * @param {*} guild_Id
  * @returns
  */
-const postSubAccountName = async (command_str, guild_id) => {
+const postSubAccount = async (command_str, guild_id) => {
   const [full_sub_name, full_main_name] = appUtil.splitStr(command_str);
 
   appUtil.validateTag(full_sub_name);
@@ -93,37 +93,52 @@ const postSubAccountName = async (command_str, guild_id) => {
   const [sub_name, sub_name_tag] = appUtil.splitTag(full_sub_name);
   const [main_name, main_name_tag] = appUtil.splitTag(full_main_name);
 
-  // 부캐 저장
-  const result = await managementMapper.postSubAccountName(
-    sub_name,
-    sub_name_tag,
-    main_name,
-    main_name_tag,
-    guild_id
-  );
+  // 게임기록에 부캐기록이 있으면 본캐기록으로 변경 (조회 순서 중요)
+  // 부캐 조회
+  const sub_account = await managementMapper.getPlayer('N', sub_name, sub_name_tag, guild_id);
+  console.log(sub_account);
 
-  if(result.status === 500){
-    return "부캐 저장 실패";
+  // 본캐 조회
+  const account = await managementMapper.getPlayer('N', main_name, main_name_tag, guild_id);
+  if(!account){
+    return "본캐로 게임한 기록이 없습니다.";
+  } else if(account.main_player_id) {
+    return `해당 ${account.riot_name} 계정은 부캐입니다, 부캐는 본캐로 저장할 수 없습니다. !부캐목록을 확인해주세요. `;
   }
 
-  // 등록된 이름 변경
-  const result_2 = await managementMapper.putName(
-    main_name,
-    main_name_tag,
-    sub_name,
-    sub_name_tag,
-    guild_id
-  );
+  // 부캐가 이미 기록에 있다면 1. 부캐 - main_player_id 추가 2. 부캐 게임기록 본캐로 수정
+  if(sub_account){
+    // 1
+    const putAccount = await managementMapper.putPlayer(
+      null,
+      null,
+      account.puuid,
+      account.player_id,
+      null,
+      sub_account.player_id
+    );
+
+    // 2
+    if(sub_account){
+      const putPlayerId = await managementMapper.putPlayerGamePlayerId(
+        sub_account.player_id,
+        account.player_id
+      );
+      return "등록 및 변경 완료";
+    }
+
+  } else { // 부캐기록이 없어서 새로 등록
   
-  if (result_2.status === 500) {
-    return "이름 변경 실패";
+    // 부캐 저장
+    const result = await managementMapper.postSubAccount(
+      sub_name,
+      sub_name_tag,
+      guild_id,
+      account.puuid,
+      account.player_id
+    );
+    return "등록 완료";
   }
-
-  return "등록 및 변경 완료";
-};
-
-const putSubAccountName = async (new_name, new_name_tag, old_name, old_name_tag, guild_id) => {
-  return await managementMapper.putSubAccountName(new_name, new_name_tag, old_name, old_name_tag, guild_id);
 };
 
 /**
@@ -132,19 +147,26 @@ const putSubAccountName = async (new_name, new_name_tag, old_name, old_name_tag,
  * @param {*} guild_Id
  * @returns
  */
-const deleteSubAccountName = async (full_sub_name, guild_id) => {
+const deleteSubAccount = async (full_sub_name, guild_id) => {
   appUtil.validateTag(full_sub_name);
   const [sub_name, sub_name_tag] = appUtil.splitTag(full_sub_name);
-  const result = await managementMapper.deleteSubAccountName(sub_name, sub_name_tag, guild_id);
-  if (result.status === 500) {
-    return "부캐삭제 실패";
+
+  const sub_account = await managementMapper.getPlayer('N' ,sub_name, sub_name_tag, guild_id);
+  if(!sub_account){
+    return "해당 부계정이 없습니다.";
   } else {
-    if (result >= 1) {
-      return "부캐삭제 완료";
+    const result = await managementMapper.putPlayer(null, null, null, null, 'Y', sub_account.player_id);
+    if (result.status === 500) {
+      return "부캐삭제 실패";
     } else {
-      return appUtil.notFoundResponse();
+      if (result >= 1) {
+        return "부캐삭제 완료";
+      } else {
+        return appUtil.notFoundResponse();
+      }
     }
   }
+
 };
 
 // 중복 체크
@@ -174,16 +196,18 @@ const postRecord = async (records) => {
  * @returns
  */
 const deleteRecord = async (game_id, guild_id) => {
-  const result = await managementMapper.deleteRecord(game_id, guild_id);
-  if (result.status === 500) {
-    throw new Error("삭제 실패");
-  } else {
-    if (result >= 1) {
+  // 1.League 데이터 update, 2. Player_game 데이터 update
+  const league = await managementMapper.deleteLeagueByGameId(game_id, guild_id);
+  if (league >= 1) {
+    const playerGame = await managementMapper.deletePlayerGameByGameId(game_id, guild_id);
+    if(playerGame >= 1) {
       return `:orange_circle:데이터 삭제완료: ${game_id}`;
     } else {
-      return appUtil.notFoundResponse();
+      return "playerGame 삭제 실패";
     }
-  }
+  } else {
+    return appUtil.notFoundResponse();
+  } 
 };
 
 /**
@@ -196,21 +220,34 @@ const deleteRecord = async (game_id, guild_id) => {
 const putDeleteYn = async (delete_yn, full_name, guild_id) => {
   appUtil.validateTag(full_name);
   const [riot_name, riot_name_tag] = appUtil.splitTag(full_name);
-  const result = await managementMapper.putUserSubAccountDeleteYN(
-    delete_yn,
-    riot_name,
-    riot_name_tag,
-    guild_id
-  );
-  if (result.status === 500) {
-    return "부계정 탈퇴/복귀 실패";
+
+  // account_delete_yn: 탈퇴한계정인지 아닌지 여부, delete_yn: 탈퇴 or 복귀 명령어로 결정 탈퇴=Y 복귀=N
+  let account_delete_yn = '';
+  if(delete_yn === 'Y'){
+    account_delete_yn = 'N'; //탈퇴시킬 계정이므로 탈퇴하지않는 계정 조회
+  } else {
+    account_delete_yn = 'Y'; //복귀시킬 계정이므로 탈퇴한 계정 조회
   }
 
-  const result_2 = await managementMapper.putUserDeleteYN(
+  // 본계정 조회
+  const account = await managementMapper.getPlayer(account_delete_yn, riot_name, riot_name_tag, guild_id);
+  if(!account) {
+    return appUtil.notFoundAccount(riot_name, riot_name_tag);
+  }
+
+  // 탈퇴한 본계정은 부캐들 전부 삭제처리, 복귀는 처리하지않음 
+  if(delete_yn === 'Y'){
+    const result_1 = await managementMapper.putSubPlayerDeleteYn(delete_yn, account.player_id);
+  }
+
+  // 본계정 수정
+  const result_2 = await managementMapper.putPlayer(
+    null,
+    null,
+    null,
+    null,
     delete_yn,
-    riot_name,
-    riot_name_tag,
-    guild_id
+    account.player_id
   );
   if (result_2.status === 500) {
     return "본계정 탈퇴/복귀 실패";
@@ -234,52 +271,49 @@ const putDeleteYn = async (delete_yn, full_name, guild_id) => {
  * @param {*} guild_id
  * @returns
  */
-const putNameAndSubAccountName = async (command_str, guild_id) => {
+const putPlayerName = async (command_str, guild_id) => {
   const [full_old_name, full_new_name] = appUtil.splitStr(command_str);
   const [old_name, old_name_tag] = appUtil.splitTag(full_old_name);
   const [new_name, new_name_tag] = appUtil.splitTag(full_new_name);
 
-  // 부캐 - main_name 변경
-  const result_2 = await managementMapper.putSubAccountName(
-    new_name,
-    new_name_tag,
-    old_name,
-    old_name_tag,
-    guild_id
-  );
-  if (result_2.status === 500) {
-    return "부캐닉네임 변경 실패";
+  // 닉변이후 계정 
+  const new_account = await managementMapper.getPlayer('N', new_name, new_name_tag, guild_id);
+  // 닉변한 계정이 존재하는 경우
+  if(new_account) {
+    return `${new_name}#${new_name_tag} 이미 존재하는 닉네임입니다.`;
   }
 
-  const result = await managementMapper.putName(
+  // 닉변이전 계정
+  const account = await managementMapper.getPlayer('N', old_name, old_name_tag, guild_id);
+  if(!account){
+    return appUtil.notFoundAccount(old_name, old_name_tag);
+  }
+
+  const result = await managementMapper.putPlayer(
     new_name,
     new_name_tag,
-    old_name,
-    old_name_tag,
-    guild_id
+    null,
+    null,
+    null,
+    account.player_id
   );
-  if (result.status === 500) {
-    return "닉네임 변경 실패";
+  if (result >= 1) {
+    return "닉변 완료";
   } else {
-    if (result >= 1) {
-      return "닉변 완료";
-    } else {
-      return appUtil.notFoundResponse();
-    }
+    return appUtil.notFoundResponse();
   }
 };
 
 module.exports = {
   getDoc,
-  getSubAccountName,
-  postSubAccountName,
-  putSubAccountName,
-  deleteSubAccountName,
+  getSubAccountList,
   getDuplicateReplay,
   getGuild,
+  postSubAccount,
   postGuild,
   postRecord,
-  deleteRecord,
   putDeleteYn,
-  putNameAndSubAccountName,
+  putPlayerName,
+  deleteRecord,
+  deleteSubAccount,
 }; 

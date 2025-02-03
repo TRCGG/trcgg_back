@@ -271,20 +271,6 @@ router.get("/getGuild/:guild_id", async (req, res) => {
 //   }
 // });
 
-// 닉네임변경(부계정)
-// router.put("/mapping/riotName", async (req, res) => {
-//   const { new_name, old_name, guild_id } = req.body;
-//   try {
-//     const result = await managementService.putSubAccountName(
-//       new_name,
-//       old_name,
-//       guild_id
-//     );
-//     res.json(result);
-//   } catch (error) {
-//     res.status(404).send(error.message);
-//   }
-// });
 
 // DELETE =====================
 

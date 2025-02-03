@@ -20,6 +20,7 @@ const getLineRecord = async (riot_name, guild_id) => {
         LEFT JOIN Player AS p ON pg.player_id = p.player_id
        WHERE LOWER(p.riot_name) = LOWER(?1)
          AND p.guild_id = ?2
+         AND p.delete_yn = 'N'
          AND pg.delete_yn = 'N'
        GROUP BY pg.position
        ORDER BY CASE pg.position
@@ -51,6 +52,7 @@ const getRecentMonthRecord = async (riot_name, guild_id) => {
         JOIN Player AS p ON pg.player_id = p.player_id
        WHERE LOWER(p.riot_name) = LOWER(?)
          AND p.guild_id = ?
+         AND p.delete_yn = 'N'
          AND pg.delete_yn = 'N'
          AND strftime('%Y-%m', pg.game_date) = strftime('%Y-%m', 'now', 'localtime')
     `,
@@ -75,8 +77,9 @@ const getStatisticOfGame = async (guild_id, year, month) => {
              ${commonQuery.selectWinRateAndKdaSql('pg',true)}
         FROM Player_game AS pg
         JOIN Player AS p ON pg.player_id = p.player_id
-       WHERE pg.delete_yn = 'N'
-         AND p.guild_id = ?
+       WHERE p.guild_id = ?
+         AND p.delete_yn = 'N'
+         AND pg.delete_yn = 'N'
          AND strftime('%Y', pg.game_date) = ?
          AND strftime('%m', pg.game_date) = ?
        GROUP BY p.riot_name
@@ -107,6 +110,8 @@ const getSynergisticTeammates = async (riot_name, guild_id) => {
                     JOIN Player AS p ON pg.player_id = p.player_id
                    WHERE LOWER(p.riot_name) = LOWER(?1)
                      AND p.guild_id = ?2
+                     AND p.delete_yn = 'N'
+                     AND pg.delete_yn = 'N'
                      AND (
                           (strftime('%Y-%m', pg.game_date) = strftime('%Y-%m', 'now', 'localtime')) 
                           OR 
@@ -117,6 +122,7 @@ const getSynergisticTeammates = async (riot_name, guild_id) => {
          AND K.guild_id = B.guild_id
          AND A.game_id = B.game_id 
          AND LOWER(K.riot_name) != LOWER(?1)
+         AND K.delete_yn = 'N'
          AND A.delete_yn = 'N'
        GROUP BY K.riot_name
       HAVING COUNT(K.riot_name) >= 5
@@ -147,6 +153,8 @@ const getNemesis = async (riot_name, guild_id) => {
                     JOIN Player AS p ON pg.player_id = p.player_id
                    WHERE LOWER(p.riot_name) = LOWER(?1)
                      AND p.guild_id = ?2
+                     AND p.delete_yn = 'N'
+                     AND pg.delete_yn = 'N'
                      AND (
                           (strftime('%Y-%m', pg.game_date) = strftime('%Y-%m', 'now', 'localtime')) 
                           OR 
@@ -157,6 +165,7 @@ const getNemesis = async (riot_name, guild_id) => {
          AND K.guild_id = B.guild_id
          AND A.game_id = B.game_id 
          AND LOWER(K.riot_name) != LOWER(?1)
+         AND K.delete_yn = 'N'
          AND A.delete_yn = 'N'
          AND A.position = B.position
        GROUP BY K.riot_name
@@ -185,6 +194,7 @@ const getWinRateByPosition = async (position, guild_id) => {
         JOIN Player AS p ON pg.player_id = p.player_id
        WHERE pg.position = ?
          AND p.guild_id = ?
+         AND p.delete_yn = 'N'         
          AND pg.delete_yn = 'N'
        GROUP BY pg.position, p.riot_name 
       HAVING COUNT(p.riot_name) >= 20
@@ -223,6 +233,7 @@ const getRecordByGame = async (game_id, guild_id) => {
         JOIN Champion c ON pg.champion_id = c.champion_id
        WHERE LOWER(pg.game_id) = LOWER(?)
          AND p.guild_id = ?
+         AND p.delete_yn = 'N'         
          AND pg.delete_yn = 'N'
        ORDER BY pg.game_team,
              CASE pg.position
@@ -265,6 +276,7 @@ const getRecentTenGamesByRiotName = async (riot_name, guild_id) => {
         JOIN Champion c ON pg.champion_id = c.champion_id
        WHERE LOWER(p.riot_name) = LOWER($1)
          AND p.guild_id = $2
+         AND p.delete_yn = 'N'         
          AND pg.delete_yn = 'N'
        ORDER BY pg.game_date DESC
        LIMIT 10
