@@ -40,7 +40,7 @@ const getMemberNick = (msg, args) => {
             throw new Error("별명 설정 필요");
         }
     } else {
-        riot_name = args.join(" ");
+        riot_name = args.join(" ").replace(/\s/g, "");
         if(checkTag(riot_name)){
             [riot_name, riot_name_tag] = riot_name.split("#");
             riot_name = riot_name.replace(/\s/g, "").replace("й","n").trim();
