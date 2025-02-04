@@ -50,7 +50,7 @@ const query = (text, params = []) => {
         console.error('Database query error:', err.message);
         reject({ status: 500, message: 'Internal Server Error' });
       } else {
-        console.log('Query Results:', rows);
+        // console.log('Query Results:', rows);
         resolve(rows);
       }
     });
