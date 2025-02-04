@@ -67,7 +67,7 @@ module.exports = [
   {
     name: "클랜통계",
     run: async (client, msg, args) => {
-        const date = args[0];
+        const date = args.join(" ");
         const guild_id = msg.guild.id;
 
         if(botUtils.checkAuth(msg)) {

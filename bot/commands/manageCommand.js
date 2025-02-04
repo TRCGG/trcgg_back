@@ -49,7 +49,7 @@ module.exports = [
   {
     name: "부캐삭제",
     run: async (client, msg, args) => {
-      const full_sub_name = args[0].replace(/\s/g, "").trim();
+      const full_sub_name = args.join(" ").replace(/\s/g, "").trim();
       const guild_id = msg.guild.id;
 
       if (botUtils.checkAuth(msg)) {
@@ -69,7 +69,7 @@ module.exports = [
   {
     name: "탈퇴",
     run: async (client, msg, args) => {
-      const full_riot_name = args[0].replace(/\s/g, "").trim();
+      const full_riot_name = args.join(" ").replace(/\s/g, "").trim();
       const delete_yn = "Y";
       const guild_id = msg.guild.id;
       if (botUtils.checkAuth(msg)) {
@@ -89,7 +89,7 @@ module.exports = [
   {
     name: "복귀",
     run: async (client, msg, args) => {
-      const full_riot_name = args[0].replace(/\s/g, "").trim();
+      const full_riot_name = args.join(" ").replace(/\s/g, "");
       const delete_yn = "N";
       const guild_id = msg.guild.id;
       if (botUtils.checkAuth(msg)) {
@@ -109,7 +109,7 @@ module.exports = [
   {
     name: "drop",
     run: async (client, msg, args) => {
-      const game_id = args[0].trim();
+      const game_id = args.join(" ").trim();
       const guild_id = msg.guild.id;
       if (botUtils.checkAuth(msg)) {
         await manageService.deleteRecord(game_id, guild_id)

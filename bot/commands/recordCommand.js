@@ -67,7 +67,7 @@ module.exports = [
   {
     name: "결과",
     run: async (client, msg, args) => {
-      const game_id = args[0];
+      const game_id = args.join(" ");
       const guild_id = msg.guild.id;
 
       await recordService
