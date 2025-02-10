@@ -19,6 +19,8 @@
     "luxon": "^3.5.0",
     "node-cron": "^3.0.3",
     "pg": "^8.13.1",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "swagger-autogen": "^2.23.7",
+    "swagger-ui-express": "^5.0.1"
   }
 }

@@ -6,8 +6,8 @@ const appUtil = require("../appUtils");
 const embedUtil = require("../embed");
 
 // 모스트픽 10
-const getMostPicks = async (riot_name, guild_id) => {
-  return await championMapper.getMostPicks(riot_name, guild_id);
+const getMostPicks = async (riot_name, riot_name_tag, guild_id) => {
+  return await championMapper.getMostPicks(riot_name, riot_name_tag, guild_id);
 };
 
 /**

@@ -6,6 +6,8 @@ const cors = require("cors");
 const compression = require('compression');
 require('dotenv').config();
 const leagueRoutes = require('./app/routes/leagueRoutes');
+const swaggerUi = require("swagger-ui-express");
+const swaggerFile = require("./app/swagger/swagger-output.json");
 const db = require('./app/db/db');
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || "localhost";
@@ -21,6 +23,7 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: '*'
 }));
+app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
 const init = async () => {
   try {
