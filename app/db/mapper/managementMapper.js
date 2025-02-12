@@ -22,48 +22,20 @@ const getPlayer = async (delete_yn, riot_name, riot_name_tag, guild_id) => {
              p.puuid,
              p.main_player_id
         FROM Player AS p
-       WHERE p.delete_yn = ?
-         AND p.riot_name = ?
-         AND p.guild_id = ?
+       WHERE p.delete_yn = $1
+         AND p.riot_name = $2
+         AND p.guild_id = $3
     `
   const params = [delete_yn, riot_name, guild_id];
 
   if(riot_name_tag) {
-    query += `AND p.riot_name_tag = ? `
+    query += `AND p.riot_name_tag = $4 `
     params.push(riot_name_tag);
   }
 
   const result = await db.queryOne(query, params);
   return result;
 }
-
-// /**
-//  * @param {*} delete_yn 
-//  * @param {*} main_player_id 
-//  * @param {*} guild_id 
-//  * @returns List<Player>
-//  * @description 부계정들 조회
-//  */
-// const getSubPlayers = async (delete_yn, main_player_id, guild_id) => {
-//   const query = 
-//     `
-//       SELECT 
-//              player_id,
-//              riot_name,
-//              riot_name_tag,
-//              guild_id,
-//              puuid,
-//              main_player_id
-//         FROM Player
-//        WHERE delete_yn = ?
-//          AND main_player_id = ?
-//          AND guild_id = ?
-//     `;
-
-//   const params = [delete_yn, main_player_id, guild_id];
-//   const result = await db.query(query, params);
-//   return result;
-// };
 
 /**
  * @param {*} guild_id 
@@ -81,7 +53,7 @@ const getSubAccountList = async (guild_id) => {
         FROM Player AS sub
         JOIN Player AS main ON sub.main_player_id = main.player_id
        WHERE sub.delete_yn = 'N'
-         AND sub.guild_id = ?
+         AND sub.guild_id = $1
        ORDER BY sub.update_date DESC
     `,
     [guild_id]
@@ -153,11 +125,11 @@ const postSubAccount = async (riot_name, riot_name_tag, guild_id, puuid, main_pl
            )
     SELECT 
              'PLR_' || (COALESCE(MAX(CAST(SUBSTR(player_id, 5) AS INTEGER)), 0) + 1) AS player_id,
-             ?1,
-             ?2,
-             ?3,
-             ?4,
-             ?5
+             $1,
+             $2,
+             $3,
+             $4,
+             $5
       FROM Player
   `;
   const result = await db.query(query, [
@@ -222,13 +194,13 @@ const postRecord = async (params) => {
            )
       VALUES 
            (
-             ?,
-             ?,
-             ?,
-             ?,
-             ?,
-             ?,
-             ?
+             $1,
+             $2,
+             $3,
+             $4,
+             $5,
+             $6,
+             $7
            )
     `,
     params
@@ -248,16 +220,16 @@ const postRecord = async (params) => {
  * @description 계정 수정
  */
 const putPlayer = async (riot_name, riot_name_tag, puuid, main_player_id, delete_yn, target_player_id) => {
-  const result = await db.queryUpdate(
+  const result = await db.query(
     `
       UPDATE Player
-         SET riot_name = COALESCE(?1, riot_name),
-             riot_name_tag = COALESCE(?2, riot_name_tag),
-             puuid = COALESCE(?3, puuid),
-             main_player_id = COALESCE(?4, main_player_id),
-             delete_yn = COALESCE(?5, delete_yn),
-             update_date = (datetime('now','localtime'))
-       WHERE player_id = ?6
+         SET riot_name = COALESCE($1, riot_name),
+             riot_name_tag = COALESCE($2, riot_name_tag),
+             puuid = COALESCE($3, puuid),
+             main_player_id = COALESCE($4, main_player_id),
+             delete_yn = COALESCE($5, delete_yn),
+             update_date = now()
+       WHERE player_id = $6
     `,
     [riot_name, riot_name_tag, puuid, main_player_id, delete_yn, target_player_id]
   );
@@ -271,13 +243,13 @@ const putPlayer = async (riot_name, riot_name_tag, puuid, main_player_id, delete
  * @description 부계정 일괄 수정
  */
 const putSubPlayerDeleteYn = async (delete_yn, main_player_id) => {
-  const result = await db.queryUpdate(
+  const result = await db.query(
     `
       UPDATE Player
          SET 
-             delete_yn = ?,
-             update_date = (datetime('now','localtime'))
-       WHERE main_player_id = ?
+             delete_yn = $1,
+             update_date = now()
+       WHERE main_player_id = $2
     `,
     [delete_yn, main_player_id]
   );
@@ -291,12 +263,12 @@ const putSubPlayerDeleteYn = async (delete_yn, main_player_id) => {
  * @description 게임기록 player 수정 (닉변, 부캐저장시 사용)
  */
 const putPlayerGamePlayerId = async (old_player_id, new_player_id) => {
-  const result = await db.queryUpdate(
+  const result = await db.query(
     `
       UPDATE Player_game 
-         SET player_id = ?2,
-             update_date = (datetime('now','localtime'))
-       WHERE player_id = ?1
+         SET player_id = $2,
+             update_date = now()
+       WHERE player_id = $1
   `,
     [old_player_id, new_player_id]
   );
@@ -311,12 +283,12 @@ const putPlayerGamePlayerId = async (old_player_id, new_player_id) => {
  * @description League 삭제
  */
 const deleteLeagueByGameId = async (game_id, guild_id) => {
-  const result = await db.queryUpdate(
+  const result = await db.query(
     `
       DELETE 
         FROM League
-       WHERE LOWER(game_id) = LOWER(?)
-         AND guild_id = ?
+       WHERE LOWER(game_id) = LOWER($1)
+         AND guild_id = $2
   `,
     [game_id, guild_id]
   );
@@ -330,11 +302,11 @@ const deleteLeagueByGameId = async (game_id, guild_id) => {
  * @description Player_game 삭제
  */
 const deletePlayerGameByGameId = async (game_id) => {
-  const result = await db.queryUpdate(
+  const result = await db.query(
     `
       DELETE
         FROM Player_Game 
-       WHERE LOWER(game_id) = LOWER(?)
+       WHERE LOWER(game_id) = LOWER($1)
   `,
     [game_id]
   );
@@ -343,7 +315,6 @@ const deletePlayerGameByGameId = async (game_id) => {
 
 module.exports = {
   getPlayer,
-  // getSubPlayers,
   getSubAccountList,
   getDuplicateReplay,
   getGuild,

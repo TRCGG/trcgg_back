@@ -19,17 +19,17 @@ const getMostPicks = async (riot_name, riot_name_tag, guild_id) => {
         FROM Player_game AS pg  
         JOIN Player AS p ON pg.player_id = p.player_id
         JOIN Champion c ON pg.champion_id = c.champion_id
-       WHERE p.riot_name = ?1
+       WHERE p.riot_name = $1
        
     `
   const params = [riot_name, guild_id];    
   if(riot_name_tag) {
-    query += `AND p.riot_name_tag = ?3 `;
+    query += `AND p.riot_name_tag = $3 `;
     params.push(riot_name_tag);
   }
   query += 
     `
-         AND p.guild_id = ?2
+         AND p.guild_id = $2
          AND pg.delete_yn = 'N'
        GROUP BY c.champ_name
        ORDER BY total_count DESC 
@@ -53,8 +53,8 @@ const getMasterOfChampion = async (champ_name, guild_id) => {
         FROM Player_game AS pg  
         JOIN Player AS p ON pg.player_id = p.player_id
         JOIN Champion c ON pg.champion_id = c.champion_id 
-       WHERE c.champ_name = ?
-         AND p.guild_id = ?
+       WHERE c.champ_name = $1
+         AND p.guild_id = $2
          AND pg.delete_yn = 'N'
        GROUP BY p.riot_name 
        ORDER BY total_count DESC
@@ -81,9 +81,9 @@ const getStatisticOfChampion = async (guild_id, year, month) => {
         JOIN Player AS p ON pg.player_id = p.player_id
         JOIN Champion c ON pg.champion_id = c.champion_id
        WHERE pg.delete_yn = 'N'
-         AND p.guild_id = ?
-         AND strftime('%Y', pg.game_date) = ?
-         AND strftime('%m', pg.game_date) = ?
+         AND p.guild_id = $1
+         AND TO_CHAR(pg.game_date, 'YYYY') = $2
+         AND TO_CHAR(pg.game_date, 'MM') = $3
        GROUP BY c.champ_name
        ORDER BY total_count DESC
     `,

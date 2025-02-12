@@ -116,61 +116,8 @@ const saveData = async (statsArray, fileName, createUser, guildId) => {
         createUser,
     )
 
-    // 부캐닉네임 매핑 DB트리거로 변경
-    // const mappings = await managementService.getSubAccountName(guildId);
-
-    // for (const d of statsArray) {
-    //     try {
-    //         resList.push({
-    //             assist: d['ASSISTS'],
-    //             death: d['NUM_DEATHS'],
-    //             kill: d['CHAMPIONS_KILLED'],
-    //             position: d['TEAM_POSITION'].replace('JUNGLE', 'JUG').replace('BOTTOM', 'ADC').replace('UTILITY', 'SUP').replace('MIDDLE', 'MID'),
-    //             riot_name: d['RIOT_ID_GAME_NAME'].replace(/\s/g, "").replace('й', 'n').trim(),
-    //             riot_name_tag: d['RIOT_ID_TAG_LINE'].replace(/\s/g, "").replace('й', 'n').trim(),
-    //             game_result: d['WIN'].replace('Win', '승').replace('Fail', '패'),
-    //             champ_name: champion_dic[d['SKIN'].toLowerCase().trim()] || d['SKIN'].toLowerCase().trim(),
-    //             game_team: d['TEAM'].replace('100', 'blue').replace('200', 'red'),
-    //             gold: d['GOLD_EARNED'],
-    //             ccing: d['TIME_CCING_OTHERS'],
-    //             time_played: d['TIME_PLAYED'],
-    //             total_damage_champions: d['TOTAL_DAMAGE_DEALT_TO_CHAMPIONS'],
-    //             total_damage_taken: d['TOTAL_DAMAGE_TAKEN'],
-    //             vision_score: d['VISION_SCORE'],
-    //             vision_bought: d['VISION_WARDS_BOUGHT_IN_GAME'],
-    //             penta_kills: d['PENTA_KILLS'],
-    //             puuid: d['PUUID'],
-    //             game_date: gameDate,
-    //             create_user: createUser,
-    //             game_id: fileName.toLowerCase(),
-    //             delete_yn: 'N',
-    //             guild_id: guildId
-    //         });
-    //     } catch (error) {
-    //         console.error(error);
-    //         continue;
-    //     }
-    // }
-
     await managementService.postRecord(params);
 };
-
-/**
- * 매핑 이름 처리 
- * 사용하지 않는 로직
- * @param {*} name 
- * @param {*} tag
- * @param {*} mappings
- * @returns 
- */
-// const setMappingName = (name, tag, mappings) => {
-//     for (const mapping of mappings) {
-//         if (name === mapping.sub_name || tag === mapping.sub_name_tag ) {
-//             return { main_name: mapping.main_name, main_name_tag: mapping.main_name_tag}
-//         }
-//     }
-//     return { main_name: name, main_name_tag: tag };
-// };
 
 /**
  * 리플 파일명 중복 확인

@@ -22,14 +22,14 @@ const getPlayerForSearch = async (riot_name, riot_name_tag, guild_id) => {
              p.puuid
         FROM Player AS p
        WHERE p.delete_yn = 'N'
-         AND LOWER(p.riot_name) = LOWER(?)
-         AND p.guild_id = ?
+         AND LOWER(p.riot_name) = LOWER($1)
+         AND p.guild_id = $2
          AND p.main_player_id IS NULL
     `
   const params = [riot_name, guild_id];
 
   if(riot_name_tag) {
-    query += `AND LOWER(p.riot_name_tag) = LOWER(?) `
+    query += `AND LOWER(p.riot_name_tag) = LOWER($3) `
     params.push(riot_name_tag);
   }
   const result = await db.query(query, params);
@@ -51,14 +51,14 @@ const getLineRecord = async (riot_name, riot_name_tag, guild_id) => {
              ${commonQuery.selectWinRateAndKdaSql('pg',true)}
         FROM Player_game AS pg
         LEFT JOIN Player AS p ON pg.player_id = p.player_id
-       WHERE p.riot_name = ?
-         AND p.guild_id = ?
+       WHERE p.riot_name = $1
+         AND p.guild_id = $2
          AND p.delete_yn = 'N'
          AND pg.delete_yn = 'N'
     `
   const params = [riot_name, guild_id];
   if(riot_name_tag) {
-    query += `AND p.riot_name_tag = ? `;
+    query += `AND p.riot_name_tag = $3`;
     params.push(riot_name_tag);
   }
   query += 
@@ -91,15 +91,15 @@ const getRecentMonthRecord = async (riot_name, riot_name_tag, guild_id) => {
              ${commonQuery.selectWinRateAndKdaSql('pg',true)}
         FROM Player_game AS pg
         JOIN Player AS p ON pg.player_id = p.player_id
-       WHERE p.riot_name = ?
-         AND p.guild_id = ?
+       WHERE p.riot_name = $1
+         AND p.guild_id = $2
          AND p.delete_yn = 'N'
          AND pg.delete_yn = 'N'
-         AND strftime('%Y-%m', pg.game_date) = strftime('%Y-%m', 'now', 'localtime')
+         AND TO_CHAR(pg.game_date, 'YYYY-MM') = TO_CHAR(NOW(), 'YYYY-MM')
          `
   const params = [riot_name, guild_id]
   if(riot_name_tag) {
-    query += `AND p.riot_name_tag = ? `;
+    query += `AND p.riot_name_tag = $3 `;
     params.push(riot_name_tag);
   }
 
@@ -122,11 +122,11 @@ const getStatisticOfGame = async (guild_id, year, month) => {
              ${commonQuery.selectWinRateAndKdaSql('pg',true)}
         FROM Player_game AS pg
         JOIN Player AS p ON pg.player_id = p.player_id
-       WHERE p.guild_id = ?
+       WHERE p.guild_id = $1
          AND p.delete_yn = 'N'
          AND pg.delete_yn = 'N'
-         AND strftime('%Y', pg.game_date) = ?
-         AND strftime('%m', pg.game_date) = ?
+         AND TO_CHAR(pg.game_date, 'YYYY') = $2
+         AND TO_CHAR(pg.game_date, 'MM') = $3
        GROUP BY p.riot_name
        ORDER BY total_count DESC;
     `,
@@ -155,32 +155,32 @@ const getSynergisticTeammates = async (riot_name, riot_name_tag, guild_id) => {
                   SELECT pg.game_id, pg.game_team, pg.game_result, p.guild_id
                     FROM Player_game AS pg
                     JOIN Player AS p ON pg.player_id = p.player_id
-                   WHERE p.riot_name = ?1
-                     AND p.guild_id = ?2
+                   WHERE p.riot_name = $1
+                     AND p.guild_id = $2
                      AND p.delete_yn = 'N'
                      AND pg.delete_yn = 'N'
 
     `
   if(riot_name_tag) {
-    query += `       AND p.riot_name_tag = ?3 `;
+    query += `       AND p.riot_name_tag = $3 `;
   }
   
   query += 
     `
                      AND (
-                          (strftime('%Y-%m', pg.game_date) = strftime('%Y-%m', 'now', 'localtime')) 
+                          (TO_CHAR(pg.game_date, 'YYYY-MM') = TO_CHAR(NOW(), 'YYYY-MM')) 
                           OR 
-                          (strftime('%Y-%m', pg.game_date) = strftime('%Y-%m', 'now', 'localtime', '-1 month'))
+                          (TO_CHAR(pg.game_date, 'YYYY-MM') = TO_CHAR(NOW() - INTERVAL '1 month', 'YYYY-MM'))
                          )
                   ) B
           ON A.game_team = B.game_team 
          AND K.guild_id = B.guild_id
          AND A.game_id = B.game_id 
-         AND K.riot_name != ?1
+         AND K.riot_name != $1
          AND K.delete_yn = 'N'
     `
   if(riot_name_tag) {
-    query += `AND K.riot_name_tag != ?3 `;
+    query += `AND K.riot_name_tag != $3 `;
     params.push(riot_name_tag);
   }
   query +=
@@ -213,35 +213,35 @@ const getNemesis = async (riot_name, riot_name_tag, guild_id) => {
                   SELECT pg.game_id, pg.game_team, pg.game_result, p.guild_id, pg.position
                     FROM Player_game AS pg
                     JOIN Player AS p ON pg.player_id = p.player_id
-                   WHERE p.riot_name = ?1
-                     AND p.guild_id = ?2
+                   WHERE p.riot_name = $1
+                     AND p.guild_id = $2
                      AND p.delete_yn = 'N'
                      AND pg.delete_yn = 'N'
 
                   
     `
   if(riot_name_tag) {
-    query += `       AND p.riot_name_tag = ?3 `;
+    query += `       AND p.riot_name_tag = $3 `;
   }
   query += 
     `
                      AND (
-                          (strftime('%Y-%m', pg.game_date) = strftime('%Y-%m', 'now', 'localtime')) 
+                          (TO_CHAR(pg.game_date, 'YYYY-MM') = TO_CHAR(NOW(), 'YYYY-MM')) 
                           OR 
-                          (strftime('%Y-%m', pg.game_date) = strftime('%Y-%m', 'now', 'localtime', '-1 month'))
+                          (TO_CHAR(pg.game_date, 'YYYY-MM') = TO_CHAR(NOW() - INTERVAL '1 month', 'YYYY-MM'))
                          )
                     ) B
           ON A.game_team != B.game_team 
          AND K.guild_id = B.guild_id
          AND A.game_id = B.game_id 
-         AND K.riot_name != ?1
+         AND K.riot_name != $1
          AND K.delete_yn = 'N'
          AND A.delete_yn = 'N'
          AND A.position = B.position
 
     `
   if(riot_name_tag) {
-    query += `AND K.riot_name_tag != ?3 `;
+    query += `AND K.riot_name_tag != $3 `;
     params.push(riot_name_tag);
   }
   query +=
@@ -269,8 +269,8 @@ const getWinRateByPosition = async (position, guild_id) => {
              ${commonQuery.selectWinRateAndKdaSql('pg',true)}
         FROM Player_game AS pg  
         JOIN Player AS p ON pg.player_id = p.player_id
-       WHERE pg.position = ?
-         AND p.guild_id = ?
+       WHERE pg.position = $1
+         AND p.guild_id = $2
          AND p.delete_yn = 'N'         
          AND pg.delete_yn = 'N'
        GROUP BY pg.position, p.riot_name 
@@ -308,8 +308,8 @@ const getRecordByGame = async (game_id, guild_id) => {
         FROM Player_game AS pg  
         JOIN Player AS p ON pg.player_id = p.player_id
         JOIN Champion c ON pg.champion_id = c.champion_id
-       WHERE LOWER(pg.game_id) = LOWER(?)
-         AND p.guild_id = ?
+       WHERE LOWER(pg.game_id) = LOWER($1)
+         AND p.guild_id = $2
          AND p.delete_yn = 'N'         
          AND pg.delete_yn = 'N'
        ORDER BY pg.game_team,
@@ -353,16 +353,16 @@ const getRecentGamesByRiotName = async (riot_name, riot_name_tag, guild_id) => {
         FROM Player_game AS pg  
         JOIN Player AS p ON pg.player_id = p.player_id
         JOIN Champion c ON pg.champion_id = c.champion_id
-       WHERE p.riot_name = ?1
+       WHERE p.riot_name = $1
     `;
   const params = [riot_name, guild_id];
   if(riot_name_tag) {
-    query += `AND p.riot_name_tag = ?3 `;
+    query += `AND p.riot_name_tag = $3 `;
     params.push(riot_name_tag);
   }
   query +=
     `
-         AND p.guild_id = ?2
+         AND p.guild_id = $2
          AND p.delete_yn = 'N'         
          AND pg.delete_yn = 'N'
        ORDER BY pg.game_date DESC
