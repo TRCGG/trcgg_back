@@ -266,6 +266,7 @@ const putDeleteYn = async (delete_yn, full_name, guild_id) => {
 
 
 /**
+ * TO-DO 닉네임,태그 대소문자 실수로 잘못된 닉변 수정방안 필요
  * !닉변
  * @param {*} command_str
  * @param {*} guild_id
