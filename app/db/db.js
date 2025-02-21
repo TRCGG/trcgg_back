@@ -11,10 +11,10 @@ const pool = new Pool({
   port: process.env.DB_PORT,
   max: 50,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000
-  // ssl: {
-  //   rejectUnauthorized: false // AWS RDS는 SSL 필요할 수 있음
-  // }
+  connectionTimeoutMillis: 2000,
+  ssl: {
+    rejectUnauthorized: false // AWS RDS는 SSL 필요할 수 있음
+  }
 });
 
 /**
