@@ -11,10 +11,10 @@ const pool = new Pool({
   port: process.env.DB_PORT,
   max: 50,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
-  ssl: {
-    rejectUnauthorized: false // AWS RDS는 SSL 필요할 수 있음
-  }
+  connectionTimeoutMillis: 2000
+  // ssl: {
+  //   rejectUnauthorized: false // AWS RDS는 SSL 필요할 수 있음
+  // }
 });
 
 /**
@@ -38,6 +38,9 @@ const testConnection = async () => {
 const jsonify = (data) => {
   return data.map(row => {
     Object.keys(row).forEach(key => {
+      if (key === 'riot_name' || key === 'riot_name_tag') {
+        return row[key];
+      }
       if (typeof row[key] === "string") {
         const num = Number(row[key]);
         row[key] = isNaN(num) ? row[key] : num;
