@@ -19,7 +19,7 @@ const getPlayerForSearch = async (riot_name, riot_name_tag, guild_id) => {
  * !전적
  * @param {*} riot_name
  * @param {*} riot_name_tag
- * @param {*} guild_Id
+ * @param {*} guild_id
  * @returns
  */
 const getAllRecord = async (riot_name, riot_name_tag, guild_id) => {
@@ -349,11 +349,13 @@ const getStatisticOfGameAllMember = async (guild_id, date, msg) => {
   }
 }
 
+// 내부로직
 // 팀워크
 const getSynergisticTeammates = async (riot_name, riot_name_tag, guild_id) => {
   return await recordMapper.getSynergisticTeammates(riot_name, riot_name_tag, guild_id);
 };
 
+// 내부로직
 // 맞라인
 const getNemesis = async (riot_name, riot_name_tag, guild_id) => {
   return await recordMapper.getNemesis(riot_name, riot_name_tag, guild_id);

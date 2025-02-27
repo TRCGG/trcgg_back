@@ -1,4 +1,10 @@
-// 공용 쿼리
+/**
+ * 공용 Mapper
+ */
+
+/**
+ * total_count, win, lose, win_rate, kda 조회 쿼리
+ */
 const selectWinRateAndKdaSql = (table, kda) => {
     let sql = 
     `

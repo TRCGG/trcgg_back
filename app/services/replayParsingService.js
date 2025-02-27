@@ -1,5 +1,4 @@
 const axios = require('axios');
-const champion_dic  = require('../constants/champions');
 const managementService = require('./managementService');
 const { DateTime } = require('luxon');
 const { Readable } = require("stream");

@@ -35,11 +35,6 @@ module.exports = {
             const args = msg.content.slice(prefix.length).trim().split(/ +/g);
             const command = args.shift().toLowerCase();
             
-            // if (!command) {
-            //     msg.reply(`명령어 \`${commandName}\`를 찾을 수 없습니다.`);
-            //     return;
-            // }
-
             try {
                 let cmd = client.commands.get(command);
                 if (cmd) cmd.run(client, msg, args); // 명령어 실행

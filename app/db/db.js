@@ -11,10 +11,10 @@ const pool = new Pool({
   port: process.env.DB_PORT,
   max: 50,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
-  ssl: {
-    rejectUnauthorized: false // AWS RDS는 SSL 필요할 수 있음
-  }
+  connectionTimeoutMillis: 2000
+// ssl: {
+  //   rejectUnauthorized: false // AWS RDS는 SSL 필요할 수 있음
+  // }
 });
 
 /**
@@ -72,19 +72,22 @@ const query = async (text, params) => {
         // UPDATE, DELETE 쿼리의 경우 rowCount 반환
         if (['DELETE', 'UPDATE'].includes(res.command)) {
           const rows = res.rowCount;
-          // console.log("update", rows);
           resolve(rows);
         }
 
         const rows = res.rows;
-        // console.log('Query Result' , jsonify(rows));
         resolve(jsonify(rows));
       }
     });
   });
 };
 
-// 데이터베이스 쿼리 실행 (결과값이 하나인 경우)
+/**
+ * 데이터베이스 쿼리 실행 (결과값 하나)
+ * @param {string} text - SQL 쿼리
+ * @param {Array} params - 쿼리 결과
+ * @returns {Object} - 쿼리 결과
+ */
 const queryOne = (text, params = []) => {
   return new Promise((resolve, reject) => {
     pool.query(text, params, (err, res) => {
@@ -92,7 +95,6 @@ const queryOne = (text, params = []) => {
         console.error('Database query error:', err);
         reject({ status: 500, message: 'Internal Server Error' });
       } else {
-        // console.log(jsonify(res.rows)[0]);
         resolve(jsonify(res.rows)[0]); 
       }
     });
@@ -102,5 +104,5 @@ const queryOne = (text, params = []) => {
 module.exports = {
   query,
   queryOne,
-  testConnection, // 연결 테스트 함수 내보내기
+  testConnection,
 }; 
