@@ -1,9 +1,9 @@
-/**
- * DB Connection
- */
 const { Pool } = require('pg');
 
-const pool = new Pool({
+/**
+ * Default Connection Pool Settings
+ */
+const dbConfig = {
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
   database: process.env.DB_NAME,
@@ -12,10 +12,38 @@ const pool = new Pool({
   max: 50,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000
-// ssl: {
-  //   rejectUnauthorized: false // AWS RDS는 SSL 필요할 수 있음
-  // }
-});
+};
+
+const pool = new Pool(dbConfig);
+
+/**
+ * @description 공통 에러 처리 함수
+ * @param {Error} error - 발생한 에러
+ * @throws {Object} - 표준화된 에러 객체
+ */
+const handleDatabaseError = (error) => {
+  console.error('Database error:', error);
+  throw { status: 500, message: 'Internal Server Error' };
+};
+
+/**
+ * @description 쿼리 결과값 변환 string -> number
+ * @param {Array} data - 변환할 데이터 배열
+ * @returns {Array} - 변환된 데이터 배열
+ */
+const jsonify = (data) => {
+  return data.map(row => {
+    const newRow = { ...row };
+    Object.entries(newRow).forEach(([key, value]) => {
+      if (key === 'riot_name' || key === 'riot_name_tag') return;
+      if (typeof value === "string") {
+        const num = Number(value);
+        newRow[key] = isNaN(num) ? value : num;
+      }
+    });
+    return newRow;
+  });
+};
 
 /**
  * 데이터베이스 연결 테스트
@@ -26,83 +54,51 @@ const testConnection = async () => {
     console.log("Database connection successful!");
     client.release();
   } catch (error) {
-    console.error("Database connection error:", error);
+    handleDatabaseError(error);
   }
 };
 
 /**
- * 데이터베이스 쿼리 결과값중 숫자 형태의 문자열을 숫자로 변환
- * @param {Array} data - 쿼리 결과
- * @returns {Array} - 숫자로 변환된 데이터
+ * 기본 쿼리 실행 함수
+ * @param {string} text - SQL 쿼리문
+ * @param {Array} params - 쿼리 파라미터
+ * @returns {Promise<Array>} - 쿼리 결과
  */
-const jsonify = (data) => {
-  return data.map(row => {
-    Object.keys(row).forEach(key => {
-      if (key === 'riot_name' || key === 'riot_name_tag') {
-        return row[key];
-      }
-      if (typeof row[key] === "string") {
-        const num = Number(row[key]);
-        row[key] = isNaN(num) ? row[key] : num;
-      }
-    });
-    return row;
-  });
+const executeQuery = async (text, params = []) => {
+  try {
+    const result = await pool.query(text, params);
+
+    if (['DELETE', 'UPDATE'].includes(result.command)) {
+      return result.rowCount;
+    }
+
+    return jsonify(result.rows);
+  } catch (error) {
+    handleDatabaseError(error);
+  }
 };
 
 /**
- * 데이터베이스 쿼리 실행
+ * 다중 결과 쿼리 실행
  * @param {string} text - SQL 쿼리
  * @param {Array} params - 쿼리 파라미터
- * @returns {Promise} - 쿼리 결과
+ * @returns {Promise<Array>} - 쿼리 결과 배열
  */
-const query = async (text, params) => {
-  return new Promise((resolve, reject) => {
-
-    // console.log('Executing Query:', {
-    //   text: text,
-    //   params: params
-    // });
-    pool.query(text, params, (err, res) => {
-      if (err) {
-        console.error('Database query error:', err);
-        reject({ status: 500, message: 'Internal Server Error' });
-      } else {
-
-        // UPDATE, DELETE 쿼리의 경우 rowCount 반환
-        if (['DELETE', 'UPDATE'].includes(res.command)) {
-          const rows = res.rowCount;
-          resolve(rows);
-        }
-
-        const rows = res.rows;
-        resolve(jsonify(rows));
-      }
-    });
-  });
-};
+const query = (text, params = []) => executeQuery(text, params);
 
 /**
- * 데이터베이스 쿼리 실행 (결과값 하나)
+ * 단일 결과 쿼리 실행
  * @param {string} text - SQL 쿼리
- * @param {Array} params - 쿼리 결과
- * @returns {Object} - 쿼리 결과
+ * @param {Array} params - 쿼리 파라미터
+ * @returns {Promise<Object>} - 단일 쿼리 결과
  */
-const queryOne = (text, params = []) => {
-  return new Promise((resolve, reject) => {
-    pool.query(text, params, (err, res) => {
-      if (err) {
-        console.error('Database query error:', err);
-        reject({ status: 500, message: 'Internal Server Error' });
-      } else {
-        resolve(jsonify(res.rows)[0]); 
-      }
-    });
-  });
+const queryOne = async (text, params = []) => {
+  const results = await executeQuery(text, params);
+  return results[0];
 };
 
 module.exports = {
   query,
   queryOne,
   testConnection,
-}; 
+};
