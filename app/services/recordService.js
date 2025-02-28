@@ -1,3 +1,7 @@
+/**
+ * 전적 검색 Service
+ */
+
 const recordMapper = require("../db/mapper/recordMapper");
 const utils = require("../utils");
 

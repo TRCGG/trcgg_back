@@ -1,5 +1,5 @@
 /**
- * 서비스 관리용 Service
+ * 서비스 관리용 Service (bot)
  */
 const managementMapper = require('../db/mapper/managementMapper');
 const utils = require("../utils");

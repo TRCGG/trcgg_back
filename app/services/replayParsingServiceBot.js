@@ -1,5 +1,9 @@
+/**
+ * 리플레이 파일 파싱 서비스
+ */
+
 const axios = require("axios");
-const managementService = require("./managementService_bot");
+const managementService = require("./managementServiceBot");
 const { DateTime } = require("luxon");
 
 /**
