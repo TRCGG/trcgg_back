@@ -2,7 +2,6 @@
  * 전적 Mapper
  */
 const db = require('../db');
-const commonQuery = require('./commonSql')
 
 /**
  * @param {*} riot_name 
@@ -48,7 +47,7 @@ const getLineRecord = async (riot_name, riot_name_tag, guild_id) => {
     `
       SELECT 
              pg.position,
-             ${commonQuery.selectWinRateAndKdaSql('pg',true)}
+             ${selectWinRateAndKdaSql('pg',true)}
         FROM Player_game AS pg
         LEFT JOIN Player AS p ON pg.player_id = p.player_id
        WHERE p.riot_name = $1
@@ -88,7 +87,7 @@ const getRecentMonthRecord = async (riot_name, riot_name_tag, guild_id) => {
   let query = 
     `
       SELECT 
-             ${commonQuery.selectWinRateAndKdaSql('pg',true)}
+             ${selectWinRateAndKdaSql('pg',true)}
         FROM Player_game AS pg
         JOIN Player AS p ON pg.player_id = p.player_id
        WHERE p.riot_name = $1
@@ -119,7 +118,7 @@ const getStatisticOfGame = async (guild_id, year, month) => {
     `
       SELECT 
              p.riot_name,
-             ${commonQuery.selectWinRateAndKdaSql('pg',true)}
+             ${selectWinRateAndKdaSql('pg',true)}
         FROM Player_game AS pg
         JOIN Player AS p ON pg.player_id = p.player_id
        WHERE p.guild_id = $1
@@ -148,7 +147,7 @@ const getSynergisticTeammates = async (riot_name, riot_name_tag, guild_id) => {
     `
       SELECT 
              K.riot_name,
-             ${commonQuery.selectWinRateAndKdaSql('B', null)}
+             ${selectWinRateAndKdaSql('B', null)}
         FROM Player_game AS A
         JOIN Player AS K ON A.player_id = K.player_id
        INNER JOIN (
@@ -206,7 +205,7 @@ const getNemesis = async (riot_name, riot_name_tag, guild_id) => {
     `
       SELECT 
               K.riot_name,
-              ${commonQuery.selectWinRateAndKdaSql('B', null)}
+              ${selectWinRateAndKdaSql('B', null)}
         FROM Player_game AS A
         JOIN Player AS K ON A.player_id = K.player_id
        INNER JOIN (
@@ -266,7 +265,7 @@ const getWinRateByPosition = async (position, guild_id) => {
       SELECT 	
              pg.position,
              p.riot_name,
-             ${commonQuery.selectWinRateAndKdaSql('pg',true)}
+             ${selectWinRateAndKdaSql('pg',true)}
         FROM Player_game AS pg  
         JOIN Player AS p ON pg.player_id = p.player_id
        WHERE pg.position = $1
@@ -373,6 +372,125 @@ const getRecentGamesByRiotName = async (riot_name, riot_name_tag, guild_id) => {
   return result;
 };
 
+/**
+ * @param {*} riot_name 
+ * @param {*} riot_name_tag
+ * @param {*} guild_id 
+ * @returns List<Player_game>
+ * @description 모스트 픽 조회
+ */
+const getMostPicks = async (riot_name, riot_name_tag, guild_id) => {
+  let query = 
+    `
+      SELECT 
+             c.champ_name,
+             ${selectWinRateAndKdaSql('pg',true)}
+        FROM Player_game AS pg  
+        JOIN Player AS p ON pg.player_id = p.player_id
+        JOIN Champion c ON pg.champion_id = c.champion_id
+       WHERE p.riot_name = $1
+       
+    `
+  const params = [riot_name, guild_id];    
+  if(riot_name_tag) {
+    query += `AND p.riot_name_tag = $3 `;
+    params.push(riot_name_tag);
+  }
+  query += 
+    `
+         AND p.guild_id = $2
+         AND pg.delete_yn = 'N'
+       GROUP BY c.champ_name
+       ORDER BY total_count DESC 
+    `
+  const result = await db.query(query, params);
+  return result;
+};
+
+/**
+ * @param {*} champ_name 
+ * @param {*} guild_id 
+ * @returns List<Player_game>
+ * @description 장인 조회
+ */
+const getMasterOfChampion = async (champ_name, guild_id) => {
+  const result = await db.query(
+    `
+      SELECT 
+             p.riot_name, 
+             ${selectWinRateAndKdaSql('pg',true)}
+        FROM Player_game AS pg  
+        JOIN Player AS p ON pg.player_id = p.player_id
+        JOIN Champion c ON pg.champion_id = c.champion_id 
+       WHERE c.champ_name = $1
+         AND p.guild_id = $2
+         AND pg.delete_yn = 'N'
+       GROUP BY p.riot_name 
+       ORDER BY total_count DESC
+    `,
+    [champ_name, guild_id]
+  );
+  return result;
+};
+
+/**
+ * @param {*} guild_id 
+ * @param {*} year 
+ * @param {*} month 
+ * @returns List<Player_game>
+ * @description 챔피언 통계 조회
+ */
+const getStatisticOfChampion = async (guild_id, year, month) => {
+  const result = await db.query(
+    `
+      SELECT 
+             c.champ_name,
+             ${selectWinRateAndKdaSql('pg', null)}
+        FROM Player_game AS pg  
+        JOIN Player AS p ON pg.player_id = p.player_id
+        JOIN Champion c ON pg.champion_id = c.champion_id
+       WHERE pg.delete_yn = 'N'
+         AND p.guild_id = $1
+         AND TO_CHAR(pg.game_date, 'YYYY') = $2
+         AND TO_CHAR(pg.game_date, 'MM') = $3
+       GROUP BY c.champ_name
+       ORDER BY total_count DESC
+    `,
+    [guild_id, year, month]
+  );
+  return result;
+};
+
+/**
+ * 내부함수 - 승률, KDA 조회 SQL
+ * @param {*} table 
+ * @param {*} kda 
+ * @returns 
+ */
+const selectWinRateAndKdaSql = (table, kda) => {
+  let sql = 
+  `
+      COUNT(1) AS total_count,
+      COUNT(CASE WHEN ${table}.game_result = '승' THEN 1 END) AS win,
+      COUNT(CASE WHEN ${table}.game_result = '패' THEN 1 END) AS lose,
+      CASE 
+        WHEN COUNT(1) = 0 THEN 0
+        ELSE ROUND(COUNT(CASE WHEN ${table}.game_result = '승' THEN 1 END) * 100.0 / NULLIF(COUNT(1), 0), 2) 
+      END AS win_rate
+  `;
+  if(kda){
+    sql += 
+    ` 
+      ,
+      CASE 
+        WHEN COALESCE(SUM(${table}.death), 0) = 0 THEN 9999
+        ELSE ROUND((COALESCE(SUM(${table}.kill), 0) + COALESCE(SUM(${table}.assist), 0)) * 1.0 / NULLIF(COALESCE(SUM(${table}.death), 0), 0), 2) 
+      END AS kda
+    `
+  }
+  return sql;
+}
+
 module.exports = {
   getPlayerForSearch,
   getLineRecord,
@@ -383,4 +501,7 @@ module.exports = {
   getWinRateByPosition,
   getRecordByGame,
   getRecentGamesByRiotName,
+  getMostPicks,
+  getMasterOfChampion,
+  getStatisticOfChampion,
 }; 

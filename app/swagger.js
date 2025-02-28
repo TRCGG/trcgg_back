@@ -1,3 +1,6 @@
+/**
+ * swagger 설정 파일 생성
+ */
 const swaggerAutogen = require('swagger-autogen')({ openapi: '3.0.0' });
 const PORT = 3000; // 사용하는 포트 번호에 맞게 변경
 

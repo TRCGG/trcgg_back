@@ -2,7 +2,7 @@
  * 서비스 관리용 Service
  */
 const managementMapper = require('../db/mapper/managementMapper');
-const appUtil = require("../appUtils");
+const utils = require("../utils");
 
 /**
  * !doc
@@ -85,25 +85,24 @@ const getSubAccountList = async (guild_id) => {
  * @returns
  */
 const postSubAccount = async (command_str, guild_id) => {
-  const [full_sub_name, full_main_name] = appUtil.splitStr(command_str);
+  const [full_sub_name, full_main_name] = utils.splitStr(command_str);
 
-  appUtil.validateTag(full_sub_name);
-  appUtil.validateTag(full_main_name);
+  utils.validateTag(full_sub_name);
+  utils.validateTag(full_main_name);
 
-  const [sub_name, sub_name_tag] = appUtil.splitTag(full_sub_name);
-  const [main_name, main_name_tag] = appUtil.splitTag(full_main_name);
+  const [sub_name, sub_name_tag] = utils.splitTag(full_sub_name);
+  const [main_name, main_name_tag] = utils.splitTag(full_main_name);
 
   // 게임기록에 부캐기록이 있으면 본캐기록으로 변경 (조회 순서 중요)
   // 부캐 조회
   const sub_account = await managementMapper.getPlayer('N', sub_name, sub_name_tag, guild_id);
-  console.log(sub_account);
 
   // 본캐 조회
   const account = await managementMapper.getPlayer('N', main_name, main_name_tag, guild_id);
   if(!account){
     return "본캐로 게임한 기록이 없습니다.";
   } else if(account.main_player_id) {
-    return `해당 ${account.riot_name} 계정은 부캐입니다, 부캐는 본캐로 저장할 수 없습니다. !부캐목록을 확인해주세요. `;
+    return `해당 ${account.riot_name} 계정은 본캐입니다, 부캐는 본캐로 저장할 수 없습니다. !부캐목록을 확인해주세요. `;
   }
 
   // 부캐가 이미 기록에 있다면 1. 부캐 - main_player_id 추가 2. 부캐 게임기록 본캐로 수정
@@ -148,8 +147,8 @@ const postSubAccount = async (command_str, guild_id) => {
  * @returns
  */
 const deleteSubAccount = async (full_sub_name, guild_id) => {
-  appUtil.validateTag(full_sub_name);
-  const [sub_name, sub_name_tag] = appUtil.splitTag(full_sub_name);
+  utils.validateTag(full_sub_name);
+  const [sub_name, sub_name_tag] = utils.splitTag(full_sub_name);
 
   const sub_account = await managementMapper.getPlayer('N' ,sub_name, sub_name_tag, guild_id);
   if(!sub_account){
@@ -162,29 +161,28 @@ const deleteSubAccount = async (full_sub_name, guild_id) => {
       if (result >= 1) {
         return "부캐삭제 완료";
       } else {
-        return appUtil.notFoundResponse();
+        return utils.notFoundResponse();
       }
     }
   }
 
 };
 
-// 중복 체크
+/**
+ * 리플레이 중복 체크
+ * @param {*} game_id 
+ * @param {*} guild_id 
+ * @returns 
+ */
 const getDuplicateReplay = async (game_id, guild_id) => {
   return await managementMapper.getDuplicateReplay(game_id, guild_id);
 };
 
-// 길드정보
-const getGuild = async (guild_id) => {
-  return await managementMapper.getGuild(guild_id);
-};
-
-// 길드등록
-const postGuild = async (guild_name, guild_id) => {
-  return await managementMapper.postGuild(guild_name, guild_id);
-};
-
-// 리플저장
+/**
+ * 리플레이 저장
+ * @param {*} records 
+ * @returns 
+ */
 const postRecord = async (records) => {
   return await managementMapper.postRecord(records);
 };
@@ -206,7 +204,7 @@ const deleteRecord = async (game_id, guild_id) => {
       return "playerGame 삭제 실패";
     }
   } else {
-    return appUtil.notFoundResponse();
+    return utils.notFoundResponse();
   } 
 };
 
@@ -218,8 +216,8 @@ const deleteRecord = async (game_id, guild_id) => {
  * @returns
  */
 const putDeleteYn = async (delete_yn, full_name, guild_id) => {
-  appUtil.validateTag(full_name);
-  const [riot_name, riot_name_tag] = appUtil.splitTag(full_name);
+  utils.validateTag(full_name);
+  const [riot_name, riot_name_tag] = utils.splitTag(full_name);
 
   // account_delete_yn: 탈퇴한계정인지 아닌지 여부, delete_yn: 탈퇴 or 복귀 명령어로 결정 탈퇴=Y 복귀=N
   let account_delete_yn = '';
@@ -232,7 +230,7 @@ const putDeleteYn = async (delete_yn, full_name, guild_id) => {
   // 본계정 조회
   const account = await managementMapper.getPlayer(account_delete_yn, riot_name, riot_name_tag, guild_id);
   if(!account) {
-    return appUtil.notFoundAccount(riot_name, riot_name_tag);
+    return utils.notFoundAccount(riot_name, riot_name_tag);
   }
 
   // 탈퇴한 본계정은 부캐들 전부 삭제처리, 복귀는 처리하지않음 
@@ -259,7 +257,7 @@ const putDeleteYn = async (delete_yn, full_name, guild_id) => {
         return "복귀 완료";
       }
     } else {
-      return appUtil.notFoundResponse();
+      return utils.notFoundResponse();
     }
   }
 };
@@ -273,9 +271,9 @@ const putDeleteYn = async (delete_yn, full_name, guild_id) => {
  * @returns
  */
 const putPlayerName = async (command_str, guild_id) => {
-  const [full_old_name, full_new_name] = appUtil.splitStr(command_str);
-  const [old_name, old_name_tag] = appUtil.splitTag(full_old_name);
-  const [new_name, new_name_tag] = appUtil.splitTag(full_new_name);
+  const [full_old_name, full_new_name] = utils.splitStr(command_str);
+  const [old_name, old_name_tag] = utils.splitTag(full_old_name);
+  const [new_name, new_name_tag] = utils.splitTag(full_new_name);
 
   // 닉변이후 계정 
   const new_account = await managementMapper.getPlayer('N', new_name, new_name_tag, guild_id);
@@ -287,7 +285,7 @@ const putPlayerName = async (command_str, guild_id) => {
   // 닉변이전 계정
   const account = await managementMapper.getPlayer('N', old_name, old_name_tag, guild_id);
   if(!account){
-    return appUtil.notFoundAccount(old_name, old_name_tag);
+    return utils.notFoundAccount(old_name, old_name_tag);
   }
 
   const result = await managementMapper.putPlayer(
@@ -301,7 +299,7 @@ const putPlayerName = async (command_str, guild_id) => {
   if (result >= 1) {
     return "닉변 완료";
   } else {
-    return appUtil.notFoundResponse();
+    return utils.notFoundResponse();
   }
 };
 
@@ -309,9 +307,7 @@ module.exports = {
   getDoc,
   getSubAccountList,
   getDuplicateReplay,
-  getGuild,
   postSubAccount,
-  postGuild,
   postRecord,
   putDeleteYn,
   putPlayerName,

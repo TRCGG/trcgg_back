@@ -1,4 +1,12 @@
-// 태그 체크 
+/**
+ * utils 공통함수 정리
+ */
+
+/**
+ * # 태그 검증
+ * @param {*} str 
+ * @returns 
+ */
 const validateTag = (str) => {
     try {
         const pattern = /^[가-힣a-zA-Z0-9]{1,16}#[가-힣a-zA-Z0-9]{1,16}$/;
@@ -13,15 +21,29 @@ const validateTag = (str) => {
     }
 }
 
-// data 없을 경우 응답 메시지
+/**
+ * 데이터 없을 경우 응답
+ * 
+ */
 const notFoundResponse = () => {
     return "해당 기록이 없습니다";
 }
 
+/**
+ * 계정이 없을 경우 응답
+ * @param {*} name 
+ * @param {*} tag 
+ * @returns 
+ */
 const notFoundAccount = (name, tag) => {
     return `${name}#${tag} 계정이 게임 기록에 존재하지 않습니다.`;
 }
 
+/**
+ * 슬래쉬 문자열 분리
+ * @param {*} str 
+ * @returns 
+ */
 const splitStr = (str) => {
     try {
         const [sub_name, main_name]= str.split('/');
@@ -36,6 +58,11 @@ const splitStr = (str) => {
     }
 }
 
+/**
+ * # 문자열 분리
+ * @param {*} str 
+ * @returns 
+ */
 const splitTag = (str) => {
     try {
         const [name, name_tag]= str.split('#');
@@ -50,7 +77,11 @@ const splitTag = (str) => {
     }
 }
 
-// 포지션 이름 설정
+/**
+ * 포지션 변환
+ * @param {*} position 
+ * @returns 
+ */
 const dictPosition = (position) => {
     let realPosition = ""
     switch (position) {
@@ -69,7 +100,11 @@ const dictPosition = (position) => {
     }
 }
 
-// 날짜 분류
+/**
+ * 날짜 분리
+ * @param {*} date 
+ * @returns 
+ */
 const splitDate = (date) => {
     if(date === undefined) {
         const now = new Date();
