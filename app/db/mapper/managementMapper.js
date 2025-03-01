@@ -13,7 +13,7 @@ const getDuplicateReplay = async (game_id, guild_id) => {
   const result = await db.queryOne(
     `
       SELECT
-             COUNT(*) AS count
+             COUNT(*)::INTEGER AS count
         FROM League
        WHERE LOWER(game_id) = LOWER($1)
          AND guild_id = $2

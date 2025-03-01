@@ -11,7 +11,10 @@ const dbConfig = {
   port: process.env.DB_PORT,
   max: 50,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000
+  connectionTimeoutMillis: 2000,
+  ssl: {
+    rejectUnauthorized: false // AWS RDS는 SSL 필요 
+  } 
 };
 
 const pool = new Pool(dbConfig);
@@ -24,25 +27,6 @@ const pool = new Pool(dbConfig);
 const handleDatabaseError = (error) => {
   console.error('Database error:', error);
   throw { status: 500, message: 'Internal Server Error' };
-};
-
-/**
- * @description 쿼리 결과값 변환 string -> number
- * @param {Array} data - 변환할 데이터 배열
- * @returns {Array} - 변환된 데이터 배열
- */
-const jsonify = (data) => {
-  return data.map(row => {
-    const newRow = { ...row };
-    Object.entries(newRow).forEach(([key, value]) => {
-      if (key === 'riot_name' || key === 'riot_name_tag') return;
-      if (typeof value === "string") {
-        const num = Number(value);
-        newRow[key] = isNaN(num) ? value : num;
-      }
-    });
-    return newRow;
-  });
 };
 
 /**
@@ -72,7 +56,7 @@ const executeQuery = async (text, params = []) => {
       return result.rowCount;
     }
 
-    return jsonify(result.rows);
+    return result.rows;
   } catch (error) {
     handleDatabaseError(error);
   }
