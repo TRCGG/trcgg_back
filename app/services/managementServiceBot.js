@@ -8,7 +8,7 @@ const utils = require("../utils");
  * !doc
  * @returns 
  */
-const getDoc = async () => {
+const getDocEmbed = async () => {
 
     // 검색 명령어
     const field_one_value =
@@ -55,7 +55,7 @@ const getDoc = async () => {
  * @param {*} guild_Id
  * @returns
  */
-const getSubAccountList = async (guild_id) => {
+const getSubAccountListEmbed = async (guild_id) => {
   const title = "부캐목록";
   let desc = "``` \n" + "|  부캐  |  본캐  |\n" + "\n";
   
@@ -304,8 +304,8 @@ const putPlayerName = async (command_str, guild_id) => {
 };
 
 module.exports = {
-  getDoc,
-  getSubAccountList,
+  getDocEmbed,
+  getSubAccountListEmbed,
   getDuplicateReplay,
   postSubAccount,
   postRecord,

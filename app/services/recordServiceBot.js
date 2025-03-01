@@ -13,7 +13,7 @@ const embedUtil = require('../embed');
  * @param {*} guild_id 
  * @returns 
  */
-const getPlayerForSearch = async (riot_name, riot_name_tag, guild_id) => {
+const getPlayerForSearchBot = async (riot_name, riot_name_tag, guild_id) => {
   const accounts = await recordMapper.getPlayerForSearch(riot_name, riot_name_tag, guild_id);
   if(accounts.length === 0){
     throw new Error(utils.notFoundResponse());
@@ -27,7 +27,7 @@ const getPlayerForSearch = async (riot_name, riot_name_tag, guild_id) => {
  * @param {*} riot_name_tag 
  * @param {*} guild_id 
  */
-const getAllRecord = async (riot_name, riot_name_tag, guild_id) => {
+const getAllRecordEmbed = async (riot_name, riot_name_tag, guild_id) => {
   const allData = {
     record_data: await recordMapper.getLineRecord(riot_name, riot_name_tag, guild_id),
     month_data: await recordMapper.getRecentMonthRecord(riot_name, riot_name_tag, guild_id),
@@ -270,7 +270,7 @@ const getAllRecord = async (riot_name, riot_name_tag, guild_id) => {
  * @param {*} date
  * @returns
  */
-const getStatisticOfGame = async (guild_id, type, date) => {
+const getStatisticOfGameEmbed = async (guild_id, type, date) => {
   const [year,month] = utils.splitDate(date);
   const title = `${year}-${month} ${type} 통계`;
   const records = await recordMapper.getStatisticOfGame(guild_id, year, month);
@@ -312,7 +312,7 @@ const getStatisticOfGame = async (guild_id, type, date) => {
  * @param {*} date
  * @returns
  */
-const getStatisticOfGameAllMember = async (guild_id, date, msg) => {
+const getStatisticOfGameAllMemberEmbed = async (guild_id, date, msg) => {
   const [year,month] = utils.splitDate(date);
   const title = `${year}-${month} \n`;
   let str = ""
@@ -350,7 +350,7 @@ const getStatisticOfGameAllMember = async (guild_id, date, msg) => {
  * @param {*} guild_Id
  * @returns
  */
-const getWinRateByPosition = async (position, guild_id) => {
+const getWinRateByPositionEmbed = async (position, guild_id) => {
   position = utils.dictPosition(position);
   const records = await recordMapper.getWinRateByPosition(position, guild_id);
   if (records.length === 0 ){
@@ -398,7 +398,7 @@ const getWinRateByPosition = async (position, guild_id) => {
  * @param {*} guild_Id
  * @returns
  */
-const getRecordByGame = async (game_id, guild_id) => {
+const getRecordByGameEmbed = async (game_id, guild_id) => {
   const game_data = await recordMapper.getRecordByGame(game_id, guild_id);
   if (game_data.length === 0) {
     return utils.notFoundResponse();
@@ -439,7 +439,7 @@ const getRecordByGame = async (game_id, guild_id) => {
  * @param {*} guild_Id
  * @returns
  */
-const getRecentGamesByRiotName = async (riot_name, riot_name_tag, guild_id) => {
+const getRecentGamesByRiotNameEmbed = async (riot_name, riot_name_tag, guild_id) => {
   const recent_data = await recordMapper.getRecentGamesByRiotName(
     riot_name,
     riot_name_tag,
@@ -475,7 +475,7 @@ const getRecentGamesByRiotName = async (riot_name, riot_name_tag, guild_id) => {
  * @param {*} guild_Id
  * @returns
  */
-const getMasterOfChampion = async (champ_name, guild_id) => {
+const getMasterOfChampionEmbed = async (champ_name, guild_id) => {
   const champ_data = await recordMapper.getMasterOfChampion(
     champ_name,
     guild_id
@@ -543,7 +543,7 @@ const getMasterOfChampion = async (champ_name, guild_id) => {
  * @param {*} date
  * @returns
  */
-const getStatisticOfChampion = async (guild_id, type, date) => {
+const getStatisticOfChampionEmbed = async (guild_id, type, date) => {
   const [year,month] = utils.splitDate(date);
   const title = `${year}-${month} ${type} 통계`;
   const records = await recordMapper.getStatisticOfChampion(guild_id, year, month);
@@ -585,13 +585,13 @@ const getStatisticOfChampion = async (guild_id, type, date) => {
 };
 
 module.exports = {
-  getPlayerForSearch,
-  getAllRecord,
-  getStatisticOfGame,
-  getStatisticOfGameAllMember,
-  getWinRateByPosition,
-  getRecordByGame,
-  getRecentGamesByRiotName,
-  getMasterOfChampion,
-  getStatisticOfChampion,
+  getPlayerForSearchBot,
+  getAllRecordEmbed,
+  getStatisticOfGameEmbed,
+  getStatisticOfGameAllMemberEmbed,
+  getWinRateByPositionEmbed,
+  getRecordByGameEmbed,
+  getRecentGamesByRiotNameEmbed,
+  getMasterOfChampionEmbed,
+  getStatisticOfChampionEmbed,
 };

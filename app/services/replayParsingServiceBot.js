@@ -128,7 +128,7 @@ const saveData = async (statsArray, fileName, createUser, guildId) => {
 };
 
 /**
- * 리플 파일명 중복 확인
+ * 리플 파일명 중복 확인 - 내부함수
  * @param {*} fileName
  * @param {*} guildId
  * @returns
