@@ -3,7 +3,7 @@
  */
 
 const axios = require("axios");
-const managementService = require("./managementServiceBot");
+const managementService = require("./managementService");
 const { DateTime } = require("luxon");
 
 /**

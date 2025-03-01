@@ -7,21 +7,6 @@ const utils = require("../utils");
 const embedUtil = require('../embed');
 
 /**
- * 전적 검생용 계정 조회
- * @param {*} riot_name 
- * @param {*} riot_name_tag 
- * @param {*} guild_id 
- * @returns 
- */
-const getPlayerForSearchBot = async (riot_name, riot_name_tag, guild_id) => {
-  const accounts = await recordMapper.getPlayerForSearch(riot_name, riot_name_tag, guild_id);
-  if(accounts.length === 0){
-    throw new Error(utils.notFoundResponse());
-  }
-  return accounts;
-}
-
-/**
  * !전적 조회에 필요한 모든 데이터 조회
  * @param {*} riot_name 
  * @param {*} riot_name_tag 

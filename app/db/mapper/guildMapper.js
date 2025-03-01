@@ -52,3 +52,8 @@ const getGuild = async (guild_id) => {
     );
     return result;
   };
+
+  module.exports = {
+    postGuild,
+    getGuild,
+  };

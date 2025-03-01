@@ -7,38 +7,6 @@ const db = require('../db');
  * @param {*} riot_name 
  * @param {*} riot_name_tag 
  * @param {*} guild_id 
- * @returns List<Player>
- * @description 전적 검색을 위한 계정 조회
- */
-const getPlayerForSearch = async (riot_name, riot_name_tag, guild_id) => {
-  let query = 
-    `
-      SELECT
-             p.player_id,
-             p.riot_name,
-             p.riot_name_tag,
-             p.guild_id,
-             p.puuid
-        FROM Player AS p
-       WHERE p.delete_yn = 'N'
-         AND LOWER(p.riot_name) = LOWER($1)
-         AND p.guild_id = $2
-         AND p.main_player_id IS NULL
-    `
-  const params = [riot_name, guild_id];
-
-  if(riot_name_tag) {
-    query += `AND LOWER(p.riot_name_tag) = LOWER($3) `
-    params.push(riot_name_tag);
-  }
-  const result = await db.query(query, params);
-  return result;
-}
-
-/**
- * @param {*} riot_name 
- * @param {*} riot_name_tag 
- * @param {*} guild_id 
  * @returns List<Player_game>
  * @description 전체 라인별 전적 조회
  */
@@ -492,7 +460,6 @@ const selectWinRateAndKdaSql = (table, kda) => {
 }
 
 module.exports = {
-  getPlayerForSearch,
   getLineRecord,
   getRecentMonthRecord,
   getStatisticOfGame,

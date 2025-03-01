@@ -6,22 +6,6 @@ const recordMapper = require("../db/mapper/recordMapper");
 const utils = require("../utils");
 
 /**
- * 전적 검생용 계정 조회
- * @param {*} riot_name 
- * @param {*} riot_name_tag 
- * @param {*} guild_id 
- * @returns 
- */
-const getPlayerForRecord = async (riot_name, riot_name_tag, guild_id) => {
-  const accounts = await recordMapper.getPlayerForSearch(
-    riot_name,
-    riot_name_tag,
-    guild_id
-  );
-  return accounts;
-};
-
-/**
  * !전적 조회에 필요한 모든 데이터 조회
  * @param {*} riot_name 
  * @param {*} riot_name_tag 
@@ -136,8 +120,7 @@ const getStatisticOfChampion = async (guild_id, date) => {
 	return records;
 };
 
-model.exports = {
-	getPlayerForRecord,
+module.exports = {
 	getAllRecord,
 	getStatisticOfGame,
 	getStatisticOfGameAllMember,

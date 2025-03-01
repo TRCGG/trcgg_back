@@ -53,7 +53,7 @@ module.exports = [
       const guild_id = msg.guild.id;
 
       if (botUtils.checkAuth(msg)) {
-        await manageService.deleteSubAccount(full_sub_name, guild_id)
+        await manageService.putSubAccount(full_sub_name, guild_id)
           .then((result) => {
             msg.reply(result);
           })
