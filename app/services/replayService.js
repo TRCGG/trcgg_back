@@ -3,25 +3,25 @@
  */
 
 const axios = require("axios");
-const managementService = require("./managementService");
+const managementMapper = require('../db/mapper/managementMapper');
 const { DateTime } = require("luxon");
 
 /**
- * 리플레이 저장
- * @param {*} fileUrl
- * @param {*} fileName
- * @param {*} createUser
- * @param {*} guildId
- * @returns
+ * @param {String} fileUrl
+ * @param {String} fileName
+ * @param {String} createUser
+ * @param {String} guild_id
+ * @description 리플레이 저장
+ * @returns {String} message
  */
-const save = async (fileUrl, fileName, createUser, guildId) => {
+const save = async (fileUrl, fileName, createUser, guild_id) => {
   try {
-    if (await checkDuplicate(fileName, guildId)) {
+    if (await checkDuplicate(fileName, guild_id)) {
       const bytesData = await getInputStreamDiscordFile(fileUrl);
 
       if (bytesData) {
         const statsArray = await parseReplayData(bytesData);
-        await saveData(statsArray, fileName, createUser, guildId);
+        await saveData(statsArray, fileName, createUser, guild_id);
         return `:green_circle:등록완료: ${fileName} 반영 완료`;
       } else {
         throw new Error("디스코드 파일 데이터 가져오기 실패");
@@ -36,8 +36,29 @@ const save = async (fileUrl, fileName, createUser, guildId) => {
 };
 
 /**
- * 리플레이 데이터 파싱
+ * @param {String} game_id
+ * @param {String} guild_Id
+ * @description !drop 리플 삭제
+ * @returns {String} message
+ */
+const deleteRecord = async (game_id, guild_id) => {
+  // 1.League 데이터 update, 2. Player_game 데이터 update
+  const league = await managementMapper.deleteLeagueByGameId(game_id, guild_id);
+  if (league >= 1) {
+    const playerGame = await managementMapper.deletePlayerGameByGameId(game_id, guild_id);
+    if(playerGame >= 1) {
+      return `:orange_circle:데이터 삭제완료: ${game_id}`;
+    } else {
+      return "playerGame 삭제 실패";
+    }
+  } else {
+    return utils.notFoundResponse();
+  } 
+};
+
+/**
  * @param {*} byte
+ * @description 리플레이 데이터 파싱
  * @returns
  */
 const parseReplayData = async (byte) => {
@@ -68,8 +89,8 @@ const parseReplayData = async (byte) => {
 };
 
 /**
- * 디스코드에 올린 파일 데이터 가져오기
- * @param {*} fileUrl
+ * @param {String} fileUrl
+ * @description 디스코드에 올린 파일 데이터 가져오기
  * @returns
  */
 const getInputStreamDiscordFile = async (fileUrl) => {
@@ -83,14 +104,14 @@ const getInputStreamDiscordFile = async (fileUrl) => {
 };
 
 /**
- * 파싱한 데이터 save
- * @param {*} statsArray
- * @param {*} fileName
- * @param {*} createUser
- * @param {*} guildId
+ * @param {String} statsArray
+ * @param {String} fileName
+ * @param {String} createUser
+ * @param {String} guild_id
+ * @description 파싱한 데이터 save
  * @returns
  */
-const saveData = async (statsArray, fileName, createUser, guildId) => {
+const saveData = async (statsArray, fileName, createUser, guild_id) => {
   const currentYear = DateTime.now().year;
   const dateTime = fileName.split("_");
 
@@ -118,26 +139,36 @@ const saveData = async (statsArray, fileName, createUser, guildId) => {
     fileName.toLowerCase(),
     raw_data,
     hash_data,
-    guildId,
+    guild_id,
     game_date,
     game_type,
     createUser
   );
 
-  return await managementService.postRecord(params);
+  return await postRecord(params);
 };
 
 /**
- * 리플 파일명 중복 확인 - 내부함수
- * @param {*} fileName
- * @param {*} guildId
+ * @param {String} fileName
+ * @param {String} guild_id
+ * @description 리플 파일명 중복 확인
  * @returns
  */
-const checkDuplicate = async (fileName, guildId) => {
-  const result = await managementService.getDuplicateReplay(fileName, guildId);
+const checkDuplicate = async (fileName, guild_id) => {
+  const result = await managementMapper.getDuplicateReplay(fileName, guild_id);
   return result.count === 0;
+};
+
+/**
+ * @param {*} records 
+ * @description 리플레이 데이터 db 저장
+ * @returns 
+ */
+const postRecord = async (records) => {
+  return await managementMapper.postRecord(records);
 };
 
 module.exports = {
   save,
+  deleteRecord,
 };
