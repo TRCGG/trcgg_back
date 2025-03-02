@@ -1,7 +1,7 @@
+const db = require('../db');
 /**
  * 서비스 관리용 Mapper
  */
-const db = require('../db');
 
 /**
  * @param {*} game_id 
@@ -23,7 +23,6 @@ const getDuplicateReplay = async (game_id, guild_id) => {
   );
   return result;
 };
-
 
 /**
  * @param {*} params 
@@ -57,8 +56,7 @@ const postRecord = async (params) => {
     `,
     params
   )
-    return result;
-  
+  return result;
 };
 
 /**

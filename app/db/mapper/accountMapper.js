@@ -1,6 +1,7 @@
 /**
  * Player 계정 관련 Mapper
  */
+const db = require('../db');
 
 /**
  * @param {*} riot_name 
@@ -30,7 +31,7 @@ const getPlayerForSearch = async (riot_name, riot_name_tag, guild_id) => {
     query += `AND LOWER(p.riot_name_tag) = LOWER($3) `
     params.push(riot_name_tag);
   }
-  const result = await db.query(query, params);
+  const result = await db.queryOne(query, params);
   return result;
 }
 
@@ -73,7 +74,7 @@ const getPlayer = async (delete_yn, riot_name, riot_name_tag, guild_id) => {
  * @returns List<Player>
  * @description 부계정 목록 조회
  */
-const getSubAccountList = async (guild_id) => {
+const getSubPlayerList = async (guild_id) => {
   const result = await db.query(
     `
       SELECT 
@@ -92,7 +93,6 @@ const getSubAccountList = async (guild_id) => {
   return result;
 };
 
-
 /**
  * @param {*} riot_name 
  * @param {*} riot_name_tag 
@@ -102,7 +102,7 @@ const getSubAccountList = async (guild_id) => {
  * @returns 
  * @description 부계정 추가
  */
-const postSubAccount = async (riot_name, riot_name_tag, guild_id, puuid, main_player_id) => {
+const postSubPlayer = async (riot_name, riot_name_tag, guild_id, puuid, main_player_id) => {
   const query = `
     INSERT 
       INTO Player 
@@ -182,10 +182,10 @@ const putSubPlayerDeleteYn = async (delete_yn, main_player_id) => {
 }
 
 module.exports = {
-    getPlayerForSearch,
-    getPlayer,
-    getSubAccountList,
-    postSubAccount,
-    putPlayer,
-    putSubPlayerDeleteYn
+  getPlayer,
+  getPlayerForSearch,
+  getSubPlayerList,
+  postSubPlayer,
+  putPlayer,
+  putSubPlayerDeleteYn
 };
