@@ -1,34 +1,20 @@
 /**
- * 전적 검색 Service (bot)
+ * 전적 검색 Service 디스코드 봇용
  */
 const recordMapper = require("../db/mapper/recordMapper");
-const championMapper = require("../db/mapper/championMapper");
+const RecordService = require("./recordService");
 const utils = require("../utils");
 const embedUtil = require('../embed');
 
 /**
- * !전적 조회에 필요한 모든 데이터 조회
- * @param {*} riot_name 
- * @param {*} riot_name_tag 
- * @param {*} guild_id 
+ * @param {String} riot_name 
+ * @param {String} riot_name_tag 
+ * @param {String} guild_id 
+ * @description !전적 Embed
+ * @returns
  */
 const getAllRecordEmbed = async (riot_name, riot_name_tag, guild_id) => {
-  const allData = {
-    record_data: await recordMapper.getLineRecord(riot_name, riot_name_tag, guild_id),
-    month_data: await recordMapper.getRecentMonthRecord(riot_name, riot_name_tag, guild_id),
-    recent_data: await recordMapper.getRecentGamesByRiotName(
-      riot_name,
-      riot_name_tag,
-      guild_id
-    ),
-    with_team_data: await recordMapper.getSynergisticTeammates(
-      riot_name,
-      riot_name_tag,
-      guild_id
-    ),
-    other_team_data: await recordMapper.getNemesis(riot_name, riot_name_tag, guild_id),
-    most_pick_data: await championMapper.getMostPicks(riot_name, riot_name_tag, guild_id),
-  };
+  const allData = await RecordService.getAllRecord(riot_name, riot_name_tag, guild_id);
 
   if (allData.record_data.length === 0) {
     return utils.notFoundResponse();
@@ -249,16 +235,14 @@ const getAllRecordEmbed = async (riot_name, riot_name_tag, guild_id) => {
 };
 
 /**
- * !통계 게임
- * @param {*} guild_id
- * @param {*} type
- * @param {*} date
+ * @param {String} guild_id
+ * @param {String} date
+ * @description !통계 게임 Embed
  * @returns
  */
-const getStatisticOfGameEmbed = async (guild_id, type, date) => {
-  const [year,month] = utils.splitDate(date);
-  const title = `${year}-${month} ${type} 통계`;
-  const records = await recordMapper.getStatisticOfGame(guild_id, year, month);
+const getStatisticOfGameEmbed = async (guild_id, date) => {
+  const title = `${year}-${month} 게임 통계`;
+  const records = await RecordService.getStatisticOfGame(guild_id, date);
   if(records.length === 0){
     return utils.notFoundResponse();
   }
@@ -292,52 +276,53 @@ const getStatisticOfGameEmbed = async (guild_id, type, date) => {
 };
 
 /**
- * !클랜통계
  * @param {*} guild_id
  * @param {*} date
+ * @description !클랜통계 Embed
  * @returns
  */
-const getStatisticOfGameAllMemberEmbed = async (guild_id, date, msg) => {
+const getStatisticOfGameAllMemberEmbed = async (guild_id, date) => {
   const [year,month] = utils.splitDate(date);
   const title = `${year}-${month} \n`;
   let str = ""
-  const records = await recordMapper.getStatisticOfGame(guild_id, year, month);
+  const records = await RecordService.getStatisticOfGame(guild_id, date);
   if(records.length === 0){
     return utils.notFoundResponse();
   }
+  return records;
 
-  records.forEach((record, index) => {
-    str += `${record.riot_name} ${record.total_count}판 \n`;
-  });
+  // bot으로 소스 이동
+  // records.forEach((record, index) => {
+  //   str += `${record.riot_name} ${record.total_count}판 \n`;
+  // });
 
-  str = title + str;
-  const rows = str.split('\n');
+  // str = title + str;
+  // const rows = str.split('\n');
 
-  const maxLength = 2000;
-  let currentMessage = '';
-  rows.forEach(row => {
-    if (currentMessage.length + row.length + 1 <= maxLength) {  
-      currentMessage += row + '\n';
-    } else {
-      msg.reply(currentMessage);
-      currentMessage = row + '\n';  
-    }
-  });
+  // const maxLength = 2000;
+  // let currentMessage = '';
+  // rows.forEach(row => {
+  //   if (currentMessage.length + row.length + 1 <= maxLength) {  
+  //     currentMessage += row + '\n';
+  //   } else {
+  //     msg.reply(currentMessage);
+  //     currentMessage = row + '\n';  
+  //   }
+  // });
 
-  if (currentMessage.length > 0) {
-    msg.reply(currentMessage);
-  }
+  // if (currentMessage.length > 0) {
+  //   msg.reply(currentMessage);
+  // }
 }
 
 /**
- * !라인
  * @param {*} position
  * @param {*} guild_Id
+ * @description !라인 Embed
  * @returns
  */
 const getWinRateByPositionEmbed = async (position, guild_id) => {
-  position = utils.dictPosition(position);
-  const records = await recordMapper.getWinRateByPosition(position, guild_id);
+  const records = await RecordService.getWinRateByPosition(position, guild_id);
   if (records.length === 0 ){
     return utils.notFoundResponse();
   }
@@ -378,13 +363,13 @@ const getWinRateByPositionEmbed = async (position, guild_id) => {
 };
 
 /**
- * !결과
  * @param {*} game_id
  * @param {*} guild_Id
+ * @description !결과 Embed
  * @returns
  */
 const getRecordByGameEmbed = async (game_id, guild_id) => {
-  const game_data = await recordMapper.getRecordByGame(game_id, guild_id);
+  const game_data = await RecordService.getRecordByGame(game_id, guild_id);
   if (game_data.length === 0) {
     return utils.notFoundResponse();
   }
@@ -418,14 +403,14 @@ const getRecordByGameEmbed = async (game_id, guild_id) => {
 };
 
 /**
- * !최근전적
  * @param {*} riot_name
  * @param {*} riot_name_tag
  * @param {*} guild_Id
+ * @description !최근전적 Embed
  * @returns
  */
 const getRecentGamesByRiotNameEmbed = async (riot_name, riot_name_tag, guild_id) => {
-  const recent_data = await recordMapper.getRecentGamesByRiotName(
+  const recent_data = await RecordService.getRecentGamesByRiotName(
     riot_name,
     riot_name_tag,
     guild_id
@@ -455,13 +440,13 @@ const getRecentGamesByRiotNameEmbed = async (riot_name, riot_name_tag, guild_id)
 };
 
 /**
- * !장인
  * @param {*} champ_name
  * @param {*} guild_Id
+ * @description !장인 Embed
  * @returns
  */
 const getMasterOfChampionEmbed = async (champ_name, guild_id) => {
-  const champ_data = await recordMapper.getMasterOfChampion(
+  const champ_data = await RecordService.getMasterOfChampion(
     champ_name,
     guild_id
   );
@@ -522,16 +507,14 @@ const getMasterOfChampionEmbed = async (champ_name, guild_id) => {
 };
 
 /**
- * !통계 챔프
  * @param {*} guild_id
- * @param {*} type
  * @param {*} date
+ * @description !통계 챔프 Embed
  * @returns
  */
-const getStatisticOfChampionEmbed = async (guild_id, type, date) => {
-  const [year,month] = utils.splitDate(date);
-  const title = `${year}-${month} ${type} 통계`;
-  const records = await recordMapper.getStatisticOfChampion(guild_id, year, month);
+const getStatisticOfChampionEmbed = async (guild_id, date) => {
+  const title = `${year}-${month} 챔프 통계`;
+  const records = await RecordService.getStatisticOfChampion(guild_id, date);
   if(records.length === 0){
     return utils.notFoundResponse();
   }
@@ -570,7 +553,6 @@ const getStatisticOfChampionEmbed = async (guild_id, type, date) => {
 };
 
 module.exports = {
-  getPlayerForSearchBot,
   getAllRecordEmbed,
   getStatisticOfGameEmbed,
   getStatisticOfGameAllMemberEmbed,

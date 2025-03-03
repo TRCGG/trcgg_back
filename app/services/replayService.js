@@ -108,7 +108,7 @@ const getInputStreamDiscordFile = async (fileUrl) => {
  * @param {String} fileName
  * @param {String} createUser
  * @param {String} guild_id
- * @description 파싱한 데이터 save
+ * @description 파싱한 데이터 db 저장
  * @returns
  */
 const saveData = async (statsArray, fileName, createUser, guild_id) => {
@@ -145,7 +145,7 @@ const saveData = async (statsArray, fileName, createUser, guild_id) => {
     createUser
   );
 
-  return await postRecord(params);
+  return await managementMapper.postRecord(params);
 };
 
 /**
@@ -157,15 +157,6 @@ const saveData = async (statsArray, fileName, createUser, guild_id) => {
 const checkDuplicate = async (fileName, guild_id) => {
   const result = await managementMapper.getDuplicateReplay(fileName, guild_id);
   return result.count === 0;
-};
-
-/**
- * @param {*} records 
- * @description 리플레이 데이터 db 저장
- * @returns 
- */
-const postRecord = async (records) => {
-  return await managementMapper.postRecord(records);
 };
 
 module.exports = {

@@ -4,20 +4,8 @@ const utils = require("../utils");
 /**
  * 계정 Service
  */
-class accountService {
+class AccountService {
   constructor() {}
-  
-  /**
-   * @constructor 검색용 계정 생성자
-   * @param {*} riot_name 
-   * @param {*} riot_name_tag 
-   * @param {*} guild_id 
-   */
-  constructor(riot_name, riot_name_tag, guild_id) { 
-    this.riot_name = riot_name;
-    this.riot_name_tag = riot_name_tag;
-    this.guild_id = guild_id;
-  }
 
   /**
    * @param {string} delete_yn - 탈퇴 여부 ("Y", "N")
@@ -39,11 +27,11 @@ class accountService {
    * @description 계정 조회(전적 검색용)
    * @returns {object|null} - 조회된 플레이어 정보
    */
-  async getPlayerForSearch() {
+  async getPlayerForSearch(riot_name, riot_name_tag, guild_id) {
     const account = await accountMapper.getPlayerForSearch(
-      this.riot_name,
-      this.riot_name_tag,
-      this.guild_id
+      riot_name,
+      riot_name_tag,
+      guild_id
     );
     return account;
   }
@@ -99,4 +87,4 @@ class accountService {
   }
 }
 
-module.exports = accountService;
+module.exports = new AccountService();

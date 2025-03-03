@@ -1,132 +1,129 @@
-/**
- * 전적 검색 Service
- */
-
 const recordMapper = require("../db/mapper/recordMapper");
+const AccountService = require("./accountService");
 const utils = require("../utils");
 
 /**
- * !전적 조회에 필요한 모든 데이터 조회
- * @param {*} riot_name 
- * @param {*} riot_name_tag 
- * @param {*} guild_id 
+ * 전적 검색 Service
  */
-const getAllRecord = async (riot_name, riot_name_tag, guild_id) => {
-	const allData = {
-    record_data: await recordMapper.getLineRecord(riot_name, riot_name_tag, guild_id),
-    month_data: await recordMapper.getRecentMonthRecord(riot_name, riot_name_tag, guild_id),
-    recent_data: await recordMapper.getRecentGamesByRiotName(
-      riot_name,
-      riot_name_tag,
-      guild_id
-    ),
-    with_team_data: await recordMapper.getSynergisticTeammates(
-      riot_name,
-      riot_name_tag,
-      guild_id
-    ),
-    other_team_data: await recordMapper.getNemesis(riot_name, riot_name_tag, guild_id),
-    most_pick_data: await recordMapper.getMostPicks(riot_name, riot_name_tag, guild_id),
-  };
-	return allData;
-};
+class RecordService  {
+  constructor() {}
 
-/**
- * !통계 게임
- * @param {*} guild_id
- * @param {*} date
- * @returns
- */
-const getStatisticOfGame = async (guild_id, date) => {
-	const [year,month] = utils.splitDate(date);
-  const records = await recordMapper.getStatisticOfGame(guild_id, year, month);
-	return records;
-};
+  /**
+   * @param {String} riot_name 
+   * @param {String} riot_name_tag 
+   * @param {String} guild_id 
+   * @description !전적 조회에 필요한 모든 데이터 조회
+   * @returns
+   */
+  async getAllRecord(riot_name, riot_name_tag, guild_id) {
+    // 검색으로 계정 조회
+    const account = await AccountService.getPlayerForSearch(riot_name, riot_name_tag, guild_id);
+    if (!account) {
+      return null;
+    }
+    riot_name = account.riot_name;
+    riot_name_tag = account.riot_name_tag;
 
-/**
- * !클랜통계
- * @param {*} guild_id
- * @param {*} date
- * @returns
- */
-const getStatisticOfGameAllMember = async (guild_id, date) => {
-  const [year,month] = utils.splitDate(date);
-  const records = await recordMapper.getStatisticOfGame(guild_id, year, month);
-	return records;
+    const allData = {
+      record_data: await recordMapper.getLineRecord(riot_name, riot_name_tag, guild_id),
+      month_data: await recordMapper.getRecentMonthRecord(riot_name, riot_name_tag, guild_id),
+      recent_data: await recordMapper.getRecentGamesByRiotName(riot_name, riot_name_tag, guild_id),
+      with_team_data: await recordMapper.getSynergisticTeammates(riot_name, riot_name_tag, guild_id),
+      other_team_data: await recordMapper.getNemesis(riot_name, riot_name_tag, guild_id),
+      most_pick_data: await recordMapper.getMostPicks(riot_name, riot_name_tag, guild_id),
+    };
+    return allData;
+  }
+
+  /**
+   * @param {String} guild_id
+   * @param {String} date
+   * @description !통계 게임
+   * @returns
+   */
+  async getStatisticOfGame(guild_id, date) {
+    const [year, month] = utils.splitDate(date);
+    const records = await recordMapper.getStatisticOfGame(guild_id, year, month);
+    return records;
+  }
+
+  /**
+   * @param {String} guild_id
+   * @param {String} date
+   * @description !클랜통계
+   * @returns
+   */
+  async getStatisticOfGameAllMember(guild_id, date) {
+    const [year, month] = utils.splitDate(date);
+    const records = await recordMapper.getStatisticOfGame(guild_id, year, month);
+    return records;
+  }
+
+  /**
+   * @param {*} position
+   * @param {*} guild_id
+   * @description !라인
+   * @returns
+   */
+  async getWinRateByPosition(position, guild_id) {
+    const realPosition = utils.dictPosition(position);
+    const records = await recordMapper.getWinRateByPosition(realPosition, guild_id);
+    return records;
+  }
+
+  /**
+   * @param {*} game_id
+   * @param {*} guild_id
+   * @description !결과
+   * @returns
+   */
+  async getRecordByGame(game_id, guild_id) {
+    const record = await recordMapper.getRecordByGame(game_id, guild_id);
+    return record;
+  }
+
+  /**
+   * @param {*} riot_name
+   * @param {*} riot_name_tag
+   * @param {*} guild_Id
+   * @description !최근전적
+   * @returns
+   */
+  async getRecentGamesByRiotName(riot_name, riot_name_tag, guild_id) {
+    // 검색으로 계정 조회
+    const account = AccountService.getPlayerForSearch(riot_name, riot_name_tag, guild_id);
+    if(!account) {
+      return null;
+    }
+    riot_name = account.riot_name;
+    riot_name_tag = account.riot_name_tag;
+
+    const records = await recordMapper.getRecentGamesByRiotName(riot_name, riot_name_tag, guild_id);
+    return records;
+  }
+
+  /**
+   * @param {*} champ_name
+   * @param {*} guild_Id
+   * @description !장인
+   * @returns
+   */
+  async getMasterOfChampion(champ_name, guild_id) {
+    const records = await recordMapper.getMasterOfChampion(champ_name, guild_id);
+    return records;
+  }
+
+  /**
+   * @param {*} guild_id
+   * @param {*} date
+   * @description !통계 챔프
+   * @returns
+   */
+  async getStatisticOfChampion(guild_id, date) {
+    const [year, month] = utils.splitDate(date);
+    const records = await recordMapper.getStatisticOfChampion(guild_id, year, month);
+    return records;
+  }
 }
 
-/**
- * !라인
- * @param {*} position
- * @param {*} guild_Id
- * @returns
- */
-const getWinRateByPosition = async (position, guild_id) => {
-	const realPosition = utils.dictPosition(position);
-	const records = await recordMapper.getWinRateByPosition(realPosition, guild_id);
-	return records;
-};
-
-/**
- * !결과
- * @param {*} game_id
- * @param {*} guild_Id
- * @returns
- */
-const getRecordByGame = async (game_id, guild_id) => {
-	const records = await recordMapper.getRecordByGame(game_id, guild_id);
-	return records;
-};
-
-/**
- * !최근전적
- * @param {*} riot_name
- * @param {*} riot_name_tag
- * @param {*} guild_Id
- * @returns
- */
-const getRecentGamesByRiotName = async (riot_name, riot_name_tag, guild_id) => {
-	const records = await recordMapper.getRecentGamesByRiotName(
-    riot_name,
-    riot_name_tag,
-    guild_id
-  );
-	return records;
-};
-
-/**
- * !장인
- * @param {*} champ_name
- * @param {*} guild_Id
- * @returns
- */
-const getMasterOfChampion = async (champ_name, guild_id) => {
-  const records = await championMapper.getMasterOfChampion(
-    champ_name,
-    guild_id
-  );
-  return records;
-};
-
-/**
- * !통계 챔프
- * @param {*} guild_id
- * @param {*} date
- * @returns
- */
-const getStatisticOfChampion = async (guild_id, date) => {
-	const [year,month] = utils.splitDate(date);
-	const records = await championMapper.getStatisticOfChampion(guild_id, year, month);
-	return records;
-};
-
-module.exports = {
-	getAllRecord,
-	getStatisticOfGame,
-	getStatisticOfGameAllMember,
-	getWinRateByPosition,
-	getRecordByGame,
-	getRecentGamesByRiotName,
-	getMasterOfChampion,
-	getStatisticOfChampion,
-};
+module.exports = new RecordService();
