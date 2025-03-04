@@ -1,6 +1,6 @@
 const recordMapper = require("../db/mapper/recordMapper");
 const AccountService = require("./accountService");
-const utils = require("../utils");
+const utils = require("../utils/stringUtils");
 
 /**
  * 전적 검색 Service

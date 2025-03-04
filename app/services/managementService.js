@@ -1,6 +1,6 @@
 const AccountService = require('./accountService');
 const managementMapper = require('../db/mapper/managementMapper');
-const utils = require("../utils");
+const utils = require("../utils/stringUtils");
 
 /**
  * 서비스 관리용 Service

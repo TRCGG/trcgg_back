@@ -2,7 +2,7 @@
  * 전적 검색 Service 디스코드 봇용
  */
 const RecordService = require("./recordService");
-const utils = require("../utils");
+const utils = require("../utils/stringUtils");
 const embedUtil = require('../embed');
 
 /**
