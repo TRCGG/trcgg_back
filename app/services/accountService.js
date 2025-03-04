@@ -1,5 +1,4 @@
 const accountMapper = require('../db/mapper/accountMapper');
-const utils = require("../utils/stringUtils");
 
 /**
  * 계정 Service
