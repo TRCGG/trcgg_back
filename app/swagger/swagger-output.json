@@ -11,7 +11,7 @@
     }
   ],
   "paths": {
-    "/league/getAccount/{riot_name}/{guild_id}": {
+    "/account/search/{riot_name}/{guild_id}": {
       "get": {
         "description": "",
         "parameters": [
@@ -43,26 +43,18 @@
           "200": {
             "description": "OK"
           },
-          "404": {
-            "description": "Not Found"
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
     },
-    "/league/getAllRecord/{riot_name}/{riot_name_tag}/{guild_id}": {
+    "/record/all/{riot_name}/{guild_id}": {
       "get": {
         "description": "",
         "parameters": [
           {
             "name": "riot_name",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "riot_name_tag",
             "in": "path",
             "required": true,
             "schema": {
@@ -76,32 +68,31 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "riot_name_tag",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "OK"
           },
-          "404": {
-            "description": "Not Found"
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
     },
-    "/league/getLineRecord/{riot_name}/{riot_name_tag}/{guild_id}": {
+    "/record/recent/{riot_name}/{guild_id}": {
       "get": {
         "description": "",
         "parameters": [
           {
             "name": "riot_name",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "riot_name_tag",
             "in": "path",
             "required": true,
             "schema": {
@@ -115,32 +106,31 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "riot_name_tag",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "OK"
           },
-          "404": {
-            "description": "Not Found"
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
     },
-    "/league/getRecordMonth/{riot_name}/{riot_name_tag}/{guild_id}": {
+    "/record/all/embed/{riot_name}/{guild_id}": {
       "get": {
         "description": "",
         "parameters": [
           {
             "name": "riot_name",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "riot_name_tag",
             "in": "path",
             "required": true,
             "schema": {
@@ -154,42 +144,10 @@
             "schema": {
               "type": "string"
             }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "404": {
-            "description": "Not Found"
-          }
-        }
-      }
-    },
-    "/league/getMostPick/{riot_name}/{riot_name_tag}/{guild_id}": {
-      "get": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "riot_name",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
           },
           {
             "name": "riot_name_tag",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "guild_id",
-            "in": "path",
-            "required": true,
+            "in": "query",
             "schema": {
               "type": "string"
             }
@@ -199,91 +157,13 @@
           "200": {
             "description": "OK"
           },
-          "404": {
-            "description": "Not Found"
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
     },
-    "/league/getRecordWithTeam/{riot_name}/{riot_name_tag}/{guild_id}": {
-      "get": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "riot_name",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "riot_name_tag",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "guild_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "404": {
-            "description": "Not Found"
-          }
-        }
-      }
-    },
-    "/league/getRecordOtherTeam/{riot_name}/{riot_name_tag}/{guild_id}": {
-      "get": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "riot_name",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "riot_name_tag",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "guild_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "404": {
-            "description": "Not Found"
-          }
-        }
-      }
-    },
-    "/league/master/{champ_name}/{guild_id}": {
+    "/record/master/embed/{champ_name}/{guild_id}": {
       "get": {
         "description": "",
         "parameters": [
@@ -308,18 +188,18 @@
           "200": {
             "description": "OK"
           },
-          "404": {
-            "description": "Not Found"
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
     },
-    "/league/champStats/{type}/{date}/{guild_id}": {
+    "/record/champstat/embed/{year}/{month}/{guild_id}": {
       "get": {
         "description": "",
         "parameters": [
           {
-            "name": "type",
+            "name": "year",
             "in": "path",
             "required": true,
             "schema": {
@@ -327,7 +207,7 @@
             }
           },
           {
-            "name": "date",
+            "name": "month",
             "in": "path",
             "required": true,
             "schema": {
@@ -347,18 +227,18 @@
           "200": {
             "description": "OK"
           },
-          "404": {
-            "description": "Not Found"
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
     },
-    "/league/gameStats/{type}/{date}/{guild_id}": {
+    "/record/gamestat/embed/{year}/{month}/{guild_id}": {
       "get": {
         "description": "",
         "parameters": [
           {
-            "name": "type",
+            "name": "year",
             "in": "path",
             "required": true,
             "schema": {
@@ -366,7 +246,7 @@
             }
           },
           {
-            "name": "date",
+            "name": "month",
             "in": "path",
             "required": true,
             "schema": {
@@ -386,13 +266,13 @@
           "200": {
             "description": "OK"
           },
-          "404": {
-            "description": "Not Found"
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
     },
-    "/league/lineStats/{position}/{guild_id}": {
+    "/record/linestat/embed/{position}/{guild_id}": {
       "get": {
         "description": "",
         "parameters": [
@@ -417,13 +297,13 @@
           "200": {
             "description": "OK"
           },
-          "404": {
-            "description": "Not Found"
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
     },
-    "/league/gameResult/{game_id}/{guild_id}": {
+    "/record/result/embed/{game_id}/{guild_id}": {
       "get": {
         "description": "",
         "parameters": [
@@ -448,13 +328,13 @@
           "200": {
             "description": "OK"
           },
-          "404": {
-            "description": "Not Found"
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
     },
-    "/league/getRecentGames/{riot_name}/{riot_name_tag}/{guild_id}": {
+    "/record/recent/embed/{riot_name}/{guild_id}": {
       "get": {
         "description": "",
         "parameters": [
@@ -467,7 +347,45 @@
             }
           },
           {
+            "name": "guild_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "riot_name_tag",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/record/clanstat/embed/{year}/{month}/{guild_id}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "year",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "month",
             "in": "path",
             "required": true,
             "schema": {
@@ -487,8 +405,291 @@
           "200": {
             "description": "OK"
           },
-          "404": {
-            "description": "Not Found"
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/management/doc": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/management/sublist/{guild_id}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "guild_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/management/subaccount/{guild_id}": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "guild_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "sub_name": {
+                    "example": "any"
+                  },
+                  "sub_name_tag": {
+                    "example": "any"
+                  },
+                  "main_name": {
+                    "example": "any"
+                  },
+                  "main_name_tag": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "guild_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "sub_name": {
+                    "example": "any"
+                  },
+                  "sub_name_tag": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/management/accountstatus/{guild_id}": {
+      "put": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "guild_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "delete_yn": {
+                    "example": "any"
+                  },
+                  "riot_name": {
+                    "example": "any"
+                  },
+                  "riot_name_tag": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/management/accountname/{guild_id}": {
+      "put": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "guild_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "old_name": {
+                    "example": "any"
+                  },
+                  "old_name_tag": {
+                    "example": "any"
+                  },
+                  "new_name": {
+                    "example": "any"
+                  },
+                  "new_name_tag": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/replay/{guild_id}": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "guild_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "fileUrl": {
+                    "example": "any"
+                  },
+                  "fileName": {
+                    "example": "any"
+                  },
+                  "createUser": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/replay/{game_id}/{guild_id}": {
+      "delete": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "game_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "guild_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
