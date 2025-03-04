@@ -8,18 +8,19 @@
  * @returns 
  */
 const validateTag = (str) => {
-    try {
-        const pattern = /^[가-힣a-zA-Z0-9]{1,16}#[가-힣a-zA-Z0-9]{1,16}$/;
-        if (pattern.test(str)){
-            return true;
-        } else {
-            throw new Error("잘못된 형식");
-        }
-    } catch (e) {
-        console.log(str);
+    const pattern = /^[가-힣a-zA-Z0-9]{1,16}#[가-힣a-zA-Z0-9]{1,16}$/;
+
+    if (!str) {
+        throw new Error("태그 문자열이 비어있습니다");
+    }
+
+    if (!pattern.test(str)) {
+        console.log("유효하지 않은 태그:", str);
         throw new Error("잘못된 형식");
     }
-}
+
+    return true;
+};
 
 /**
  * 데이터 없을 경우 응답
