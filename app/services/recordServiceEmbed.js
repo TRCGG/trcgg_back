@@ -41,7 +41,7 @@ const getAllRecordEmbed = async (riot_name, riot_name_tag, guild_id) => {
 
   allData.record_data.forEach((data) => {
     // 제일 판수 많은 포지션에 thumbs up 이모지 추가
-    if (data.total_count == max_count) {
+    if (data.total_count === max_count) {
       line_desc += thumbs_up_str;
     }
     line_desc += embedUtil.makeStat(
@@ -189,7 +189,7 @@ const getAllRecordEmbed = async (riot_name, riot_name_tag, guild_id) => {
   let desc = month_desc + "\n" + all_desc + line_desc;
 
   // 특별 호칭 (변경 필요)
-  if (riot_name == "크넹") {
+  if (riot_name === "크넹") {
     riot_name = "<:__:1197186572433490090> <:__:1197186590968139836> :crown:";
   }
 
