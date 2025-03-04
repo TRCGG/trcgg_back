@@ -5,8 +5,10 @@ const utils = require("../utils");
 /**
  * 전적 검색 Service
  */
-class RecordService  {
-  constructor() {}
+class RecordService extends AccountService {
+  constructor() {
+    super();
+  }
 
   /**
    * @param {String} riot_name 
@@ -17,7 +19,7 @@ class RecordService  {
    */
   async getAllRecord(riot_name, riot_name_tag, guild_id) {
     // 검색으로 계정 조회
-    const account = await AccountService.getPlayerForSearch(riot_name, riot_name_tag, guild_id);
+    const account = await this.getPlayerForSearch(riot_name, riot_name_tag, guild_id);
     if (!account) {
       return null;
     }
@@ -37,24 +39,24 @@ class RecordService  {
 
   /**
    * @param {String} guild_id
-   * @param {String} date
+   * @param {String} year
+   * @param {String} month
    * @description !통계 게임
    * @returns
    */
-  async getStatisticOfGame(guild_id, date) {
-    const [year, month] = utils.splitDate(date);
+  async getStatisticOfGame(guild_id, year, month) {
     const records = await recordMapper.getStatisticOfGame(guild_id, year, month);
     return records;
   }
 
   /**
    * @param {String} guild_id
-   * @param {String} date
+   * @param {String} year
+   * @param {String} month
    * @description !클랜통계
    * @returns
    */
-  async getStatisticOfGameAllMember(guild_id, date) {
-    const [year, month] = utils.splitDate(date);
+  async getStatisticOfGameAllMember(guild_id, year, month) {
     const records = await recordMapper.getStatisticOfGame(guild_id, year, month);
     return records;
   }
@@ -85,13 +87,13 @@ class RecordService  {
   /**
    * @param {*} riot_name
    * @param {*} riot_name_tag
-   * @param {*} guild_Id
+   * @param {*} guild_id
    * @description !최근전적
    * @returns
    */
   async getRecentGamesByRiotName(riot_name, riot_name_tag, guild_id) {
     // 검색으로 계정 조회
-    const account = AccountService.getPlayerForSearch(riot_name, riot_name_tag, guild_id);
+    const account = await this.getPlayerForSearch(riot_name, riot_name_tag, guild_id);
     if(!account) {
       return null;
     }
@@ -104,7 +106,7 @@ class RecordService  {
 
   /**
    * @param {*} champ_name
-   * @param {*} guild_Id
+   * @param {*} guild_id
    * @description !장인
    * @returns
    */
@@ -115,12 +117,12 @@ class RecordService  {
 
   /**
    * @param {*} guild_id
-   * @param {*} date
+   * @param {*} year
+   * @param {*} month
    * @description !통계 챔프
    * @returns
    */
-  async getStatisticOfChampion(guild_id, date) {
-    const [year, month] = utils.splitDate(date);
+  async getStatisticOfChampion(guild_id, year, month) {
     const records = await recordMapper.getStatisticOfChampion(guild_id, year, month);
     return records;
   }

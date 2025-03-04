@@ -1,12 +1,14 @@
-const accountService = require('./accountService');
+const AccountService = require('./accountService');
 const managementMapper = require('../db/mapper/managementMapper');
 const utils = require("../utils");
 
 /**
  * 서비스 관리용 Service
  */
-class managementService extends accountService {
-  constructor() {}
+class managementService extends AccountService {
+  constructor() {
+    super();
+  }
 
   /**
    * @description !doc 명령어 설명
@@ -55,7 +57,7 @@ class managementService extends accountService {
 
 
   /**
-   * @param {String} guild_Id
+   * @param {String} guild_id
    * @description !부캐목록
    * @returns {Object} Embed 형식 Json
    */
@@ -74,7 +76,7 @@ class managementService extends accountService {
     desc += `총 : ${size} \n`;
     desc += "```";
 
-    jsonData = {
+    const jsonData = {
       title: title,
       description: desc,
       fields: [],
@@ -90,12 +92,12 @@ class managementService extends accountService {
    * @description !부캐저장
    * @returns {string} message
    */
-  async postSubAccount(sub_name, sub_name_tag, main_name, main_name_tag) {
+  async postSubAccount(sub_name, sub_name_tag, main_name, main_name_tag, guild_id) {
     // 부캐 조회
-    const sub_account = await this.getPlayer("N", sub_name, sub_name_tag, this.guild_id);
+    const sub_account = await this.getPlayer("N", sub_name, sub_name_tag, guild_id);
 
     // 본캐 조회
-    const account = await this.getPlayer("N", main_name, main_name_tag, this.guild_id);
+    const account = await this.getPlayer("N", main_name, main_name_tag, guild_id);
     if (!account) return "본캐로 게임한 기록이 없습니다.";
     if (account.main_player_id) {
       return `해당 ${account.riot_name} 계정은 본캐입니다, 부캐는 본캐로 저장할 수 없습니다. !부캐목록을 확인해주세요. `;
@@ -107,12 +109,12 @@ class managementService extends accountService {
       const putAccount = await this.putPlayer(null, null, account.puuid, account.player_id, null, sub_account.player_id);
       // 2
       if (sub_account) {
-        const putPlayerId = await managementMapper.putPlayerGamePlayerId(sub_account.player_id, account.player_id);
+        const putPlayer = await managementMapper.putPlayerGamePlayerId(sub_account.player_id, account.player_id);
         return "등록 및 변경 완료";
       }
     } else {
       // 부캐기록이 없어서 새로 등록
-      const putAccount = await this.putPlayer(null, null, account.puuid, account.player_id, null, null);
+      const postPlayer = await this.postSubPlayer(sub_name, sub_name_tag, guild_id, account.puuid, account.player_id);
       return "등록 완료";
     }
   }
@@ -120,7 +122,7 @@ class managementService extends accountService {
   /**
    * @param {String} sub_name 부캐 닉네임
    * @param {String} sub_name_tag 부캐 태그
-   * @param {String} guild_Id
+   * @param {String} guild_id
    * @description !부캐삭제
    * @returns {String} message
    */
@@ -146,7 +148,7 @@ class managementService extends accountService {
    * @param {String} delete_yn (Y/N)
    * @param {String} riot_name 라이엇 닉네임 
    * @param {String} riot_name_tag 라이엇 태그
-   * @param {String} guild_Id 길드 ID
+   * @param {String} guild_id 길드 ID
    * @description !탈퇴, !복귀
    * @returns {String} message
    */

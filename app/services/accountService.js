@@ -87,4 +87,4 @@ class AccountService {
   }
 }
 
-module.exports = new AccountService();
+module.exports = AccountService;
