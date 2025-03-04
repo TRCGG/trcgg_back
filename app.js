@@ -5,7 +5,10 @@ const express = require("express");
 const cors = require("cors");
 const compression = require('compression');
 require('dotenv').config();
-const leagueRoutes = require('./app/routes/leagueRoutes');
+const accountRoutes = require('./app/routes/accountRoutes');
+const recordRoutes = require('./app/routes/recordRoutes');
+const managementRoutes = require('./app/routes/managementRoutes');
+const replayRoutes = require('./app/routes/replayRoutes');
 const swaggerUi = require("swagger-ui-express");
 const swaggerFile = require("./app/swagger/swagger-output.json");
 const db = require('./app/db/db');
@@ -28,7 +31,10 @@ app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerFile));
 const init = async () => {
   try {
     await db.testConnection();
-    app.use('/league', leagueRoutes);
+    app.use('/account', accountRoutes);
+    app.use('/record', recordRoutes);
+    app.use('/management', managementRoutes);
+    app.use('/replay', replayRoutes);
     app.listen(PORT, () => {
       console.log(`Server is running on ${HOST}:${PORT}🚀`);
     });
