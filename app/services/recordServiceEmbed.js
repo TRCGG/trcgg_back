@@ -18,6 +18,10 @@ const getAllRecordEmbed = async (riot_name, riot_name_tag, guild_id) => {
   if (allData.record_data.length === 0) {
     return utils.notFoundResponse();
   }
+  // 계정 조회 2건 이상일 경우
+  if (allData.length > 1){
+    return allData;
+  }
 
   // 통합 전적
   let all_count = 0;
@@ -416,6 +420,10 @@ const getRecentGamesByRiotNameEmbed = async (riot_name, riot_name_tag, guild_id)
   );
   if (recent_data.length === 0) {
     return utils.notFoundResponse();
+  }
+  // 계정 조회 2건 이상일 경우
+  if (allData.length > 1){
+    return allData;
   }
 
   let title = riot_name + "최근 상세 전적";

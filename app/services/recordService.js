@@ -23,6 +23,10 @@ class RecordService extends AccountService {
     if (!account) {
       return null;
     }
+    // 검색으로 계정이 2개 이상이면 계정 return
+    if (account.length > 1) {
+      return account;
+    }
     riot_name = account.riot_name;
     riot_name_tag = account.riot_name_tag;
 
@@ -96,6 +100,10 @@ class RecordService extends AccountService {
     const account = await this.getPlayerForSearch(riot_name, riot_name_tag, guild_id);
     if(!account) {
       return null;
+    }
+    // 검색으로 계정이 2개 이상이면 계정 return
+    if(account.length > 1) {
+      return account;
     }
     riot_name = account.riot_name;
     riot_name_tag = account.riot_name_tag;
