@@ -150,6 +150,21 @@ const filterAndSortByWinRate = (records, win_rate, greater_than, limit) => {
     return filtered_records;
 }
 
+// 계정조회 2명 이상일 경우
+const getPlayersEmbed = (accounts) => {
+    let desc = "";
+    accounts.forEach((account, index) => {
+      desc += `${account.riot_name}#${account.riot_name_tag} \n`;
+    });
+    jsonData = {
+      title: "검색결과",
+      description: desc,
+      fields: null,
+      color: 0x0099ff,
+    };
+    return jsonData;
+  };
+
 module.exports = {
     setLineFieldHeader,
     setLineValue,
@@ -157,5 +172,6 @@ module.exports = {
     makeTeamStat,
     makeStat,
     makeStatsList,
-    filterAndSortByWinRate
+    filterAndSortByWinRate,
+    getPlayersEmbed,
 };
