@@ -438,9 +438,9 @@ const getStatisticOfChampion = async (guild_id, year, month) => {
 const selectWinRateAndKdaSql = (table, kda) => {
   let sql = 
   `
-      COUNT(1) AS total_count,
-      COUNT(CASE WHEN ${table}.game_result = '승' THEN 1 END) AS win,
-      COUNT(CASE WHEN ${table}.game_result = '패' THEN 1 END) AS lose,
+      COUNT(1)::INTEGER AS total_count,
+      COUNT(CASE WHEN ${table}.game_result = '승' THEN 1 END)::INTEGER AS win,
+      COUNT(CASE WHEN ${table}.game_result = '패' THEN 1 END)::INTEGER AS lose,
       CASE 
         WHEN COUNT(1) = 0 THEN 0
         ELSE ROUND(COUNT(CASE WHEN ${table}.game_result = '승' THEN 1 END) * 100.0 / NULLIF(COUNT(1), 0), 2) 

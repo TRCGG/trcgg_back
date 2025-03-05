@@ -65,7 +65,7 @@ const getPlayer = async (delete_yn, riot_name, riot_name_tag, guild_id) => {
     params.push(riot_name_tag);
   }
 
-  const result = await db.query(query, params);
+  const result = await db.queryOne(query, params);
   return result;
 }
 
