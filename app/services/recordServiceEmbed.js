@@ -15,12 +15,12 @@ const embedUtil = require('../embed');
 const getAllRecordEmbed = async (riot_name, riot_name_tag, guild_id) => {
   const allData = await RecordService.getAllRecord(riot_name, riot_name_tag, guild_id);
 
+  // 계정 조회 2건 이상일 경우
+  if (allData.player.length > 1){
+    return embedUtil.getPlayersEmbed(allData.player);
+  }
   if (allData.record_data.length === 0) {
     return utils.notFoundResponse();
-  }
-  // 계정 조회 2건 이상일 경우
-  if (allData.length > 1){
-    return allData;
   }
 
   // 통합 전적
@@ -198,7 +198,7 @@ const getAllRecordEmbed = async (riot_name, riot_name_tag, guild_id) => {
   }
 
   jsonData = {
-    title: `${riot_name}#${riot_name_tag}`,
+    title: `${riot_name}#${allData.player[0].riot_name_tag}`,
     description: desc,
     fields: [
       {
@@ -418,18 +418,19 @@ const getRecentGamesByRiotNameEmbed = async (riot_name, riot_name_tag, guild_id)
     riot_name_tag,
     guild_id
   );
-  if (recent_data.length === 0) {
+
+  // 계정 조회 2건 이상일 경우
+  if (recent_data.player.length > 1){
+    return embedUtil.getPlayersEmbed(recent_data.player);
+  }
+  if (recent_data.records.length === 0) {
     return utils.notFoundResponse();
   }
-  // 계정 조회 2건 이상일 경우
-  if (allData.length > 1){
-    return allData;
-  }
 
-  let title = riot_name + "최근 상세 전적";
+  let title = `${recent_data.player.riot_name}#${recent_data.player.riot_name_tag} 최근 상세 전적`;
   let desc_value = "";
 
-  recent_data.slice(0,10).forEach((data) => {
+  recent_data.records.slice(0,10).forEach((data) => {
     if (data.game_result === "승") {
       desc_value += ":blue_circle:";
     } else {

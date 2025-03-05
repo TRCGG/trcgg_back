@@ -25,20 +25,23 @@ class RecordService extends AccountService {
     }
     // 검색으로 계정이 2개 이상이면 계정 return
     if (account.length > 1) {
-      return account;
+      return {player : account};
     }
-    riot_name = account.riot_name;
-    riot_name_tag = account.riot_name_tag;
-
-    const allData = {
-      record_data: await recordMapper.getLineRecord(riot_name, riot_name_tag, guild_id),
-      month_data: await recordMapper.getRecentMonthRecord(riot_name, riot_name_tag, guild_id),
-      recent_data: await recordMapper.getRecentGamesByRiotName(riot_name, riot_name_tag, guild_id),
-      with_team_data: await recordMapper.getSynergisticTeammates(riot_name, riot_name_tag, guild_id),
-      other_team_data: await recordMapper.getNemesis(riot_name, riot_name_tag, guild_id),
-      most_pick_data: await recordMapper.getMostPicks(riot_name, riot_name_tag, guild_id),
-    };
-    return allData;
+    if (account.length === 1) {
+      riot_name = account[0].riot_name;
+      riot_name_tag = account[0].riot_name_tag;
+  
+      const allData = {
+        record_data: await recordMapper.getLineRecord(riot_name, riot_name_tag, guild_id),
+        month_data: await recordMapper.getRecentMonthRecord(riot_name, riot_name_tag, guild_id),
+        recent_data: await recordMapper.getRecentGamesByRiotName(riot_name, riot_name_tag, guild_id),
+        with_team_data: await recordMapper.getSynergisticTeammates(riot_name, riot_name_tag, guild_id),
+        other_team_data: await recordMapper.getNemesis(riot_name, riot_name_tag, guild_id),
+        most_pick_data: await recordMapper.getMostPicks(riot_name, riot_name_tag, guild_id),
+        player : account
+      };
+      return allData;
+    }
   }
 
   /**
@@ -103,13 +106,15 @@ class RecordService extends AccountService {
     }
     // 검색으로 계정이 2개 이상이면 계정 return
     if(account.length > 1) {
-      return account;
+      return {player : account};
+    } else if (account.length === 1) {
+      const records = await recordMapper.getRecentGamesByRiotName(account[0].riot_name, account[0].riot_name_tag, guild_id);
+      const result = {
+        player : account[0],
+        records : records
+      }
+      return result;
     }
-    riot_name = account.riot_name;
-    riot_name_tag = account.riot_name_tag;
-
-    const records = await recordMapper.getRecentGamesByRiotName(riot_name, riot_name_tag, guild_id);
-    return records;
   }
 
   /**
