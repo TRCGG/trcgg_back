@@ -299,23 +299,6 @@ const getStatisticOfGameAllMemberEmbed = async (guild_id, year, month) => {
 
   str = title + str;
   return str;
-  // 봇소스로 이동
-  // const rows = str.split('\n');
-
-  // const maxLength = 2000;
-  // let currentMessage = '';
-  // rows.forEach(row => {
-  //   if (currentMessage.length + row.length + 1 <= maxLength) {  
-  //     currentMessage += row + '\n';
-  //   } else {
-  //     msg.reply(currentMessage);
-  //     currentMessage = row + '\n';  
-  //   }
-  // });
-
-  // if (currentMessage.length > 0) {
-  //   msg.reply(currentMessage);
-  // }
 }
 
 /**
