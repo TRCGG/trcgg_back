@@ -89,6 +89,7 @@ class managementService extends AccountService {
    * @param {String} sub_name_tag 부캐 태그
    * @param {String} main_name 본캐 닉네임
    * @param {String} main_name_tag 본캐 태그
+   * @param {String} guild_id guild_id
    * @description !부캐저장
    * @returns {string} message
    */
@@ -106,15 +107,15 @@ class managementService extends AccountService {
     // 부캐가 이미 기록에 있다면 1. 부캐 - main_player_id 추가 2. 부캐 게임기록 본캐로 수정
     if (sub_account) {
       // 1
-      const putAccount = await this.putPlayer(null, null, account.puuid, account.player_id, null, sub_account.player_id);
+      await this.putPlayer(null, null, account.puuid, account.player_id, null, sub_account.player_id);
       // 2
       if (sub_account) {
-        const putPlayer = await managementMapper.putPlayerGamePlayerId(sub_account.player_id, account.player_id);
+        await managementMapper.putPlayerGamePlayerId(sub_account.player_id, account.player_id);
         return "등록 및 변경 완료";
       }
     } else {
       // 부캐기록이 없어서 새로 등록
-      const postPlayer = await this.postSubPlayer(sub_name, sub_name_tag, guild_id, account.puuid, account.player_id);
+      await this.postSubPlayer(sub_name, sub_name_tag, guild_id, account.puuid, account.player_id);
       return "등록 완료";
     }
   }
@@ -168,15 +169,15 @@ class managementService extends AccountService {
 
     // 탈퇴한 본계정은 부캐들 전부 삭제처리, 복귀는 처리하지않음
     if (delete_yn === "Y") {
-      const result_1 = await this.putSubPlayerDeleteYn(delete_yn, account.player_id);
+      await this.putSubPlayerDeleteYn(delete_yn, account.player_id);
     }
     
     // 본계정 수정
-    const result_2 = await this.putPlayer(null, null, null, null, delete_yn, account.player_id);
-    if (result_2.status === 500) {
+    const result = await this.putPlayer(null, null, null, null, delete_yn, account.player_id);
+    if (result.status === 500) {
       return "본계정 탈퇴/복귀 실패";
     } else {
-      if (result_2 >= 1) {
+      if (result >= 1) {
         if (delete_yn === "Y") {
           return "탈퇴 완료";
         } else {
