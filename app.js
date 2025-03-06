@@ -30,7 +30,6 @@ const routes = {
 const swaggerUi = require('swagger-ui-express');
 const swaggerFile = require('./app/swagger/swagger-output.json');
 const db = require('./app/db/db');
-const bot = require('./bot/bot');  // TODO: BOT 분리시 제거 필요
 
 class Server {
   constructor() {
