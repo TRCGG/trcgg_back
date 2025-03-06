@@ -1,6 +1,6 @@
 const AccountService = require('./accountService');
 const managementMapper = require('../db/mapper/managementMapper');
-const utils = require("../utils/stringUtils");
+const responseUtils = require("../utils/responseUtils");
 
 /**
  * 서비스 관리용 Service
@@ -138,7 +138,7 @@ class managementService extends AccountService {
         if (result >= 1) {
           return "부캐삭제 완료";
         } else {
-          return utils.notFoundResponse();
+          return responseUtils.notFoundResponse();
         }
       }
     }
@@ -163,7 +163,7 @@ class managementService extends AccountService {
     // 본계정 조회
     const account = await this.getPlayer(account_delete_yn, riot_name, riot_name_tag, guild_id);
     if (!account) {
-      return utils.notFoundAccount(riot_name, riot_name_tag);
+      return responseUtils.notFoundAccount(riot_name, riot_name_tag);
     }
 
     // 탈퇴한 본계정은 부캐들 전부 삭제처리, 복귀는 처리하지않음
@@ -183,7 +183,7 @@ class managementService extends AccountService {
           return "복귀 완료";
         }
       } else {
-        return utils.notFoundResponse();
+        return responseUtils.notFoundResponse();
       }
     }
   }
@@ -209,7 +209,7 @@ class managementService extends AccountService {
     // 닉변이전 계정
     const account = await this.getPlayer("N", old_name, old_name_tag, guild_id);
     if (!account) {
-      return utils.notFoundAccount(old_name, old_name_tag);
+      return responseUtils.notFoundAccount(old_name, old_name_tag);
     }
 
     const result = await this.putPlayer(new_name, new_name_tag, null, null, null, account.player_id);
@@ -219,7 +219,7 @@ class managementService extends AccountService {
       if (result >= 1) {
         return "닉변 완료";
       } else {
-        return utils.notFoundResponse();
+        return responseUtils.notFoundResponse();
       }
     }
   }

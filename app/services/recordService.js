@@ -1,6 +1,7 @@
 const recordMapper = require("../db/mapper/recordMapper");
 const AccountService = require("./accountService");
-const utils = require("../utils/stringUtils");
+const responseUtils = require("../utils/responseUtils");
+const stringUtils = require("../utils/stringUtils");
 
 /**
  * 전적 검색 Service
@@ -20,11 +21,11 @@ class RecordService extends AccountService {
    */
   async search(riot_name, riot_name_tag, guild_id) {
     if(riot_name.length < 2) {
-      return utils.requireMoreChars();
+      return responseUtils.requireMoreChars();
     }
     const account = await this.getPlayerForSearch(riot_name, riot_name_tag, guild_id);
     if(account.length === 0) {
-      return utils.notFoundAccount(riot_name, riot_name_tag);
+      return responseUtils.notFoundAccount(riot_name, riot_name_tag);
     }
     return account;
   }
@@ -90,7 +91,7 @@ class RecordService extends AccountService {
    * @returns
    */
   async getWinRateByPosition(position, guild_id) {
-    const realPosition = utils.dictPosition(position);
+    const realPosition = stringUtils.dictPosition(position);
     const records = await recordMapper.getWinRateByPosition(realPosition, guild_id);
     return records;
   }

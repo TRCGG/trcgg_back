@@ -5,6 +5,7 @@
 const axios = require("axios");
 const managementMapper = require('../db/mapper/managementMapper');
 const { DateTime } = require("luxon");
+const responseUtils = require("../utils/responseUtils");
 
 /**
  * @param {String} fileUrl
@@ -52,7 +53,7 @@ const deleteRecord = async (game_id, guild_id) => {
       return "playerGame 삭제 실패";
     }
   } else {
-    return utils.notFoundResponse();
+    return responseUtils.notFoundResponse();
   } 
 };
 

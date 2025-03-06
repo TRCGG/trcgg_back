@@ -2,8 +2,9 @@
  * 전적 검색 Service 디스코드 봇용
  */
 const RecordService = require("./recordService");
-const utils = require("../utils/stringUtils");
-const embedUtil = require('../embed');
+const stringUtils = require("../utils/stringUtils");
+const arrayUtils = require("../utils/arrayUtils");
+const responseUtils = require("../utils/responseUtils");
 
 /**
  * @param {String} riot_name 
@@ -21,7 +22,7 @@ const getAllRecordEmbed = async (riot_name, riot_name_tag, guild_id) => {
   }
   // 계정 조회 2건 이상일 경우
   if (allData.player.length > 1){
-    return embedUtil.getPlayersEmbed(allData.player);
+    return responseUtils.getPlayersEmbed(allData.player);
   }
 
   // 통합 전적
@@ -49,7 +50,7 @@ const getAllRecordEmbed = async (riot_name, riot_name_tag, guild_id) => {
     if (data.total_count === max_count) {
       line_desc += thumbs_up_str;
     }
-    line_desc += embedUtil.makeStat(
+    line_desc += stringUtils.makeStat(
       data.position,
       data.win,
       data.win_rate,
@@ -67,7 +68,7 @@ const getAllRecordEmbed = async (riot_name, riot_name_tag, guild_id) => {
   let month_desc = "";
 
   allData.month_data.forEach((data) => {
-    month_desc = embedUtil.makeStat(
+    month_desc = stringUtils.makeStat(
       "이번달 전적",
       data.win,
       data.win_rate,
@@ -110,14 +111,14 @@ const getAllRecordEmbed = async (riot_name, riot_name_tag, guild_id) => {
   let team_data = allData.with_team_data;
 
   // 팀워크 좋은 순
-  let high_team_data = embedUtil.filterAndSortByWinRate(
+  let high_team_data = stringUtils.filterAndSortByWinRate(
     team_data,
     52,
     true,
     10
   );
   high_team_data.forEach((data) => {
-    good_team_value += embedUtil.makeTeamStat(
+    good_team_value += stringUtils.makeTeamStat(
       data.riot_name,
       data.win,
       data.lose,
@@ -125,14 +126,14 @@ const getAllRecordEmbed = async (riot_name, riot_name_tag, guild_id) => {
     );
   });
 
-  let bad_team_data = embedUtil.filterAndSortByWinRate(
+  let bad_team_data = stringUtils.filterAndSortByWinRate(
     team_data,
     48,
     false,
     10
   );
   bad_team_data.forEach((data) => {
-    bad_team_value += embedUtil.makeTeamStat(
+    bad_team_value += stringUtils.makeTeamStat(
       data.riot_name,
       data.win,
       data.lose,
@@ -151,14 +152,14 @@ const getAllRecordEmbed = async (riot_name, riot_name_tag, guild_id) => {
   team_data = other_team_data;
 
   // 맞라인 자주 이기는 순
-  let easy_rival_data = embedUtil.filterAndSortByWinRate(
+  let easy_rival_data = stringUtils.filterAndSortByWinRate(
     team_data,
     52,
     true,
     10
   );
   easy_rival_data.forEach((data) => {
-    easy_rival_value += embedUtil.makeTeamStat(
+    easy_rival_value += stringUtils.makeTeamStat(
       data.riot_name,
       data.win,
       data.lose,
@@ -167,14 +168,14 @@ const getAllRecordEmbed = async (riot_name, riot_name_tag, guild_id) => {
   });
 
   // 맞라인 자주 지는 순
-  let hard_rival_data = embedUtil.filterAndSortByWinRate(
+  let hard_rival_data = stringUtils.filterAndSortByWinRate(
     team_data,
     48,
     false,
     10
   );
   hard_rival_data.forEach((data) => {
-    hard_rival_value += embedUtil.makeTeamStat(
+    hard_rival_value += stringUtils.makeTeamStat(
       data.riot_name,
       data.win,
       data.lose,
@@ -249,17 +250,17 @@ const getStatisticOfGameEmbed = async (guild_id, year, month) => {
   const title = `${year}-${month} 게임 통계`;
   const records = await RecordService.getStatisticOfGame(guild_id, year, month);
   if(records.length === 0){
-    return utils.notFoundResponse();
+    return responseUtils.notFoundResponse();
   }
   const field_one_header = "판수 20위";
-  const field_one_value = embedUtil.makeStatsList(records.slice(0,20), "game");
+  const field_one_value = arrayUtils.makeStatsList(records.slice(0,20), "game");
 
   const field_two_header = "승률 20위";
   const top20high = records
   .filter(record => record.total_count >= 20)
   .sort((a,b) => b.win_rate - a.win_rate ).slice(0,20);
   
-  let field_two_value = embedUtil.makeStatsList(top20high, "game_high");
+  let field_two_value = arrayUtils.makeStatsList(top20high, "game_high");
 
   jsonData = {
     title:title,
@@ -292,7 +293,7 @@ const getStatisticOfGameAllMemberEmbed = async (guild_id, year, month) => {
   let str = ""
   const records = await RecordService.getStatisticOfGame(guild_id, year, month);
   if(records.length === 0){
-    return utils.notFoundResponse();
+    return responseUtils.notFoundResponse();
   }
   records.forEach((record, index) => {
     str += `${record.riot_name} ${record.total_count}판 \n`;
@@ -311,7 +312,7 @@ const getStatisticOfGameAllMemberEmbed = async (guild_id, year, month) => {
 const getWinRateByPositionEmbed = async (position, guild_id) => {
   const records = await RecordService.getWinRateByPosition(position, guild_id);
   if (records.length === 0 ){
-    return utils.notFoundResponse();
+    return responseUtils.notFoundResponse();
   }
 
   const title = `${position} 라인`;
@@ -338,7 +339,7 @@ const getWinRateByPositionEmbed = async (position, guild_id) => {
       default:
         prefix = `${index + 1}. `;
     }
-    desc += `${prefix}${record.riot_name}${embedUtil.makeStat('', record.win, record.win_rate, record.kda)}`;
+    desc += `${prefix}${record.riot_name}${stringUtils.makeStat('', record.win, record.win_rate, record.kda)}`;
 });
 
   jsonData = {
@@ -358,17 +359,17 @@ const getWinRateByPositionEmbed = async (position, guild_id) => {
 const getRecordByGameEmbed = async (game_id, guild_id) => {
   const game_data = await RecordService.getRecordByGame(game_id, guild_id);
   if (game_data.length === 0) {
-    return utils.notFoundResponse();
+    return responseUtils.notFoundResponse();
   }
 
   let dto = game_data[0];
 
   let title = game_id;
-  let blue_team_field = embedUtil.setLineFieldHeader(dto, "blue");
-  let red_team_field = embedUtil.setLineFieldHeader(dto, "red");
+  let blue_team_field = stringUtils.setLineFieldHeader(dto, "blue");
+  let red_team_field = stringUtils.setLineFieldHeader(dto, "red");
 
-  let blue_team_value = embedUtil.setLineValue(game_data, "blue");
-  let red_team_value = embedUtil.setLineValue(game_data, "red");
+  let blue_team_value = arrayUtils.setLineValue(game_data, "blue");
+  let red_team_value = arrayUtils.setLineValue(game_data, "red");
 
   jsonData = {
     title: title,
@@ -402,14 +403,14 @@ const getRecentGamesByRiotNameEmbed = async (riot_name, riot_name_tag, guild_id)
     riot_name_tag,
     guild_id
   );
-  
+
   //player가 없다면 그대로 return 
   if (!recent_data.player){
     return recent_data;
   }
   // 계정 조회 2건 이상일 경우
   if (recent_data.player.length > 1){
-    return embedUtil.getPlayersEmbed(recent_data.player);
+    return responseUtils.getPlayersEmbed(recent_data.player);
   }
 
   let title = `${recent_data.player.riot_name}#${recent_data.player.riot_name_tag} 최근 상세 전적`;
@@ -444,7 +445,7 @@ const getMasterOfChampionEmbed = async (champ_name, guild_id) => {
     guild_id
   );
   if (champ_data.length === 0) {
-    return utils.notFoundResponse();
+    return responseUtils.notFoundResponse();
   }
 
   let title = champ_name;
@@ -457,7 +458,7 @@ const getMasterOfChampionEmbed = async (champ_name, guild_id) => {
   let count_records = champ_data.slice(0, 10);
 
   count_records.forEach((data) => {
-    field_one_value += embedUtil.makeAllStat(
+    field_one_value += stringUtils.makeAllStat(
       data.riot_name,
       data.total_count,
       data.win,
@@ -472,7 +473,7 @@ const getMasterOfChampionEmbed = async (champ_name, guild_id) => {
     .slice(0, 10);
 
   high_records.forEach((data) => {
-    field_two_value += embedUtil.makeStat(
+    field_two_value += stringUtils.makeStat(
       data.riot_name,
       data.win,
       data.win_rate,
@@ -510,17 +511,17 @@ const getStatisticOfChampionEmbed = async (guild_id, year, month) => {
   const title = `${year}-${month} 챔프 통계`;
   const records = await RecordService.getStatisticOfChampion(guild_id, year, month);
   if(records.length === 0){
-    return utils.notFoundResponse();
+    return responseUtils.notFoundResponse();
   }
 
   let field_one_header = "인기 챔프:star:";
-  let field_one_value = embedUtil.makeStatsList(records.slice(0,15), "champ");
+  let field_one_value = arrayUtils.makeStatsList(records.slice(0,15), "champ");
 
   let field_two_header = "1티어:partying_face:";
-  let field_two_value = embedUtil.makeStatsList(records.filter(record => record.total_count >= 20).sort((a,b) => (b.win_rate - a.win_rate)).slice(0,15), "champ");
+  let field_two_value = arrayUtils.makeStatsList(records.filter(record => record.total_count >= 20).sort((a,b) => (b.win_rate - a.win_rate)).slice(0,15), "champ");
 
   let field_three_header = "5티어:scream:"
-  let field_three_value = embedUtil.makeStatsList(records.filter(record => record.total_count >= 20).sort((a,b) => (a.win_rate - b.win_rate)).slice(0,15), "champ");
+  let field_three_value = arrayUtils.makeStatsList(records.filter(record => record.total_count >= 20).sort((a,b) => (a.win_rate - b.win_rate)).slice(0,15), "champ");
 
   jsonData = {
     title:title,
