@@ -21,7 +21,7 @@ const getPlayerForSearch = async (riot_name, riot_name_tag, guild_id) => {
              p.puuid
         FROM Player AS p
        WHERE p.delete_yn = 'N'
-         AND LOWER(p.riot_name) = LOWER($1)
+         AND LOWER(REPLACE(p.riot_name, ' ', '')) LIKE '%' || LOWER(REPLACE($1, ' ', '')) || '%'
          AND p.guild_id = $2
          AND p.main_player_id IS NULL
     `

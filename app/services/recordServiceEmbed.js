@@ -15,12 +15,13 @@ const embedUtil = require('../embed');
 const getAllRecordEmbed = async (riot_name, riot_name_tag, guild_id) => {
   const allData = await RecordService.getAllRecord(riot_name, riot_name_tag, guild_id);
 
+  // player가 없다면 그대로 return 
+  if (!allData.player){
+    return allData;
+  }
   // 계정 조회 2건 이상일 경우
   if (allData.player.length > 1){
     return embedUtil.getPlayersEmbed(allData.player);
-  }
-  if (allData.record_data.length === 0) {
-    return utils.notFoundResponse();
   }
 
   // 통합 전적
@@ -198,7 +199,7 @@ const getAllRecordEmbed = async (riot_name, riot_name_tag, guild_id) => {
   }
 
   jsonData = {
-    title: `${riot_name}#${allData.player[0].riot_name_tag}`,
+    title: `${allData.player[0].riot_name}#${allData.player[0].riot_name_tag}`,
     description: desc,
     fields: [
       {
@@ -401,13 +402,14 @@ const getRecentGamesByRiotNameEmbed = async (riot_name, riot_name_tag, guild_id)
     riot_name_tag,
     guild_id
   );
-
+  
+  //player가 없다면 그대로 return 
+  if (!recent_data.player){
+    return recent_data;
+  }
   // 계정 조회 2건 이상일 경우
   if (recent_data.player.length > 1){
     return embedUtil.getPlayersEmbed(recent_data.player);
-  }
-  if (recent_data.records.length === 0) {
-    return utils.notFoundResponse();
   }
 
   let title = `${recent_data.player.riot_name}#${recent_data.player.riot_name_tag} 최근 상세 전적`;

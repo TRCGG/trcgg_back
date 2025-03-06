@@ -14,23 +14,36 @@ class RecordService extends AccountService {
    * @param {String} riot_name 
    * @param {String} riot_name_tag 
    * @param {String} guild_id 
+   * @description 전적검색을 위한 계정 조회
+   * @returns 
+   * 
+   */
+  async search(riot_name, riot_name_tag, guild_id) {
+    if(riot_name.length < 2) {
+      return utils.requireMoreChars();
+    }
+    const account = await this.getPlayerForSearch(riot_name, riot_name_tag, guild_id);
+    if(account.length === 0) {
+      return utils.notFoundAccount(riot_name, riot_name_tag);
+    }
+    return account;
+  }
+
+  /**
+   * @param {String} riot_name 
+   * @param {String} riot_name_tag 
+   * @param {String} guild_id 
    * @description !전적 조회에 필요한 모든 데이터 조회
    * @returns
    */
   async getAllRecord(riot_name, riot_name_tag, guild_id) {
-    // 검색으로 계정 조회
-    const account = await this.getPlayerForSearch(riot_name, riot_name_tag, guild_id);
-    if (!account) {
-      return null;
-    }
-    // 검색으로 계정이 2개 이상이면 계정 return
-    if (account.length > 1) {
-      return {player : account};
+    const account = await this.search(riot_name, riot_name_tag, guild_id);
+    if(typeof account === 'string') {
+      return account;
     }
     if (account.length === 1) {
       riot_name = account[0].riot_name;
       riot_name_tag = account[0].riot_name_tag;
-  
       const allData = {
         record_data: await recordMapper.getLineRecord(riot_name, riot_name_tag, guild_id),
         month_data: await recordMapper.getRecentMonthRecord(riot_name, riot_name_tag, guild_id),
@@ -41,8 +54,10 @@ class RecordService extends AccountService {
         player : account
       };
       return allData;
+    } else {
+      return account;
     }
-  }
+  } 
 
   /**
    * @param {String} guild_id
@@ -100,20 +115,20 @@ class RecordService extends AccountService {
    */
   async getRecentGamesByRiotName(riot_name, riot_name_tag, guild_id) {
     // 검색으로 계정 조회
-    const account = await this.getPlayerForSearch(riot_name, riot_name_tag, guild_id);
-    if(!account) {
-      return null;
+    const account = await this.search(riot_name, riot_name_tag, guild_id);
+    if(typeof account === 'string') {
+      return account;
     }
     // 검색으로 계정이 2개 이상이면 계정 return
-    if(account.length > 1) {
-      return {player : account};
-    } else if (account.length === 1) {
+    if(account.length === 1) {
       const records = await recordMapper.getRecentGamesByRiotName(account[0].riot_name, account[0].riot_name_tag, guild_id);
       const result = {
         player : account[0],
         records : records
       }
       return result;
+    } else {
+      return account;
     }
   }
 
