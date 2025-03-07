@@ -15,25 +15,6 @@ class RecordService extends AccountService {
    * @param {String} riot_name 
    * @param {String} riot_name_tag 
    * @param {String} guild_id 
-   * @description 전적검색을 위한 계정 조회
-   * @returns 
-   * 
-   */
-  async search(riot_name, riot_name_tag, guild_id) {
-    if(riot_name.length < 2) {
-      return responseUtils.requireMoreChars();
-    }
-    const account = await this.getPlayerForSearch(riot_name, riot_name_tag, guild_id);
-    if(account.length === 0) {
-      return responseUtils.notFoundAccount(riot_name, riot_name_tag);
-    }
-    return account;
-  }
-
-  /**
-   * @param {String} riot_name 
-   * @param {String} riot_name_tag 
-   * @param {String} guild_id 
    * @description !전적 조회에 필요한 모든 데이터 조회
    * @returns
    */

@@ -7,6 +7,24 @@ class AccountService {
   constructor() {}
 
   /**
+   * @param {String} riot_name 
+   * @param {String} riot_name_tag 
+   * @param {String} guild_id 
+   * @description 전적검색을 위한 계정 조회
+   * @returns 
+   */
+  async search(riot_name, riot_name_tag, guild_id) {
+    if(riot_name.length < 2) {
+      return responseUtils.requireMoreChars();
+    }
+    const account = await this.getPlayerForSearch(riot_name, riot_name_tag, guild_id);
+    if(account.length === 0) {
+      return responseUtils.notFoundAccount(riot_name, riot_name_tag);
+    }
+    return account;
+  }
+
+  /**
    * @param {string} delete_yn - 탈퇴 여부 ("Y", "N")
    * @param {string} riot_name - 플레이어 닉네임
    * @param {string} riot_name_tag - 태그
