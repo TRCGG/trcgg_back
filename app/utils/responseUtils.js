@@ -33,7 +33,7 @@ const getPlayersEmbed = (accounts) => {
   accounts.forEach((account, index) => {
     desc += `${account.riot_name}#${account.riot_name_tag} \n`;
   });
-  jsonData = {
+  const jsonData = {
     title: "검색결과",
     description: desc,
     fields: null,

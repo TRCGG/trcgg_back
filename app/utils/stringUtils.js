@@ -8,18 +8,17 @@
  * @returns
  */
 const dictPosition = (position) => {
-  let realPosition = "";
   switch (position) {
     case "탑":
-      return (realPosition = "TOP");
+      return "TOP";
     case "정글":
-      return (realPosition = "JUG");
+      return "JUG";
     case "미드":
-      return (realPosition = "MID");
+      return "MID";
     case "원딜":
-      return (realPosition = "ADC");
+      return "ADC";
     case "서폿":
-      return (realPosition = "SUP");
+      return "SUP";
     default:
       throw new Error("잘못된 값:" + position);
   }

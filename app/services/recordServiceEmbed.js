@@ -28,7 +28,7 @@ const getAllRecordEmbed = async (riot_name, riot_name_tag, guild_id) => {
   // 통합 전적
   let all_count = 0;
   let all_win = 0;
-  let all_lose = 0;
+  // let all_lose = 0; // 현재 미사용
   let max_count = 0;
   let all_win_rate = 0;
   let thumbs_up_str = ":thumbsup:";
@@ -38,7 +38,7 @@ const getAllRecordEmbed = async (riot_name, riot_name_tag, guild_id) => {
   allData.record_data.forEach((data) => {
     all_count += data.total_count || 0;
     all_win += data.win || 0;
-    all_lose += data.lose || 0;
+    // all_lose += data.lose || 0; 현재 미사용
 
     if (data.total_count > max_count) {
       max_count = data.total_count;
@@ -199,7 +199,7 @@ const getAllRecordEmbed = async (riot_name, riot_name_tag, guild_id) => {
     riot_name = "<:__:1197186572433490090> <:__:1197186590968139836> :crown:";
   }
 
-  jsonData = {
+  const jsonData = {
     title: `${allData.player[0].riot_name}#${allData.player[0].riot_name_tag}`,
     description: desc,
     fields: [
@@ -262,7 +262,7 @@ const getStatisticOfGameEmbed = async (guild_id, year, month) => {
   
   let field_two_value = arrayUtils.makeStatsList(top20high, "game_high");
 
-  jsonData = {
+  const jsonData = {
     title:title,
     description:"",
     fields: [
@@ -295,7 +295,7 @@ const getStatisticOfGameAllMemberEmbed = async (guild_id, year, month) => {
   if(records.length === 0){
     return responseUtils.notFoundResponse();
   }
-  records.forEach((record, index) => {
+  records.forEach((record) => {
     str += `${record.riot_name} ${record.total_count}판 \n`;
   });
 
@@ -342,7 +342,7 @@ const getWinRateByPositionEmbed = async (position, guild_id) => {
     desc += `${prefix}${record.riot_name}${stringUtils.makeStat('', record.win, record.win_rate, record.kda)}`;
 });
 
-  jsonData = {
+  const jsonData = {
     title: title,
     description: desc,
     fields: []
@@ -371,7 +371,7 @@ const getRecordByGameEmbed = async (game_id, guild_id) => {
   let blue_team_value = arrayUtils.setLineValue(game_data, "blue");
   let red_team_value = arrayUtils.setLineValue(game_data, "red");
 
-  jsonData = {
+  const jsonData = {
     title: title,
     description: undefined,
     fields: [
@@ -425,7 +425,7 @@ const getRecentGamesByRiotNameEmbed = async (riot_name, riot_name_tag, guild_id)
     desc_value += `${data.game_id} ${data.game_team} ${data.position} ${data.champ_name} ${data.kill}/${data.death}/${data.assist} 핑와:${data.vision_bought} 피해량:${data.total_damage_champions} \n`;
   });
 
-  jsonData = {
+  const jsonData = {
     title: title,
     description: desc_value,
     fields: [],
@@ -481,7 +481,7 @@ const getMasterOfChampionEmbed = async (champ_name, guild_id) => {
     );
   });
 
-  jsonData = {
+  const jsonData = {
     title: title,
     description: undefined,
     fields: [
@@ -523,7 +523,7 @@ const getStatisticOfChampionEmbed = async (guild_id, year, month) => {
   let field_three_header = "5티어:scream:"
   let field_three_value = arrayUtils.makeStatsList(records.filter(record => record.total_count >= 20).sort((a,b) => (a.win_rate - b.win_rate)).slice(0,15), "champ");
 
-  jsonData = {
+  const jsonData = {
     title:title,
     description:"",
     fields: [
