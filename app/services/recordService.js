@@ -1,6 +1,5 @@
 const recordMapper = require("../db/mapper/recordMapper");
 const AccountService = require("./accountService");
-const responseUtils = require("../utils/responseUtils");
 const stringUtils = require("../utils/stringUtils");
 
 /**
