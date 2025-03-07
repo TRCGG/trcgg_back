@@ -1,46 +1,35 @@
-const express = require("express");
-const router = express.Router();
+const BaseRouter = require("./core/BaseRouter");
 const ReplayService = require("../services/replayService");
 
 /**
- * 리플레이 파싱 관련 라우터
+ * replay routes
  */
-
-/**
- * @param {String} fileUrl
- * @param {String} fileName
- * @param {String} createUser
- * @param {String} guildId
- * @description 리플레이 저장
- * @returns {String} message
- */
-router.post("/:guild_id", async (req, res) => {
-  const { fileUrl, fileName, createUser } = req.body;
-  const { guild_id } = req.params;
-  try {
-    const result = await ReplayService.save(fileUrl, fileName, createUser, guild_id);
-    res.json(result);
-  } catch (error) {
-    res.status(500).send(error.message);
+class ReplayRoutes extends BaseRouter {
+  initializeRoutes() {
+    this.router.post("/:guild_id", this.handle(this.saveReplay));
+    this.router.delete("/:game_id/:guild_id", this.handle(this.deleteReplay));
   }
-});
 
-// DELETE =====================
-
-/**
- * @param {String} game_id
- * @param {String} guild_id
- * @description !drop 리플 삭제
- * @returns {String} message
- */
-router.delete("/:game_id/:guild_id", async (req, res) => {
-  const { game_id, guild_id } = req.params;
-  try {
-    const result = await ReplayService.deleteRecord(game_id, guild_id);
-    res.json(result);
-  } catch (error) {
-    res.status(500).send(error.message);
+  /**
+   * @param {Object} req - The request object.
+   * @returns {Promise<Object>} message
+   * @description 리플레이 저장
+   */
+  async saveReplay(req) {
+    const { fileUrl, fileName, createUser } = req.body;
+    const { guild_id } = req.params;
+    return await ReplayService.save(fileUrl, fileName, createUser, guild_id);
   }
-});
 
-module.exports = router;
+  /**
+   * @param {Object} req - The request object.
+   * @returns {Promise<Object>} message
+   * @description !drop 리플 삭제
+   */
+  async deleteReplay(req) {
+    const { game_id, guild_id } = req.params;
+    return await ReplayService.deleteRecord(game_id, guild_id);
+  }
+}
+
+module.exports = ReplayRoutes;

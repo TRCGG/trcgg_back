@@ -4,6 +4,7 @@
 const express = require('express');
 const cors = require('cors');
 const compression = require('compression');
+const RouterFactory = require('./app/routes/core/routerFactory');
 require('dotenv').config();
 
 // Constants
@@ -16,14 +17,6 @@ const CONFIG = {
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: '*'
   }
-};
-
-// Import routes
-const routes = {
-  account: require('./app/routes/accountRoutes'),
-  record: require('./app/routes/recordRoutes'),
-  management: require('./app/routes/managementRoutes'),
-  replay: require('./app/routes/replayRoutes')
 };
 
 // Import dependencies
@@ -50,8 +43,10 @@ class Server {
   }
 
   setupRoutes() {
-    Object.entries(routes).forEach(([path, router]) => {
-      this.app.use(`/${path}`, router);
+    const routers = ["account", "record", "management", "replay"];
+    routers.forEach((type) => {
+      const routerInstance = RouterFactory.createRouter(type);
+      this.app.use(`/${type}`, routerInstance.router); // router 속성을 사용해야 함
     });
   }
 
