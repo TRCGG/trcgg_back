@@ -26,19 +26,19 @@ class managementService extends AccountService {
 
     // 관리자 명령어
     const field_two_value =
-      "1. 닉네임 띄어쓰기구분X, 대소문자구분O, 태그필수 \n" +
-      "2. 관리자 권한 필요\n" +
-      "`!탈퇴 {name#tag}` 탈퇴한 회원 추가, 전적검색제외 \n" +
-      "`!복귀 {name#tag}` 탈퇴한 회원 복구, 전잭검색포함 \n" +
-      "`!부캐목록` 등록된 모든 부캐닉/본캐닉 닉네임 목록 \n" +
-      "`!부캐저장 {부캐닉#태그/본캐닉#태그}` 부캐닉네임 등록, 데이터저장할때 부캐닉네임은 본캐닉네임으로 변경되서 저장 \n" +
-      "`!부캐삭제 {부캐닉#태그}` 등록된 부캐닉네임 삭제 \n" +
-      "`!닉변 {oldname#tag/newname#tag}` 닉네임 변경 \n" +
-      "`!drop {gameId}` {리플레이 파일 이름} 데이터 삭제 \n";
+      ":one: 태그 필수 \n" +
+      ":two: 관리자 권한 필요(TRC관리자 역할)\n" +
+      "`!탈퇴 {name#tag}` 계정 탈퇴, 전적 검색 제외 \n" +
+      "`!복귀 {name#tag}` 계정 복구, 전적 검색 포함 \n" +
+      "`!부캐목록` 등록된 모든 부계정 목록 \n" +
+      "`!부캐저장 {부캐닉#태그/본캐닉#태그}` 부계정 등록, 부계정 전적은 본계정 전적으로 이동 \n" +
+      "`!부캐삭제 {부캐닉#태그}` 등록된 부계정 삭제 \n" +
+      "`!닉변 {oldname#tag/newname#tag}` 닉네임 변경(띄어쓰기, 대소문자 구분!) \n" +
+      "`!drop {리플파일명}` 저장된 리플 데이터 삭제 \n";
 
     const jsonData = {
-      title: "명령어 doc",
-      description: "help",
+      title: "명령어 설명",
+      description: "",
       fields: [
         {
           name: "검색 명령어",
@@ -46,7 +46,7 @@ class managementService extends AccountService {
           inline: false,
         },
         {
-          name: "관리자 명령어",
+          name: "관리자 명령어(닉네임 띄어쓰기, 대소문자 구분 :star:)",
           value: field_two_value,
           inline: false,
         },
