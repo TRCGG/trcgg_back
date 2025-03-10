@@ -1,4 +1,4 @@
-const BaseRouter = require("./core/BaseRouter");
+const BaseRouter = require("./core/baseRouter");
 const AccountService = require("../services/accountService");
 
 /**
