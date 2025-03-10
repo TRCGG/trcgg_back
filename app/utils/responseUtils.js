@@ -13,6 +13,9 @@ const notFoundResponse = () => {
  * @returns
  */
 const notFoundAccount = (name, tag) => {
+  if(!tag){
+    return `${name} 계정이 게임 기록에 존재하지 않습니다.`;
+  }
   return `${name}#${tag} 계정이 게임 기록에 존재하지 않습니다.`;
 };
 
