@@ -9,9 +9,9 @@ class ManagementRoutes extends BaseRouter {
     this.router.get("/doc", this.handle(this.getDoc));
     this.router.get("/sublist/:guild_id", this.handle(this.getSublist));
     this.router.post("/subaccount/:guild_id", this.handle(this.postSubAccount));
-    this.router.put("/subaccount/:guild_id", this.handle(this.putSubAccount));
     this.router.put("/accountstatus/:guild_id", this.handle(this.putAccountStatus));
     this.router.put("/accountname/:guild_id", this.handle(this.putAccountName));
+    this.router.delete("/subaccount/:guild_id", this.handle(this.deleteSubAccount));
   }
 
   /**
@@ -45,17 +45,6 @@ class ManagementRoutes extends BaseRouter {
 
   /**
    * @param {*} req 
-   * @description !부캐삭제
-   * @returns {string} message
-   */
-  async putSubAccount(req) {
-    const { guild_id } = req.params;
-    const { sub_name, sub_name_tag } = req.body;
-    return await ManagementService.putSubAccount(sub_name, sub_name_tag, guild_id);
-  }
-
-  /**
-   * @param {*} req 
    * @description !탈퇴, !복귀
    * @returns {string} message
    */
@@ -74,6 +63,17 @@ class ManagementRoutes extends BaseRouter {
     const { guild_id } = req.params;
     const { old_name, old_name_tag, new_name, new_name_tag } = req.body;
     return await ManagementService.putAccountName(old_name, old_name_tag, new_name, new_name_tag, guild_id);
+  }
+  
+  /**
+   * @param {*} req 
+   * @description !부캐삭제
+   * @returns {string} message
+   */
+  async deleteSubAccount(req) {
+    const { guild_id } = req.params;
+    const { sub_name, sub_name_tag } = req.body;
+    return await ManagementService.putSubAccount(sub_name, sub_name_tag, guild_id);
   }
 }
 

@@ -93,13 +93,22 @@ class AccountService {
   }
 
   /**
-   * @param {*} delete_yn 
-   * @param {*} main_player_id 
-   * @description 부계정 delete_yn 일괄 수정 (!탈퇴, !복귀 명령어)
+   * @param {*} player_id 
+   * @description 부계정 삭제
    * @returns 
    */
-  async putSubPlayerDeleteYn(delete_yn, main_player_id) {
-    const result = await accountMapper.putSubPlayerDeleteYn(delete_yn, main_player_id);
+  async deleteSubPlayer(player_id) {
+    const result = await accountMapper.deleteSubPlayer(player_id);
+    return result;
+  }
+
+  /**
+   * @param {*} main_player_id 
+   * @description 부계정 일괄 삭제 (!탈퇴, !복귀 명령어)
+   * @returns 
+   */
+  async deleteSubPlayers(main_player_id) {
+    const result = await accountMapper.deleteSubPlayers(main_player_id);
     return result;
   }
 }

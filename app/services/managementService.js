@@ -132,7 +132,7 @@ class managementService extends AccountService {
     if (!sub_account) {
       return "해당 부계정이 없습니다.";
     } else {
-      const result = await this.putPlayer(null, null, null, null, "Y", sub_account.player_id);
+      const result = await this.deleteSubPlayer(sub_account.player_id);
       if (result.status === 500) {
         return "부캐삭제 실패";
       } else {
@@ -167,9 +167,9 @@ class managementService extends AccountService {
       return responseUtils.notFoundAccount(riot_name, riot_name_tag);
     }
 
-    // 탈퇴한 본계정은 부캐들 전부 삭제처리, 복귀는 처리하지않음
+    // 탈퇴한 본계정의 부계정들 전부 삭제처리, 복귀는 처리하지않음
     if (delete_yn === "Y") {
-      await this.putSubPlayerDeleteYn(delete_yn, account.player_id);
+      await this.deleteSubPlayers(account.player_id);
     }
     
     // 본계정 수정

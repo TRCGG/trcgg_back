@@ -162,21 +162,33 @@ const putPlayer = async (riot_name, riot_name_tag, puuid, main_player_id, delete
 }
 
 /**
- * @param {*} delete_yn 
- * @param {*} main_player_id  
- * @returns num
- * @description 부계정 일괄 수정
+ * @param {*} player_id 
+ * @description 부계정 삭제
  */
-const putSubPlayerDeleteYn = async (delete_yn, main_player_id) => {
+const deleteSubPlayer = async (player_id) => {
   const result = await db.query(
     `
-      UPDATE Player
-         SET 
-             delete_yn = $1,
-             update_date = now()
-       WHERE main_player_id = $2
+      DELETE FROM Player
+       WHERE player_id = $1
+         AND main_player_id IS NOT NULL
     `,
-    [delete_yn, main_player_id]
+    [player_id]
+  );
+  return result;
+}
+
+/**
+ * @param {*} main_player_id  
+ * @returns num
+ * @description 부계정 일괄 삭제
+ */
+const deleteSubPlayers = async (main_player_id) => {
+  const result = await db.query(
+    `
+      DELETE FROM Player
+       WHERE main_player_id = $1
+    `,
+    [main_player_id]
   );
   return result;
 }
@@ -187,5 +199,6 @@ module.exports = {
   getSubPlayerList,
   postSubPlayer,
   putPlayer,
-  putSubPlayerDeleteYn
+  deleteSubPlayer,
+  deleteSubPlayers
 };
