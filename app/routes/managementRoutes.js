@@ -73,7 +73,7 @@ class ManagementRoutes extends BaseRouter {
   async deleteSubAccount(req) {
     const { guild_id } = req.params;
     const { sub_name, sub_name_tag } = req.body;
-    return await ManagementService.putSubAccount(sub_name, sub_name_tag, guild_id);
+    return await ManagementService.deleteSubAccount(sub_name, sub_name_tag, guild_id);
   }
 }
 

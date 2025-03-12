@@ -121,31 +121,6 @@ class managementService extends AccountService {
   }
 
   /**
-   * @param {String} sub_name 부캐 닉네임
-   * @param {String} sub_name_tag 부캐 태그
-   * @param {String} guild_id
-   * @description !부캐삭제
-   * @returns {String} message
-   */
-  async putSubAccount(sub_name, sub_name_tag, guild_id) { 
-    const sub_account = await this.getPlayer("N", sub_name, sub_name_tag, guild_id);
-    if (!sub_account) {
-      return "해당 부계정이 없습니다.";
-    } else {
-      const result = await this.deleteSubPlayer(sub_account.player_id);
-      if (result.status === 500) {
-        return "부캐삭제 실패";
-      } else {
-        if (result >= 1) {
-          return "부캐삭제 완료";
-        } else {
-          return responseUtils.notFoundResponse();
-        }
-      }
-    }
-  }
-
-  /**
    * @param {String} delete_yn (Y/N)
    * @param {String} riot_name 라이엇 닉네임 
    * @param {String} riot_name_tag 라이엇 태그
@@ -221,6 +196,31 @@ class managementService extends AccountService {
         return "닉변 완료";
       } else {
         return responseUtils.notFoundResponse();
+      }
+    }
+  }
+  
+  /**
+   * @param {String} sub_name 부캐 닉네임
+   * @param {String} sub_name_tag 부캐 태그
+   * @param {String} guild_id
+   * @description !부캐삭제
+   * @returns {String} message
+   */
+  async deleteSubAccount(sub_name, sub_name_tag, guild_id) { 
+    const sub_account = await this.getPlayer("N", sub_name, sub_name_tag, guild_id);
+    if (!sub_account) {
+      return "해당 부계정이 없습니다.";
+    } else {
+      const result = await this.deleteSubPlayer(sub_account.player_id);
+      if (result.status === 500) {
+        return "부캐삭제 실패";
+      } else {
+        if (result >= 1) {
+          return "부캐삭제 완료";
+        } else {
+          return responseUtils.notFoundResponse();
+        }
       }
     }
   }
