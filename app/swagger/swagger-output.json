@@ -492,7 +492,7 @@
           }
         }
       },
-      "put": {
+      "delete": {
         "description": "",
         "parameters": [
           {
