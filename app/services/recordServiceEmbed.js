@@ -409,7 +409,7 @@ const getRecentGamesByRiotNameEmbed = async (riot_name, riot_name_tag, guild_id)
     return recent_data;
   }
   // 계정 조회 2건 이상일 경우
-  if (allData.error){
+  if (recent_data.error){
     return responseUtils.getPlayersEmbed(recent_data.player);
   }
 
