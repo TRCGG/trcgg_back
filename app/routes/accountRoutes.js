@@ -19,7 +19,7 @@ class AccountRoutes extends BaseRouter {
     const { riot_name, guild_id } = req.params;
     const { riot_name_tag = null } = req.query;
     const accountService = new AccountService();
-    return await accountService.getPlayerForSearch(riot_name, riot_name_tag, guild_id);
+    return await accountService.search(riot_name, riot_name_tag, guild_id);
   }
 }
 

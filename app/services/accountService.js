@@ -17,11 +17,19 @@ class AccountService {
     if(riot_name.length < 2) {
       return responseUtils.requireMoreChars();
     }
-    const account = await this.getPlayerForSearch(riot_name, riot_name_tag, guild_id);
-    if(account.length === 0) {
+
+    //첫 계정 조회 (like 없이)
+    const first_account = await this.getPlayerByExactName(riot_name, riot_name_tag, guild_id);
+    if(first_account.length >= 1) {
+      return first_account;
+    } 
+
+    //두번째 계정 조회
+    const second_account = await this.getPlayerBySimilarName(riot_name, riot_name_tag, guild_id);
+    if(second_account.length === 0) {
       return responseUtils.notFoundAccount(riot_name, riot_name_tag);
     }
-    return account;
+    return second_account;
   }
 
   /**
@@ -41,16 +49,32 @@ class AccountService {
    * @param {String} riot_name 
    * @param {String} riot_name_tag not required
    * @param {String} guild_id 
-   * @description 계정 조회(전적 검색용)
-   * @returns {object|null} - 조회된 플레이어 정보
+   * @description 계정 조회(전적 검색용) - 첫번째
+   * @returns {List<Player>} - 조회된 플레이어 정보
    */
-  async getPlayerForSearch(riot_name, riot_name_tag, guild_id) {
-    const account = await accountMapper.getPlayerForSearch(
+    async getPlayerByExactName(riot_name, riot_name_tag, guild_id) {
+      const accounts = await accountMapper.getPlayerByExactName(
+        riot_name,
+        riot_name_tag,
+        guild_id
+      );
+      return accounts;
+    }
+
+  /**
+   * @param {String} riot_name 
+   * @param {String} riot_name_tag not required
+   * @param {String} guild_id 
+   * @description 계정 조회(전적 검색용) - 두번째
+   * @returns {List<Player>} - 조회된 플레이어 정보
+   */
+  async getPlayerBySimilarName(riot_name, riot_name_tag, guild_id) {
+    const accounts = await accountMapper.getPlayerBySimilarName(
       riot_name,
       riot_name_tag,
       guild_id
     );
-    return account;
+    return accounts;
   }
 
   /**

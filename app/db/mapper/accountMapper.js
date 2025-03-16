@@ -8,9 +8,41 @@ const db = require('../db');
  * @param {*} riot_name_tag 
  * @param {*} guild_id 
  * @returns List<Player>
- * @description 전적 검색을 위한 계정 조회
+ * @description 전적 검색을 위한 계정 조회 첫번째
  */
-const getPlayerForSearch = async (riot_name, riot_name_tag, guild_id) => {
+const getPlayerByExactName = async (riot_name, riot_name_tag, guild_id) => {
+  let query = 
+    `
+      SELECT
+             p.player_id,
+             p.riot_name,
+             p.riot_name_tag,
+             p.guild_id,
+             p.puuid
+        FROM Player AS p
+       WHERE p.delete_yn = 'N'
+         AND p.riot_name = $1
+         AND p.guild_id = $2
+         AND p.main_player_id IS NULL
+    `
+  const params = [riot_name, guild_id];
+
+  if(riot_name_tag) {
+    query += `AND p.riot_name_tag = $3`
+    params.push(riot_name_tag);
+  }
+  const result = await db.query(query, params);
+  return result;
+}
+
+/**
+ * @param {*} riot_name 
+ * @param {*} riot_name_tag 
+ * @param {*} guild_id 
+ * @returns List<Player>
+ * @description 전적 검색을 위한 계정 조회 두번째
+ */
+const getPlayerBySimilarName = async (riot_name, riot_name_tag, guild_id) => {
   let query = 
     `
       SELECT
@@ -195,7 +227,8 @@ const deleteSubPlayers = async (main_player_id) => {
 
 module.exports = {
   getPlayer,
-  getPlayerForSearch,
+  getPlayerByExactName,
+  getPlayerBySimilarName,
   getSubPlayerList,
   postSubPlayer,
   putPlayer,
