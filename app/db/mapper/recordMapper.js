@@ -362,7 +362,7 @@ const getMasterOfChampion = async (champ_name, guild_id) => {
         JOIN Champion c ON pg.champion_id = c.champion_id 
        WHERE c.champ_name = $1
          AND p.guild_id = $2
-         AND pg.delete_yn = 'N'
+         AND p.delete_yn = 'N'
        GROUP BY p.riot_name 
        ORDER BY total_count DESC
     `,
