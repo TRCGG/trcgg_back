@@ -43,7 +43,7 @@ class Server {
   }
 
   setupRoutes() {
-    const routers = ["account", "record", "management", "replay"];
+    const routers = ["account", "record", "management", "replay", "event"];
     routers.forEach((type) => {
       const routerInstance = RouterFactory.createRouter(type);
       this.app.use(`/${type}`, routerInstance.router); // router 속성을 사용해야 함
