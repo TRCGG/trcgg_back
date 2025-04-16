@@ -8,7 +8,8 @@ class RouterFactory {
       management: require('../managementRoutes'),
       record: require('../recordRoutes'),
       replay: require('../replayRoutes'),
-      event: require('../eventRoutes')
+      event: require('../eventRoutes'),
+      guild: require('../guildRoutes'),
     };
 
     if (!routers[type]) {
