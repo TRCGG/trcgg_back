@@ -49,6 +49,37 @@
         }
       }
     },
+    "/record/result/{game_id}/{guild_id}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "game_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "guild_id",
+          "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/record/all/{riot_name}/{guild_id}": {
       "get": {
         "description": "",

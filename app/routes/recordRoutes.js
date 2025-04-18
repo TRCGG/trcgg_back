@@ -10,12 +10,13 @@ class RecordRoutes extends BaseRouter {
   initializeRoutes() {
     this.router.get("/all/:riot_name/:guild_id", this.handle(this.getAllRecords));
     this.router.get("/recent/:riot_name/:guild_id", this.handle(this.getRecentGames));
+    this.router.get("/result/:game_id/:guild_id", this.handle(this.getGameResult));
     this.router.get("/all/embed/:riot_name/:guild_id", this.handle(this.getAllRecordsEmbed));
     this.router.get("/master/embed/:champ_name/:guild_id", this.handle(this.getMasterOfChampion));
     this.router.get("/champstat/embed/:year/:month/:guild_id", this.handle(this.getChampionStats));
     this.router.get("/gamestat/embed/:year/:month/:guild_id", this.handle(this.getGameStats));
     this.router.get("/linestat/embed/:position/:guild_id", this.handle(this.getLineStats));
-    this.router.get("/result/embed/:game_id/:guild_id", this.handle(this.getGameResult));
+    this.router.get("/result/embed/:game_id/:guild_id", this.handle(this.getGameResultEmbed));
     this.router.get("/recent/embed/:riot_name/:guild_id", this.handle(this.getRecentGamesEmbed));
     this.router.get("/clanstat/embed/:year/:month/:guild_id", this.handle(this.getClanStats));
   }
@@ -40,6 +41,16 @@ class RecordRoutes extends BaseRouter {
     const { riot_name, guild_id } = req.params;
     const { riot_name_tag = null } = req.query;
     return await RecordService.getRecentGamesByRiotName(riot_name, riot_name_tag, guild_id);
+  }
+
+/**
+ * @param {*} req 
+ * @description !결과 조회
+ * @returns 
+ */
+  async getGameResult(req) {
+    const { game_id, guild_id } = req.params;
+    return await RecordService.getRecordByGame(game_id, guild_id);
   }
 
   /**
@@ -98,7 +109,7 @@ class RecordRoutes extends BaseRouter {
    * @description !결과 Embed
    * @returns {Promise<Object>} The game results.
    */
-  async getGameResult(req) {
+  async getGameResultEmbed(req) {
     const { game_id, guild_id } = req.params;
     return await RecordServiceEmbed.getRecordByGameEmbed(game_id, guild_id);
   }
