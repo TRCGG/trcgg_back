@@ -13,7 +13,9 @@
   "paths": {
     "/account/search/{riot_name}/{guild_id}": {
       "get": {
-        "description": "",
+        "tags": ["account"],
+        "summary": "소환사 계정 검색(일반)",
+        "description": "소환사 계정 검색(like 검색어 사용, 대소문자 구분 안함)",
         "parameters": [
           {
             "name": "riot_name",
@@ -51,7 +53,9 @@
     },
     "/record/result/{game_id}/{guild_id}": {
       "get": {
-        "description": "",
+        "tags": ["record"],
+        "summary": "게임 결과 조회",
+        "description": "game_id로 게임 결과 조회",
         "parameters": [
           {
             "name": "game_id",
@@ -82,7 +86,9 @@
     },
     "/record/all/{riot_name}/{guild_id}": {
       "get": {
-        "description": "",
+        "tags": ["record"],
+        "summary": "전적 조회",
+        "description": "전적 조회에 필요한 모든 정보",
         "parameters": [
           {
             "name": "riot_name",
@@ -120,6 +126,8 @@
     },
     "/record/recent/{riot_name}/{guild_id}": {
       "get": {
+        "tags": ["record"],
+        "summary": "최근 20 게임 전적 조회",
         "description": "",
         "parameters": [
           {
@@ -158,6 +166,8 @@
     },
     "/record/all/embed/{riot_name}/{guild_id}": {
       "get": {
+        "tags": ["record/embed"],
+        "summary": "전적 조회(디스코드용)",
         "description": "",
         "parameters": [
           {
@@ -196,6 +206,8 @@
     },
     "/record/master/embed/{champ_name}/{guild_id}": {
       "get": {
+        "tags": ["record/embed"],
+        "summary": "챔피언 장인 조회(디스코드용)",
         "description": "",
         "parameters": [
           {
@@ -227,6 +239,8 @@
     },
     "/record/champstat/embed/{year}/{month}/{guild_id}": {
       "get": {
+        "tags": ["record/embed"],
+        "summary": "챔피언 통계 조회(디스코드용)",
         "description": "",
         "parameters": [
           {
@@ -266,6 +280,8 @@
     },
     "/record/gamestat/embed/{year}/{month}/{guild_id}": {
       "get": {
+        "tags": ["record/embed"],
+        "summary": "게임 통계 조회(디스코드용)",
         "description": "",
         "parameters": [
           {
@@ -305,6 +321,8 @@
     },
     "/record/linestat/embed/{position}/{guild_id}": {
       "get": {
+        "tags": ["record/embed"],
+        "summary": "라인 통계 조회(디스코드용)",
         "description": "",
         "parameters": [
           {
@@ -336,6 +354,8 @@
     },
     "/record/result/embed/{game_id}/{guild_id}": {
       "get": {
+        "tags": ["record/embed"],
+        "summary": "게임 결과 조회(디스코드용)",
         "description": "",
         "parameters": [
           {
@@ -367,6 +387,8 @@
     },
     "/record/recent/embed/{riot_name}/{guild_id}": {
       "get": {
+        "tags": ["record/embed"],
+        "summary": "최근 10 게임 전적 조회(디스코드용)",
         "description": "",
         "parameters": [
           {
@@ -405,6 +427,8 @@
     },
     "/record/clanstat/embed/{year}/{month}/{guild_id}": {
       "get": {
+        "tags": ["record/embed"],
+        "summary": "클랜 통계 조회(디스코드용)",
         "description": "",
         "parameters": [
           {
@@ -444,6 +468,8 @@
     },
     "/management/doc": {
       "get": {
+        "tags": ["management"],
+        "summary": "명령어 설명서",
         "description": "",
         "responses": {
           "200": {
@@ -457,6 +483,8 @@
     },
     "/management/sublist/{guild_id}": {
       "get": {
+        "tags": ["management"],
+        "summary": "부계정 목록 조회",
         "description": "",
         "parameters": [
           {
@@ -480,6 +508,8 @@
     },
     "/management/subaccount/{guild_id}": {
       "post": {
+        "tags": ["management"],
+        "summary": "부계정 등록",
         "description": "",
         "parameters": [
           {
@@ -524,6 +554,8 @@
         }
       },
       "delete": {
+        "tags": ["management"],
+        "summary": "부계정 삭제",
         "description": "",
         "parameters": [
           {
@@ -564,6 +596,8 @@
     },
     "/management/accountstatus/{guild_id}": {
       "put": {
+        "tags": ["management"],
+        "summary": "계정 탈퇴 여부 변경",
         "description": "",
         "parameters": [
           {
@@ -607,6 +641,8 @@
     },
     "/management/accountname/{guild_id}": {
       "put": {
+        "tags": ["management"],
+        "summary": "계정 이름 변경",
         "description": "",
         "parameters": [
           {
@@ -653,6 +689,8 @@
     },
     "/replay/{guild_id}": {
       "post": {
+        "tags": ["replay"],
+        "summary": "게임 리플레이 업로드",
         "description": "",
         "parameters": [
           {
@@ -696,6 +734,8 @@
     },
     "/replay/{game_id}/{guild_id}": {
       "delete": {
+        "tags": ["replay"],
+        "summary": "게임 리플레이 삭제",
         "description": "",
         "parameters": [
           {
@@ -727,6 +767,8 @@
     },
     "/event/{year}/{month}/{guild_id}": {
       "get": {
+        "tags": ["event"],
+        "summary": "이번달 특정 조건(50승/150판) 여부 조회 및 달성시 DB에 저장",
         "description": "",
         "parameters": [
           {
