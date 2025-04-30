@@ -14,25 +14,20 @@ const HttpError = require("../utils/HttpError");
  * @param {String} guild_id
  * @description 리플레이 저장
  * @returns {String} message
- */
+*/
 const save = async (fileUrl, fileName, createUser, guild_id) => {
-  try {
-    if (await checkDuplicate(fileName, guild_id)) {
-      const bytesData = await getInputStreamDiscordFile(fileUrl);
+  if (await checkDuplicate(fileName, guild_id)) {
+    const bytesData = await getInputStreamDiscordFile(fileUrl);
 
-      if (bytesData) {
-        const statsArray = await parseReplayData(bytesData);
-        await saveData(statsArray, fileName, createUser, guild_id);
-        return `:green_circle:등록완료: ${fileName} 반영 완료`;
-      } else {
-        throw HttpError.internal("디스코드 파일 데이터 가져오기 실패");
-      }
+    if (bytesData) {
+      const statsArray = await parseReplayData(bytesData);
+      await saveData(statsArray, fileName, createUser, guild_id);
+      return `:green_circle:등록완료: ${fileName} 반영 완료`;
     } else {
-      throw HttpError.badRequest(`:red_circle:등록실패: ${fileName} 중복된 리플 파일 등록`);
+      throw HttpError.internal("디스코드 파일 데이터 가져오기 실패");
     }
-  } catch (e) {
-    console.log(e);
-    throw HttpError.internal(":red_circle: 저장 실패");
+  } else {
+    throw HttpError.badRequest(`:red_circle:등록실패: ${fileName} 중복된 리플 파일 등록`);
   }
 };
 
