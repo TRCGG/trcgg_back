@@ -1,3 +1,5 @@
+const HttpError = require('../utils/HttpError');
+
 /**
  * StringUtils 
  */
@@ -20,7 +22,7 @@ const dictPosition = (position) => {
     case "서폿":
       return "SUP";
     default:
-      throw new Error("잘못된 값:" + position);
+      throw HttpError.badRequest("잘못된 값:" + position);
   }
 };
 

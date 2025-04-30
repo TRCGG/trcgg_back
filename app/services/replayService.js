@@ -5,7 +5,7 @@
 const axios = require("axios");
 const managementMapper = require('../db/mapper/managementMapper');
 const { DateTime } = require("luxon");
-const responseUtils = require("../utils/responseUtils");
+const HttpError = require("../utils/HttpError");
 
 /**
  * @param {String} fileUrl
@@ -25,14 +25,14 @@ const save = async (fileUrl, fileName, createUser, guild_id) => {
         await saveData(statsArray, fileName, createUser, guild_id);
         return `:green_circle:등록완료: ${fileName} 반영 완료`;
       } else {
-        throw new Error("디스코드 파일 데이터 가져오기 실패");
+        throw HttpError.internal("디스코드 파일 데이터 가져오기 실패");
       }
     } else {
-      return `:red_circle:등록실패: ${fileName} 중복된 리플 파일 등록`;
+      throw HttpError.badRequest(`:red_circle:등록실패: ${fileName} 중복된 리플 파일 등록`);
     }
   } catch (e) {
     console.log(e);
-    return ":red_circle: 저장 실패";
+    throw HttpError.internal(":red_circle: 저장 실패");
   }
 };
 
@@ -50,10 +50,10 @@ const deleteRecord = async (game_id, guild_id) => {
     if(playerGame >= 1) {
       return `:orange_circle:데이터 삭제완료: ${game_id}`;
     } else {
-      return "playerGame 삭제 실패";
+      throw HttpError.internal("playerGame 삭제 실패");
     }
   } else {
-    return responseUtils.notFoundResponse();
+    throw HttpError.notFound();
   } 
 };
 
@@ -70,7 +70,7 @@ const parseReplayData = async (byte) => {
   const endIndex = byteString.lastIndexOf('"}');
 
   if (!byteString || byteString.length === 0) {
-    throw new Error("파싱 데이터가 없습니다");
+    throw HttpError.internal("파싱 데이터가 없습니다");
   }
 
   try {
@@ -85,7 +85,7 @@ const parseReplayData = async (byte) => {
     return JSON.stringify(statsArray);
   } catch (error) {
     console.error(`파싱 에러: ${error}`);
-    throw error;
+    throw HttpError.internal("파싱 에러");
   }
 };
 
@@ -100,7 +100,7 @@ const getInputStreamDiscordFile = async (fileUrl) => {
     return Buffer.from(response.data);
   } catch (error) {
     console.error(`파일 가져오기 에러: ${error}`);
-    return null;
+    throw HttpError.internal("파일 가져오기 에러");
   }
 };
 

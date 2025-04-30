@@ -14,7 +14,7 @@ class BaseRouter {
   }
 
   handle(handler) {
-    return async (req, res) => {
+    return async (req, res, next) => {
       try {
         // Decode guild_id from base64 if it exists in the params
         if (req.params.guild_id) {
@@ -22,15 +22,19 @@ class BaseRouter {
             req.params.guild_id = Buffer.from(req.params.guild_id, 'base64').toString('utf8');
         } catch (decodeError) {
             console.warn('⚠️ guild_id 디코딩 실패:', decodeError.message);
-            return res.status(400).json({ error: 'Invalid guild_id encoding' });
+            return res.badRequest('Invalid guild_id encoding');
+            // return res.status(400).json({ error: 'Invalid guild_id encoding' });
           }
         }
         const result = await handler(req);
-        res.json(result);
+        // res.json(result);
+        res.success(result);
       } catch (error) {
-        res.status(error.status || 500).json({
-          error: error.message
-        });
+        if(error.statusCode === 400) return res.badRequest(error.message);
+        if(error.statusCode === 401) return res.unauthorized(error.message);
+        if(error.statusCode === 403) return res.notFound(error.message);
+        if(error.statusCode === 404) return res.error(error.message, 404);
+        return res.internalError(error.message);
       }
     };
   }

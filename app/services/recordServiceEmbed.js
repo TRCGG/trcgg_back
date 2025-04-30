@@ -4,7 +4,7 @@
 const RecordService = require("./recordService");
 const stringUtils = require("../utils/stringUtils");
 const arrayUtils = require("../utils/arrayUtils");
-const responseUtils = require("../utils/responseUtils");
+const HttpError = require("../utils/HttpError");
 
 /**
  * @param {String} riot_name 
@@ -21,8 +21,8 @@ const getAllRecordEmbed = async (riot_name, riot_name_tag, guild_id) => {
     return allData;
   }
   // 계정 조회 2건 이상일 경우
-  if (allData.error){
-    return responseUtils.getPlayersEmbed(allData.player);
+  if (allData.player.length >= 2){
+    return getPlayersEmbed(allData.player);
   }
 
   // 통합 전적
@@ -250,7 +250,7 @@ const getStatisticOfGameEmbed = async (guild_id, year, month) => {
   const title = `${year}-${month} 게임 통계`;
   const records = await RecordService.getStatisticOfGame(guild_id, year, month);
   if(records.length === 0){
-    return responseUtils.notFoundResponse();
+    throw HttpError.notFound();
   }
   const field_one_header = "판수 20위";
   const field_one_value = arrayUtils.makeStatsList(records.slice(0,20), "game");
@@ -293,7 +293,7 @@ const getStatisticOfGameAllMemberEmbed = async (guild_id, year, month) => {
   let str = ""
   const records = await RecordService.getStatisticOfGame(guild_id, year, month);
   if(records.length === 0){
-    return responseUtils.notFoundResponse();
+    throw HttpError.notFound();
   }
   records.forEach((record) => {
     str += `${record.riot_name} ${record.total_count}판 \n`;
@@ -312,7 +312,7 @@ const getStatisticOfGameAllMemberEmbed = async (guild_id, year, month) => {
 const getWinRateByPositionEmbed = async (position, guild_id) => {
   const records = await RecordService.getWinRateByPosition(position, guild_id);
   if (records.length === 0 ){
-    return responseUtils.notFoundResponse();
+    throw HttpError.notFound();
   }
 
   const title = `${position} 라인`;
@@ -359,7 +359,7 @@ const getWinRateByPositionEmbed = async (position, guild_id) => {
 const getRecordByGameEmbed = async (game_id, guild_id) => {
   const game_data = await RecordService.getRecordByGame(game_id, guild_id);
   if (game_data.length === 0) {
-    return responseUtils.notFoundResponse();
+    throw HttpError.notFound();
   }
 
   let dto = game_data[0];
@@ -409,8 +409,8 @@ const getRecentGamesByRiotNameEmbed = async (riot_name, riot_name_tag, guild_id)
     return recent_data;
   }
   // 계정 조회 2건 이상일 경우
-  if (recent_data.error){
-    return responseUtils.getPlayersEmbed(recent_data.player);
+  if (recent_data.player.length >= 2){
+    return getPlayersEmbed(recent_data.player);
   }
 
   let title = `${recent_data.player.riot_name}#${recent_data.player.riot_name_tag} 최근 상세 전적`;
@@ -445,7 +445,7 @@ const getMasterOfChampionEmbed = async (champ_name, guild_id) => {
     guild_id
   );
   if (champ_data.length === 0) {
-    return responseUtils.notFoundResponse();
+    throw HttpError.notFound();
   }
 
   let title = champ_name;
@@ -511,7 +511,7 @@ const getStatisticOfChampionEmbed = async (guild_id, year, month) => {
   const title = `${year}-${month} 챔프 통계`;
   const records = await RecordService.getStatisticOfChampion(guild_id, year, month);
   if(records.length === 0){
-    return responseUtils.notFoundResponse();
+    throw HttpError.notFound();
   }
 
   let field_one_header = "인기 챔프:star:";
@@ -546,6 +546,25 @@ const getStatisticOfChampionEmbed = async (guild_id, year, month) => {
   }
   return jsonData;
 };
+
+/**
+ * @param {*} accounts
+ * @description 계정조회 2명 이상일 경우
+ * @returns
+ */
+const getPlayersEmbed = (accounts) => {
+  let desc = "";
+  accounts.forEach((account, index) => {
+    desc += `${account.riot_name}#${account.riot_name_tag} \n`;
+  });
+  const jsonData = {
+    title: "검색결과",
+    description: desc,
+    fields: null,
+    color: 0x0099ff,
+  };
+  return jsonData;
+}
 
 module.exports = {
   getAllRecordEmbed,

@@ -1,5 +1,5 @@
 const accountMapper = require('../db/mapper/accountMapper');
-const responseUtils = require('../utils/responseUtils');
+const HttpError = require('../utils/HttpError');
 /**
  * 계정 Service
  */
@@ -15,7 +15,7 @@ class AccountService {
    */
   async search(riot_name, riot_name_tag, guild_id) {
     if(riot_name.length < 2) {
-      return responseUtils.requireMoreChars();
+      throw HttpError.requireMoreChars();
     }
 
     //첫 계정 조회 (like 없이)
@@ -27,7 +27,7 @@ class AccountService {
     //두번째 계정 조회
     const second_account = await this.getPlayerBySimilarName(riot_name, riot_name_tag, guild_id);
     if(second_account.length === 0) {
-      return responseUtils.notFoundAccount(riot_name, riot_name_tag);
+      throw HttpError.notFoundAccount(riot_name, riot_name_tag);
     }
     return second_account;
   }

@@ -5,6 +5,7 @@ const express = require('express');
 const cors = require('cors');
 const compression = require('compression');
 const RouterFactory = require('./app/routes/core/routerFactory');
+const responseInterceptor = require('./app/middlewares/responseInterceptor');
 require('dotenv').config();
 
 // Constants
@@ -30,12 +31,14 @@ class Server {
     this.setupMiddleware();
     this.setupSwagger();
     this.setupRoutes();
+    this.setupResponseInterceptor();
   }
 
   setupMiddleware() {
     this.app.use(express.json());
     this.app.use(compression());
     this.app.use(cors(CONFIG.CORS_OPTIONS));
+    this.app.use(responseInterceptor);
   }
 
   setupSwagger() {
@@ -47,6 +50,14 @@ class Server {
     routers.forEach((type) => {
       const routerInstance = RouterFactory.createRouter(type);
       this.app.use(`/${type}`, routerInstance.router); // router 속성을 사용해야 함
+    });
+  }
+
+  // 맨 마지막으로 정의해야 함
+  setupResponseInterceptor() {
+    this.app.use((err, req, res, next) => {
+      console.log(err);
+      res.error(err.message || 'Internal Server Error', 500);
     });
   }
 

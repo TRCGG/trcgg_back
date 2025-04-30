@@ -36,7 +36,7 @@ class RecordService extends AccountService {
       };
       return allData;
     } 
-    return { error: 'multiple accounts', player: account }; // 계정 2개 이상일 경우
+    return { player: account }; // 계정 2개 이상일 경우
   } 
 
   /**

@@ -1,6 +1,6 @@
 const AccountService = require('./accountService');
 const managementMapper = require('../db/mapper/managementMapper');
-const responseUtils = require("../utils/responseUtils");
+const HttpError = require("../utils/HttpError");
 
 /**
  * 서비스 관리용 Service
@@ -99,9 +99,9 @@ class managementService extends AccountService {
 
     // 본캐 조회
     const account = await this.getPlayer("N", main_name, main_name_tag, guild_id);
-    if (!account) return "본캐로 게임한 기록이 없습니다.";
+    if (!account) throw HttpError.badRequest("본캐로 게임한 기록이 없습니다.");
     if (account.main_player_id) {
-      return `해당 ${account.riot_name} 계정은 본캐입니다, 부캐는 본캐로 저장할 수 없습니다. !부캐목록을 확인해주세요. `;
+      throw HttpError.badRequest(`해당 ${account.riot_name} 계정은 본캐입니다, 부캐는 본캐로 저장할 수 없습니다. !부캐목록을 확인해주세요.`);
     }
 
     // 부캐가 이미 기록에 있다면 1. 부캐 - main_player_id 추가 2. 부캐 게임기록 본캐로 수정
@@ -139,7 +139,7 @@ class managementService extends AccountService {
     // 본계정 조회
     const account = await this.getPlayer(account_delete_yn, riot_name, riot_name_tag, guild_id);
     if (!account) {
-      return responseUtils.notFoundAccount(riot_name, riot_name_tag);
+      throw HttpError.notFoundAccount(riot_name, riot_name_tag);
     }
 
     // 탈퇴한 본계정의 부계정들 전부 삭제처리, 복귀는 처리하지않음
@@ -150,7 +150,7 @@ class managementService extends AccountService {
     // 본계정 수정
     const result = await this.putPlayer(null, null, null, null, delete_yn, account.player_id);
     if (result.status === 500) {
-      return "본계정 탈퇴/복귀 실패";
+      throw HttpError.internal("본계정 탈퇴/복귀 실패");
     } else {
       if (result >= 1) {
         if (delete_yn === "Y") {
@@ -159,7 +159,7 @@ class managementService extends AccountService {
           return "복귀 완료";
         }
       } else {
-        return responseUtils.notFoundResponse();
+        throw HttpError.notFound();
       }
     }
   }
@@ -179,23 +179,23 @@ class managementService extends AccountService {
     const new_account = await this.getPlayer("N", new_name, new_name_tag, guild_id);
     // 닉변한 계정이 존재하는 경우
     if (new_account) {
-      return `${new_name}#${new_name_tag} 이미 존재하는 닉네임입니다.`;
+      throw HttpError.badRequest(`${new_name}#${new_name_tag} 이미 존재하는 닉네임입니다.`);
     }
 
     // 닉변이전 계정
     const account = await this.getPlayer("N", old_name, old_name_tag, guild_id);
     if (!account) {
-      return responseUtils.notFoundAccount(old_name, old_name_tag);
+      throw HttpError.notFoundAccount(old_name, old_name_tag);
     }
 
     const result = await this.putPlayer(new_name, new_name_tag, null, null, null, account.player_id);
     if (result.status === 500) {
-      return "닉변 실패";
+      throw HttpError.internal("닉변 실패");
     } else {
       if (result >= 1) {
         return "닉변 완료";
       } else {
-        return responseUtils.notFoundResponse();
+        throw HttpError.notFound();
       }
     }
   }
@@ -207,19 +207,19 @@ class managementService extends AccountService {
    * @description !부캐삭제
    * @returns {String} message
    */
-  async deleteSubAccount(sub_name, sub_name_tag, guild_id) { 
+  async deleteSubAccount(sub_name, sub_name_tag, guild_id) {
     const sub_account = await this.getPlayer("N", sub_name, sub_name_tag, guild_id);
     if (!sub_account) {
-      return "해당 부계정이 없습니다.";
+      throw HttpError.badRequest("해당 부계정이 없습니다.") ;
     } else {
       const result = await this.deleteSubPlayer(sub_account.player_id);
       if (result.status === 500) {
-        return "부캐삭제 실패";
+        throw HttpError.internal("부캐삭제 실패");
       } else {
         if (result >= 1) {
           return "부캐삭제 완료";
         } else {
-          return responseUtils.notFoundResponse();
+          throw HttpError.notFound();
         }
       }
     }
