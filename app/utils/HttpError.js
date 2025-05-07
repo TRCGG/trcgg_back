@@ -48,7 +48,7 @@ class HttpError extends Error {
    * 두 글자 이상 입력
    */
   static requireMoreChars = () => {
-    return this.badRequest(400, '두 글자 이상 검색해주세요');
+    return this.badRequest('두 글자 이상 검색해주세요');
   }
 
 }
