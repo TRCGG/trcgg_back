@@ -10,6 +10,7 @@ class RouterFactory {
       replay: require('../replayRoutes'),
       event: require('../eventRoutes'),
       guild: require('../guildRoutes'),
+      championShip: require('../championShipRoutes'),
     };
 
     if (!routers[type]) {

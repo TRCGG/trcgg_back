@@ -12,16 +12,18 @@ const HttpError = require("../utils/HttpError");
  * @param {String} fileName
  * @param {String} createUser
  * @param {String} guild_id
+ * @param {String} game_type
  * @description 리플레이 저장
  * @returns {String} message
 */
-const save = async (fileUrl, fileName, createUser, guild_id) => {
+const save = async (fileUrl, fileName, createUser, guild_id, game_type) => {
   if (await checkDuplicate(fileName, guild_id)) {
     const bytesData = await getInputStreamDiscordFile(fileUrl);
 
     if (bytesData) {
       const statsArray = await parseReplayData(bytesData);
-      await saveData(statsArray, fileName, createUser, guild_id);
+      const params = await setParams(statsArray, fileName, createUser, guild_id, game_type);
+      await postRecord(params);
       return `:green_circle:등록완료: ${fileName} 반영 완료`;
     } else {
       throw HttpError.internal("디스코드 파일 데이터 가져오기 실패");
@@ -104,10 +106,11 @@ const getInputStreamDiscordFile = async (fileUrl) => {
  * @param {String} fileName
  * @param {String} createUser
  * @param {String} guild_id
- * @description 파싱한 데이터 db 저장
+ * @param {String} game_type
+ * @description 파싱한 데이터 Set 
  * @returns
  */
-const saveData = async (statsArray, fileName, createUser, guild_id) => {
+const setParams = async (statsArray, fileName, createUser, guild_id, game_type) => {
   const currentYear = DateTime.now().year;
   const dateTime = fileName.split("_");
 
@@ -126,7 +129,6 @@ const saveData = async (statsArray, fileName, createUser, guild_id) => {
     minute
   ).toFormat("yyyy-MM-dd HH:mm:ss");
 
-  const game_type = 1;
   const hash_data = "";
   const raw_data = statsArray;
   const params = [];
@@ -141,7 +143,7 @@ const saveData = async (statsArray, fileName, createUser, guild_id) => {
     createUser
   );
 
-  return await managementMapper.postRecord(params);
+  return params;
 };
 
 /**
@@ -155,7 +157,22 @@ const checkDuplicate = async (fileName, guild_id) => {
   return result.count === 0;
 };
 
+/**
+ * 
+ * @param {*} params 
+ * @description 전적 추가
+ * @returns 
+ */
+const postRecord = async (params) => {
+  const result = await managementMapper.postRecord(params);
+  return result;
+}
+  
+
 module.exports = {
   save,
   deleteRecord,
+  setParams,
+  getInputStreamDiscordFile,
+  parseReplayData
 };

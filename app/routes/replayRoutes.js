@@ -16,9 +16,9 @@ class ReplayRoutes extends BaseRouter {
    * @description 리플레이 저장
    */
   async saveReplay(req) {
-    const { fileUrl, fileName, createUser } = req.body;
+    const { fileUrl, fileName, createUser, game_type } = req.body;
     const { guild_id } = req.params;
-    return await ReplayService.save(fileUrl, fileName, createUser, guild_id);
+    return await ReplayService.save(fileUrl, fileName, createUser, guild_id, game_type);
   }
 
   /**
