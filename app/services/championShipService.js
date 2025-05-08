@@ -26,7 +26,7 @@ class ChampionShipService {
         const statsArray = await replayService.parseReplayData(bytesData);
         const params = await replayService.setParams(statsArray, fileName, createUser, guild_id, game_type);
         await this.post(params);
-        return `:green_circle:등록완료: ${fileName} 반영 완료`;
+        return `:white_check_mark: 대회기록:${fileName} 반영 완료`;
       } else {
         throw HttpError.internal("디스코드 파일 데이터 가져오기 실패");
       }
