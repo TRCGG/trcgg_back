@@ -99,7 +99,7 @@ class RecordService extends AccountService {
     if(typeof account === 'string') {
       return account;
     }
-    // 검색으로 계정이 2개 이상이면 계정 return
+    
     if(account.length === 1) {
       const records = await recordMapper.getRecentGamesByRiotName(account[0].riot_name, account[0].riot_name_tag, guild_id);
       const result = {
@@ -108,7 +108,7 @@ class RecordService extends AccountService {
       }
       return result;
     } else {
-      return account;
+      return { player : account }; // 계정 2개 이상일 경우
     }
   }
 
