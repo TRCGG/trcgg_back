@@ -15,8 +15,14 @@ class managementService extends AccountService {
    * @returns 
    */
   async getDocEmbed() {
-    // 검색 명령어
+
+    // 내전 폼 명령어
     const field_one_value =
+      "`!내전 ` 내전 신청 폼 생성 \n" +
+      "`!로그채널등록` 내전 신청 폼 로그 채널 등록 \n";
+
+    // 검색 명령어
+    const field_two_value =
       "`!전적 !전적 {name}` 자신의 전적, name의 전적 검색 \n" +
       "`!최근전적 {name}` 최근 10게임 상세 검색\n" +
       "`!결과 {gameId}` 내전 게임 결과 검색 \n" +
@@ -25,15 +31,16 @@ class managementService extends AccountService {
       "`!라인 {탑|정글|미드|원딜|서폿}` 30게임 이상 {라인}별 승률\n\n";
 
     // 관리자 명령어
-    const field_two_value =
-      ":one: 태그 필수 \n" +
-      ":two: 관리자 권한 필요(TRC관리자 역할)\n" +
+    const field_three_value =
+      ":star: #태그 필요 \n" +
+      ":star: 관리자 권한 필요(TRC관리자 역할이름)\n" +
+      ":star: 닉네임 띄어쓰기, 대소문자 구분 필수!! \n" +
       "`!탈퇴 {name#tag}` 계정 탈퇴, 전적 검색 제외 \n" +
       "`!복귀 {name#tag}` 계정 복구, 전적 검색 포함 \n" +
       "`!부캐목록` 등록된 모든 부계정 목록 \n" +
       "`!부캐저장 {부캐닉#태그/본캐닉#태그}` 부계정 등록, 부계정 전적은 본계정 전적으로 이동 \n" +
       "`!부캐삭제 {부캐닉#태그}` 등록된 부계정 삭제 \n" +
-      "`!닉변 {oldname#tag/newname#tag}` 닉네임 변경(띄어쓰기, 대소문자 구분!) \n" +
+      "`!닉변 {oldname#tag/newname#tag}` 수동 닉네임 변경 (리플 올리면 자동으로 반영) \n" +
       "`!drop {리플파일명}` 저장된 리플 데이터 삭제 \n";
 
     const jsonData = {
@@ -41,13 +48,18 @@ class managementService extends AccountService {
       description: "",
       fields: [
         {
-          name: "검색 명령어",
+          name: "내전 폼 명령어",
           value: field_one_value,
           inline: false,
         },
         {
-          name: "관리자 명령어(닉네임 띄어쓰기, 대소문자 구분 :star:)",
+          name: "검색 명령어",
           value: field_two_value,
+          inline: false,
+        },
+        {
+          name: "관리자 명령어",
+          value: field_three_value,
           inline: false,
         },
       ],
