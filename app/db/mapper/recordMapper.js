@@ -233,7 +233,8 @@ const getRecordByGame = async (game_id, guild_id) => {
       SELECT 
              pg.game_id, 
              p.riot_name, 
-             c.champ_name, 
+             c.champ_name,
+             c.champ_name_eng, 
              pg.position, 
              pg.kill, 
              pg.death, 
@@ -279,6 +280,7 @@ const getRecentGamesByRiotName = async (riot_name, riot_name_tag, guild_id) => {
              pg.game_id, 
              p.riot_name, 
              c.champ_name, 
+             c.champ_name_eng, 
              pg.position, 
              pg.kill, 
              pg.death, 
@@ -323,6 +325,7 @@ const getMostPicks = async (riot_name, riot_name_tag, guild_id) => {
     `
       SELECT 
              c.champ_name,
+             c.champ_name_eng, 
              ${selectWinRateAndKdaSql('pg',true)}
         FROM Player_game AS pg  
         JOIN Player AS p ON pg.player_id = p.player_id
@@ -339,7 +342,7 @@ const getMostPicks = async (riot_name, riot_name_tag, guild_id) => {
     `
          AND p.guild_id = $2
          AND pg.delete_yn = 'N'
-       GROUP BY c.champ_name
+       GROUP BY c.champ_name, c.champ_name_eng
        ORDER BY total_count DESC 
     `
   const result = await db.query(query, params);
@@ -384,6 +387,7 @@ const getStatisticOfChampion = async (guild_id, year, month) => {
     `
       SELECT 
              c.champ_name,
+             c.champ_name_eng,
              ${selectWinRateAndKdaSql('pg', null)}
         FROM Player_game AS pg  
         JOIN Player AS p ON pg.player_id = p.player_id
@@ -392,7 +396,7 @@ const getStatisticOfChampion = async (guild_id, year, month) => {
          AND p.guild_id = $1
          AND TO_CHAR(pg.game_date, 'YYYY') = $2
          AND TO_CHAR(pg.game_date, 'MM') = $3
-       GROUP BY c.champ_name
+       GROUP BY c.champ_name, c.champ_name_eng
        ORDER BY total_count DESC
     `,
     [guild_id, year, month]
