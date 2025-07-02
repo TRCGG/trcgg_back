@@ -119,7 +119,7 @@ class managementService extends AccountService {
     // 부캐가 이미 기록에 있다면 1. 부캐 - main_player_id 추가 2. 부캐 게임기록 본캐로 수정
     if (sub_account) {
       // 1
-      await this.putPlayer(null, null, account.puuid, account.player_id, null, sub_account.player_id);
+      await this.putPlayer(null, null, null, account.player_id, null, sub_account.player_id);
       // 2
       if (sub_account) {
         await managementMapper.putPlayerGamePlayerId(sub_account.player_id, account.player_id);
@@ -127,8 +127,8 @@ class managementService extends AccountService {
       }
     } else {
       // 부캐기록이 없어서 새로 등록
-      await this.postSubPlayer(sub_name, sub_name_tag, guild_id, account.puuid, account.player_id);
-      return "등록 완료";
+      // await this.postSubPlayer(sub_name, sub_name_tag, guild_id, account.puuid, account.player_id);
+      return "부캐 기록이 없습니다.";
     }
   }
 
