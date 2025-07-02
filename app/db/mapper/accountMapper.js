@@ -146,14 +146,14 @@ const postSubPlayer = async (riot_name, riot_name_tag, guild_id, puuid, main_pla
              puuid,
              main_player_id
            )
-    SELECT 
-             'PLR_' || (COALESCE(MAX(CAST(SUBSTR(player_id, 5) AS INTEGER)), 0) + 1) AS player_id,
+    VALUES ( 
+             'PLR_' || LPAD(nextval('player_id_seq')::TEXT, 5, '0'),
              $1,
              $2,
              $3,
              $4,
              $5
-      FROM Player
+            )
   `;
   const result = await db.query(query, [
     riot_name,
