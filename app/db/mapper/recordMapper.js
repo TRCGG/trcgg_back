@@ -204,6 +204,7 @@ const getWinRateByPosition = async (position, guild_id) => {
       SELECT 	
              pg.position,
              p.riot_name,
+             p.riot_name_tag,
              ${selectWinRateAndKdaSql('pg',true)}
         FROM Player_game AS pg  
         JOIN Player AS p ON pg.player_id = p.player_id
@@ -233,6 +234,7 @@ const getRecordByGame = async (game_id, guild_id) => {
       SELECT 
              pg.game_id, 
              p.riot_name, 
+             p.riot_name_tag,
              c.champ_name,
              c.champ_name_eng, 
              pg.position, 
@@ -279,6 +281,7 @@ const getRecentGamesByRiotName = async (riot_name, riot_name_tag, guild_id) => {
       SELECT 
              pg.game_id, 
              p.riot_name, 
+             p.riot_name_tag,
              c.champ_name, 
              c.champ_name_eng, 
              pg.position, 
@@ -360,6 +363,7 @@ const getMasterOfChampion = async (champ_name, guild_id) => {
     `
       SELECT 
              p.riot_name, 
+             p.riot_name_tag,
              ${selectWinRateAndKdaSql('pg',true)}
         FROM Player_game AS pg  
         JOIN Player AS p ON pg.player_id = p.player_id
