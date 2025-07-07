@@ -212,7 +212,7 @@ const getWinRateByPosition = async (position, guild_id) => {
          AND p.guild_id = $2
          AND p.delete_yn = 'N'         
          AND pg.delete_yn = 'N'
-       GROUP BY pg.position, p.riot_name 
+       GROUP BY pg.position, p.riot_name , p.riot_name_tag
       HAVING COUNT(p.riot_name) >= 20
        ORDER BY win_rate DESC
        LIMIT 15   
@@ -371,7 +371,7 @@ const getMasterOfChampion = async (champ_name, guild_id) => {
        WHERE c.champ_name = $1
          AND p.guild_id = $2
          AND p.delete_yn = 'N'
-       GROUP BY p.riot_name 
+       GROUP BY p.riot_name, p.riot_name_tag
        ORDER BY total_count DESC
     `,
     [champ_name, guild_id]
