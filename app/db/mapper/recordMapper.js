@@ -244,7 +244,10 @@ const getRecordByGame = async (game_id, guild_id) => {
              pg.game_result, 
              pg.game_team,
              pg.total_damage_champions,
+             pg.total_damage_taken,
+             pg.vision_score,
              pg.vision_bought,
+             pg.time_played,
              pg.penta_kills,
              pg.level,
              pg.item0,
@@ -257,7 +260,8 @@ const getRecordByGame = async (game_id, guild_id) => {
              pg.summoner_spell_1,
              pg.summoner_spell_2,
              pg.keystone_id,
-             pg.perk_sub_style
+             pg.perk_sub_style,
+             pg.create_date
         FROM Player_game AS pg  
         JOIN Player AS p ON pg.player_id = p.player_id
         JOIN Champion c ON pg.champion_id = c.champion_id
@@ -303,7 +307,10 @@ const getRecentGamesByRiotName = async (riot_name, riot_name_tag, guild_id) => {
              pg.game_result, 
              pg.game_team,
              pg.total_damage_champions,
+             pg.total_damage_taken,
+             pg.vision_score,
              pg.vision_bought,
+             pg.time_played,
              pg.penta_kills,
              pg.level,
              pg.item0,
@@ -316,7 +323,8 @@ const getRecentGamesByRiotName = async (riot_name, riot_name_tag, guild_id) => {
              pg.summoner_spell_1,
              pg.summoner_spell_2,
              pg.keystone_id,
-             pg.perk_sub_style
+             pg.perk_sub_style,
+             pg.create_date
         FROM Player_game AS pg  
         JOIN Player AS p ON pg.player_id = p.player_id
         JOIN Champion c ON pg.champion_id = c.champion_id
