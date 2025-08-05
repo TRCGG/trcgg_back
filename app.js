@@ -6,6 +6,7 @@ const cors = require('cors');
 const compression = require('compression');
 const RouterFactory = require('./app/routes/core/routerFactory');
 const responseInterceptor = require('./app/middlewares/responseInterceptor');
+const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
 // Constants
@@ -14,7 +15,7 @@ const CONFIG = {
   HOST: process.env.HOST || 'localhost',
   CORS_OPTIONS: {
     origin: '*',
-    credentials: false,
+    credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: '*'
   }
@@ -36,6 +37,7 @@ class Server {
 
   setupMiddleware() {
     this.app.use(express.json());
+    this.app.use(cookieParser());
     this.app.use(compression());
     this.app.use(cors(CONFIG.CORS_OPTIONS));
     this.app.use(responseInterceptor);
@@ -46,7 +48,7 @@ class Server {
   }
 
   setupRoutes() {
-    const routers = ["account", "record", "management", "replay", "event", "guild", "championShip"];
+    const routers = ["account", "record", "management", "replay", "event", "guild", "championShip", "auth"];
     routers.forEach((type) => {
       const routerInstance = RouterFactory.createRouter(type);
       this.app.use(`/${type}`, routerInstance.router); // router 속성을 사용해야 함
@@ -56,8 +58,8 @@ class Server {
   // 맨 마지막으로 정의해야 함
   setupResponseInterceptor() {
     this.app.use((err, req, res, next) => {
-      console.log(err);
-      res.error(err.message || 'Internal Server Error', 500);
+      console.error(err);
+      res.status(500).json({ error: err.message || 'Internal Server Error' });
     });
   }
 
