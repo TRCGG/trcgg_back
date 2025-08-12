@@ -257,14 +257,22 @@ const getRecordByGame = async (game_id, guild_id) => {
              pg.item4,
              pg.item5,
              pg.item6,
-             pg.summoner_spell_1,
-             pg.summoner_spell_2,
-             pg.keystone_id,
-             pg.perk_sub_style,
+             sp1.key AS summoner_spell_1_key,
+             sp1.name AS summoner_spell_1_name,
+             sp2.key AS summoner_spell_2_key,
+             sp2.name AS summoner_spell_2_name,
+             keystone.icon AS keyston_icon, 
+             keystone.name AS keyston_name,
+             substyle.icon AS substyle_icon,
+             substyle.name AS substyle_name,
              pg.create_date
         FROM Player_game AS pg  
         JOIN Player AS p ON pg.player_id = p.player_id
         JOIN Champion c ON pg.champion_id = c.champion_id
+        JOIN Summoner_spell AS sp1 ON pg.summoner_spell_1 = sp1.id
+		    JOIN Summoner_spell AS sp2 ON pg.summoner_spell_2 = sp2.id
+        JOIN Perks AS keystone ON pg.keystone_id = keystone.id
+		    JOIN Perks AS substyle ON pg.perk_sub_style = substyle.id
        WHERE LOWER(pg.game_id) = LOWER($1)
          AND p.guild_id = $2
          AND p.delete_yn = 'N'         
@@ -320,14 +328,22 @@ const getRecentGamesByRiotName = async (riot_name, riot_name_tag, guild_id) => {
              pg.item4,
              pg.item5,
              pg.item6,
-             pg.summoner_spell_1,
-             pg.summoner_spell_2,
-             pg.keystone_id,
-             pg.perk_sub_style,
+             sp1.key AS summoner_spell_1_key,
+             sp1.name AS summoner_spell_1_name,
+             sp2.key AS summoner_spell_2_key,
+             sp2.name AS summoner_spell_2_name,
+             keystone.icon AS keyston_icon, 
+             keystone.name AS keyston_name,
+             substyle.icon AS substyle_icon,
+             substyle.name AS substyle_name,
              pg.create_date
         FROM Player_game AS pg  
         JOIN Player AS p ON pg.player_id = p.player_id
         JOIN Champion c ON pg.champion_id = c.champion_id
+        JOIN Summoner_spell AS sp1 ON pg.summoner_spell_1 = sp1.id
+		    JOIN Summoner_spell AS sp2 ON pg.summoner_spell_2 = sp2.id
+        JOIN Perks AS keystone ON pg.keystone_id = keystone.id
+		    JOIN Perks AS substyle ON pg.perk_sub_style = substyle.id
        WHERE p.riot_name = $1
     `;
   const params = [riot_name, guild_id];
