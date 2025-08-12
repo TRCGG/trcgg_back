@@ -8,6 +8,9 @@
   "servers": [
     {
       "url": "http://3.34.106.28:24001"
+    },
+    {
+      "url": "http://localhost:24001"
     }
   ],
   "paths": {
@@ -796,6 +799,112 @@
             }
           }
 
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/clanMatch": {
+      "get": {
+        "tags": ["clanMatch"],
+        "summary": "클랜 매치, 최근전적 조회",
+        "description": "",
+        "parameters": [
+          {
+            "name": "game_type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "enum": [3,4,5]
+              }
+            }
+          },
+          {
+            "name": "our_clan_role_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "opponent_clan_role_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "post": {
+        "tags": ["clanMatch"],
+        "summary": "클랜 매치 저장",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file_name": {
+                    "example": "any"
+                  },
+                  "game_type": {
+                    "example": "3(스크림) 4(격전) 5(대회)"
+                  },
+                  "our_clan_role_id": {
+                    "example": "any"
+                  },
+                  "opponent_clan_role_id": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["clanMatch"],
+        "summary": "클랜 매치 삭제",
+        "description": "",
+        "parameters": [
+          {
+            "name": "file_name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
         ],
         "responses": {
           "200": {
