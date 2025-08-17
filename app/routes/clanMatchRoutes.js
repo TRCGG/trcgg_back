@@ -7,6 +7,7 @@ const ClanMatchService = require("../services/clanMatchService");
 class ClanMatchRoutes extends BaseRouter {
   initializeRoutes() {
     this.router.get("/", this.handle(this.getClanMatch));
+    this.router.get("/count", this.handle(this.getClanMatchCount));
     this.router.post("/", this.handle(this.postClanMatch));
     this.router.delete("/", this.handle(this.deleteClanMatch));
   }
@@ -18,6 +19,14 @@ class ClanMatchRoutes extends BaseRouter {
       : game_type?.split(',').map((v) => Number(v.trim()));
       
     return await ClanMatchService.getClanMatch(gameTypes, our_clan_role_id, opponent_clan_role_id);
+  }
+
+  async getClanMatchCount(req) {
+    const { our_clan_role_id, opponent_clan_role_id } = req.query;
+    if (!our_clan_role_id || !opponent_clan_role_id) {
+      throw new Error("클랜 역할 ID는 필수입니다.");
+    }
+    return await ClanMatchService.getClanMatchCount(our_clan_role_id, opponent_clan_role_id);
   }
 
   async postClanMatch(req) {

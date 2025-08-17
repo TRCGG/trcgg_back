@@ -62,6 +62,20 @@ class ClanMatchService {
     return `:orange_circle: 클랜 매치 데이터 삭제완료: ${file_name}`;
   }
 
+  /**
+   * 
+   * @param {*} our_clan_role_id 
+   * @param {*} opponent_clan_role_id 
+   * @description 클랜전적 스크림 매치 카운트 조회
+   */
+  async getClanMatchCount(our_clan_role_id, opponent_clan_role_id) {
+    if (!our_clan_role_id) {
+      throw HttpError.badRequest();
+    }
+    const clanMatchCount = await clanMatchMapper.getClanMatchCount(our_clan_role_id, opponent_clan_role_id);
+    return clanMatchCount;
+  }
+
 }
 
 module.exports = new ClanMatchService();

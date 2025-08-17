@@ -833,7 +833,7 @@
             "in": "query",
             "required": true,
             "schema": {
-              "type": "integer"
+              "type": "string"
             }
           },
           {
@@ -841,7 +841,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "type": "integer"
+              "type": "string"
             }
           }
 
@@ -915,6 +915,40 @@
           }
         }
       }
+    },
+    "/clanMatch/count": {
+      "get": {
+        "tags": ["clanMatch"],
+        "summary": "클랜 매치 횟수 조회",
+        "description": "",
+        "parameters": [
+          {
+            "name": "our_clan_role_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "opponent_clan_role_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
     }
+    
   }
 }

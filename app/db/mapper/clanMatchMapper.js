@@ -32,12 +32,12 @@ const getClanMatch = async (game_type, our_clan_role_id, opponent_clan_role_id) 
                       WHEN our_clan_role_id = $2 THEN 'win'
                       ELSE 'lose'
                     END AS game_result
-                  FROM clan_match 
+                  FROM scrim_clan_match 
                   WHERE game_type = ANY($1)
                     AND (our_clan_role_id = $2 or opponent_clan_role_id = $2)
                     AND delete_yn = 'N'
                 ) AS k
-        LEFT JOIN guild g
+        LEFT JOIN scrim_clan g
               ON k.opponent_clan_role_id = g.clan_role_id
         `
   const params = [game_type, our_clan_role_id];
@@ -83,14 +83,14 @@ const getRecentClanMatch = async (game_type, our_clan_role_id, opponent_clan_rol
                            WHEN cm.our_clan_role_id = $2 THEN 'win'
                            ELSE 'lose'
                          END AS game_result
-                    FROM clan_match cm
+                    FROM scrim_clan_match cm
                    WHERE cm.game_type = ANY($1)
                      AND (cm.our_clan_role_id = $2 OR cm.opponent_clan_role_id = $2)
                      AND cm.delete_yn = 'N'
                 ORDER BY cm.create_date DESC
                    LIMIT 20
                   ) AS k
-       LEFT JOIN guild g 
+       LEFT JOIN scrim_clan g 
               ON k.opponent_clan_role_id = g.clan_role_id 
         ORDER BY k.create_date DESC
         `;
@@ -113,7 +113,7 @@ const postClanMatch = async (params) => {
     const result = await db.query(
     `
       INSERT 
-        INTO clan_match
+        INTO scrim_clan_match
            (
             file_name,
             game_type,
@@ -143,10 +143,27 @@ const postClanMatch = async (params) => {
 const deleteClanMatch = async (file_name) => {
   const query = `
     DELETE 
-      FROM clan_match
+      FROM scrim_clan_match
      WHERE file_name = $1
   `;
   return await db.query(query, [file_name]);
+}
+
+const getClanMatchCount = async (our_clan_role_id, opponent_clan_role_id) => {
+  const query = `
+      WITH pair AS (
+        SELECT LEAST($1, $2) AS a, GREATEST($1, $2) AS b
+      )
+      SELECT COUNT(*)::INT AS meeting_count
+        FROM scrim_clan_match cm
+        JOIN pair p ON
+       LEAST (cm.our_clan_role_id, cm.opponent_clan_role_id) = p.a
+         AND GREATEST(cm.our_clan_role_id, cm.opponent_clan_role_id) = p.b
+       WHERE cm.delete_yn = 'N';
+  `;
+  const params = [our_clan_role_id, opponent_clan_role_id];
+  const result = await db.queryOne(query, params);
+  return result;
 }
 
 
@@ -154,5 +171,6 @@ module.exports = {
   getClanMatch,
   getRecentClanMatch,
   postClanMatch,
-  deleteClanMatch
+  deleteClanMatch,
+  getClanMatchCount,
 };
