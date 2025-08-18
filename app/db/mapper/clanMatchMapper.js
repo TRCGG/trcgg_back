@@ -91,14 +91,15 @@ const getRecentClanMatch = async (game_type, our_clan_role_id, opponent_clan_rol
                    LIMIT 20
                   ) AS k
        LEFT JOIN scrim_clan g 
-              ON k.opponent_clan_role_id = g.clan_role_id 
-        ORDER BY k.create_date DESC
+              ON k.opponent_clan_role_id = g.clan_role_id
         `;
   const params = [game_type, our_clan_role_id];
   if(opponent_clan_role_id) {
     query += `WHERE k.opponent_clan_role_id = $3 `;
     params.push(opponent_clan_role_id);
   }
+  query += `ORDER BY k.create_date DESC`;
+  
   const result = await db.query(query, params);
   return result;
 }
