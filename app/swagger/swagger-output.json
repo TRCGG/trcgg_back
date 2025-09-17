@@ -7,14 +7,138 @@
   },
   "servers": [
     {
-      "url": "http://3.34.106.28:24001"
+      "url": "http://13.124.155.28:24001"
+    },
+    {
+      "url": "http://localhost:24001"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "디스코드 OAuth2 인증 및 로그아웃 관련 API"
+    },
+    {
+      "name": "User",
+      "description": "디스코드 유저/길드 정보 조회 관련 API"
+    },
+    {
+      "name": "Account",
+      "description": "소환사 계정 관리 관련 API"
+    },
+    {
+      "name": "Record",
+      "description": "게임 기록 및 전적 조회 관련 API"
+    },
+    {
+      "name": "Replay",
+      "description": "게임 리플레이 업로드 및 관리 관련 API"
+    },
+    {
+      "name": "Event",
+      "description": "게임 통계 이벤트 관련 API"
+    },
+    {
+      "name": "Management",
+      "description": "부계정 및 계정 상태 관리 관련 API"
     }
   ],
   "paths": {
+    "/auth/login": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "디스코드 로그인 페이지로 리디렉션",
+        "description": "사용자를 디스코드 OAuth2 로그인 페이지로 리디렉션하여 인증을 시작합니다.",
+        "responses": {
+          "302": {
+            "description": "디스코드 로그인 페이지로 리디렉션"
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "로그아웃",
+        "description": "사용자 세션을 비활성화하고, 쿠키를 삭제한 후, 애플리케이션의 메인 페이지로 리디렉션합니다.",
+        "responses": {
+          "302": {
+            "description": "성공적으로 로그아웃 후 메인 페이지로 리디렉션"
+          }
+        }
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "현재 유저 정보 조회",
+        "description": "인증된 사용자의 디스코드 유저 정보를 조회합니다.",
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "세션 쿠키가 유효하지 않거나 누락됨"
+          }
+        }
+      }
+    },
+    "/auth/guilds": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "사용자가 속한 길드 목록 조회",
+        "description": "인증된 사용자가 속한 길드의 목록을 조회합니다. 이 API는 `guilds` 스코프가 필요합니다.",
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Guild"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "세션 쿠키가 유효하지 않거나 누락됨"
+          }
+        }
+      }
+    },
     "/account/search/{riot_name}/{guild_id}": {
       "get": {
-        "tags": ["account"],
-        "summary": "소환사 계정 검색(일반)",
+        "tags": [
+          "Account"
+        ],
+        "summary": "소환사 계정 검색",
         "description": "소환사 계정 검색(like 검색어 사용, 대소문자 구분 안함)",
         "parameters": [
           {
@@ -53,7 +177,9 @@
     },
     "/record/result/{game_id}/{guild_id}": {
       "get": {
-        "tags": ["record"],
+        "tags": [
+          "Record"
+        ],
         "summary": "게임 결과 조회",
         "description": "game_id로 게임 결과 조회",
         "parameters": [
@@ -67,7 +193,7 @@
           },
           {
             "name": "guild_id",
-          "in": "path",
+            "in": "path",
             "required": true,
             "schema": {
               "type": "string"
@@ -86,7 +212,9 @@
     },
     "/record/all/{riot_name}/{guild_id}": {
       "get": {
-        "tags": ["record"],
+        "tags": [
+          "Record"
+        ],
         "summary": "전적 조회",
         "description": "전적 조회에 필요한 모든 정보",
         "parameters": [
@@ -126,7 +254,9 @@
     },
     "/record/recent/{riot_name}/{guild_id}": {
       "get": {
-        "tags": ["record"],
+        "tags": [
+          "Record"
+        ],
         "summary": "최근 20 게임 전적 조회",
         "description": "",
         "parameters": [
@@ -166,7 +296,9 @@
     },
     "/record/all/embed/{riot_name}/{guild_id}": {
       "get": {
-        "tags": ["record/embed"],
+        "tags": [
+          "Record"
+        ],
         "summary": "전적 조회(디스코드용)",
         "description": "",
         "parameters": [
@@ -206,7 +338,9 @@
     },
     "/record/master/embed/{champ_name}/{guild_id}": {
       "get": {
-        "tags": ["record/embed"],
+        "tags": [
+          "Record"
+        ],
         "summary": "챔피언 장인 조회(디스코드용)",
         "description": "",
         "parameters": [
@@ -239,7 +373,9 @@
     },
     "/record/champstat/embed/{year}/{month}/{guild_id}": {
       "get": {
-        "tags": ["record/embed"],
+        "tags": [
+          "Record"
+        ],
         "summary": "챔피언 통계 조회(디스코드용)",
         "description": "",
         "parameters": [
@@ -280,7 +416,9 @@
     },
     "/record/gamestat/embed/{year}/{month}/{guild_id}": {
       "get": {
-        "tags": ["record/embed"],
+        "tags": [
+          "Record"
+        ],
         "summary": "게임 통계 조회(디스코드용)",
         "description": "",
         "parameters": [
@@ -321,7 +459,9 @@
     },
     "/record/linestat/embed/{position}/{guild_id}": {
       "get": {
-        "tags": ["record/embed"],
+        "tags": [
+          "Record"
+        ],
         "summary": "라인 통계 조회(디스코드용)",
         "description": "",
         "parameters": [
@@ -354,7 +494,9 @@
     },
     "/record/result/embed/{game_id}/{guild_id}": {
       "get": {
-        "tags": ["record/embed"],
+        "tags": [
+          "Record"
+        ],
         "summary": "게임 결과 조회(디스코드용)",
         "description": "",
         "parameters": [
@@ -387,7 +529,9 @@
     },
     "/record/recent/embed/{riot_name}/{guild_id}": {
       "get": {
-        "tags": ["record/embed"],
+        "tags": [
+          "Record"
+        ],
         "summary": "최근 10 게임 전적 조회(디스코드용)",
         "description": "",
         "parameters": [
@@ -427,7 +571,9 @@
     },
     "/record/clanstat/embed/{year}/{month}/{guild_id}": {
       "get": {
-        "tags": ["record/embed"],
+        "tags": [
+          "Record"
+        ],
         "summary": "클랜 통계 조회(디스코드용)",
         "description": "",
         "parameters": [
@@ -468,7 +614,9 @@
     },
     "/management/doc": {
       "get": {
-        "tags": ["management"],
+        "tags": [
+          "Management"
+        ],
         "summary": "명령어 설명서",
         "description": "",
         "responses": {
@@ -483,7 +631,9 @@
     },
     "/management/sublist/{guild_id}": {
       "get": {
-        "tags": ["management"],
+        "tags": [
+          "Management"
+        ],
         "summary": "부계정 목록 조회",
         "description": "",
         "parameters": [
@@ -508,7 +658,9 @@
     },
     "/management/subaccount/{guild_id}": {
       "post": {
-        "tags": ["management"],
+        "tags": [
+          "Management"
+        ],
         "summary": "부계정 등록",
         "description": "",
         "parameters": [
@@ -554,7 +706,9 @@
         }
       },
       "delete": {
-        "tags": ["management"],
+        "tags": [
+          "Management"
+        ],
         "summary": "부계정 삭제",
         "description": "",
         "parameters": [
@@ -596,7 +750,9 @@
     },
     "/management/accountstatus/{guild_id}": {
       "put": {
-        "tags": ["management"],
+        "tags": [
+          "Management"
+        ],
         "summary": "계정 탈퇴 여부 변경",
         "description": "",
         "parameters": [
@@ -641,7 +797,9 @@
     },
     "/management/accountname/{guild_id}": {
       "put": {
-        "tags": ["management"],
+        "tags": [
+          "Management"
+        ],
         "summary": "계정 이름 변경",
         "description": "",
         "parameters": [
@@ -689,7 +847,9 @@
     },
     "/replay/{guild_id}": {
       "post": {
-        "tags": ["replay"],
+        "tags": [
+          "Replay"
+        ],
         "summary": "게임 리플레이 업로드",
         "description": "",
         "parameters": [
@@ -730,11 +890,11 @@
             }
           }
         }
-      }
-    },
-    "/replay/{game_id}/{guild_id}": {
+      },
       "delete": {
-        "tags": ["replay"],
+        "tags": [
+          "Replay"
+        ],
         "summary": "게임 리플레이 삭제",
         "description": "",
         "parameters": [
@@ -762,12 +922,31 @@
           "500": {
             "description": "Internal Server Error"
           }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "sub_name": {
+                    "example": "any"
+                  },
+                  "sub_name_tag": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
     "/event/{year}/{month}/{guild_id}": {
       "get": {
-        "tags": ["event"],
+        "tags": [
+          "Event"
+        ],
         "summary": "이번달 특정 조건(50승/150판) 여부 조회 및 달성시 DB에 저장",
         "description": "",
         "parameters": [
@@ -795,7 +974,6 @@
               "type": "string"
             }
           }
-
         ],
         "responses": {
           "200": {
@@ -805,6 +983,175 @@
             "description": "Internal Server Error"
           }
         }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "1399342035290554399"
+          },
+          "username": {
+            "type": "string",
+            "example": "디스코드닉네임"
+          },
+          "avatar": {
+            "type": "string",
+            "example": "358700201192134543.jpg"
+          }
+        }
+      },
+      "Guild": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "123456789123456789(guild_id)"
+          },
+          "name": {
+            "type": "string",
+            "example": "개발자 커뮤니티"
+          },
+          "icon": {
+            "type": "string",
+            "example": "936081442994464879.jpg"
+          },
+          "owner": {
+            "type": "boolean",
+            "example": true
+          },
+          "permissions": {
+            "type": "string",
+            "example": "37000000"
+          }
+        }
+      },
+      "SubAccountAdd": {
+        "type": "object",
+        "properties": {
+          "sub_name": {
+            "type": "string",
+            "example": "부계정_이름"
+          },
+          "sub_name_tag": {
+            "type": "string",
+            "example": "KR1"
+          },
+          "main_name": {
+            "type": "string",
+            "example": "본계정_이름"
+          },
+          "main_name_tag": {
+            "type": "string",
+            "example": "KR1"
+          }
+        },
+        "required": [
+          "sub_name",
+          "sub_name_tag",
+          "main_name",
+          "main_name_tag"
+        ]
+      },
+      "SubAccountDelete": {
+        "type": "object",
+        "properties": {
+          "sub_name": {
+            "type": "string",
+            "example": "삭제할_부계정_이름"
+          },
+          "sub_name_tag": {
+            "type": "string",
+            "example": "KR1"
+          }
+        },
+        "required": [
+          "sub_name",
+          "sub_name_tag"
+        ]
+      },
+      "AccountStatusUpdate": {
+        "type": "object",
+        "properties": {
+          "delete_yn": {
+            "type": "string",
+            "example": "Y or N"
+          },
+          "riot_name": {
+            "type": "string",
+            "example": "소환사_이름"
+          },
+          "riot_name_tag": {
+            "type": "string",
+            "example": "KR1"
+          }
+        },
+        "required": [
+          "delete_yn",
+          "riot_name",
+          "riot_name_tag"
+        ]
+      },
+      "AccountNameUpdate": {
+        "type": "object",
+        "properties": {
+          "old_name": {
+            "type": "string",
+            "example": "기존_소환사_이름"
+          },
+          "old_name_tag": {
+            "type": "string",
+            "example": "KR1"
+          },
+          "new_name": {
+            "type": "string",
+            "example": "새_소환사_이름"
+          },
+          "new_name_tag": {
+            "type": "string",
+            "example": "KR1"
+          }
+        },
+        "required": [
+          "old_name",
+          "old_name_tag",
+          "new_name",
+          "new_name_tag"
+        ]
+      },
+      "ReplayUpload": {
+        "type": "object",
+        "properties": {
+          "fileUrl": {
+            "type": "string",
+            "example": "http://example.com/replay.zip"
+          },
+          "fileName": {
+            "type": "string",
+            "example": "game-replay-123.zip"
+          },
+          "createUser": {
+            "type": "string",
+            "example": "닉네임#1234"
+          }
+        },
+        "required": [
+          "fileUrl",
+          "fileName",
+          "createUser"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "sessionCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "session_uid",
+        "description": "로그인 후 발급받은 세션 쿠키"
       }
     }
   }
