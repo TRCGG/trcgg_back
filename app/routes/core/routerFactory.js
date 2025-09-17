@@ -12,6 +12,7 @@ class RouterFactory {
       guild: require('../guildRoutes'),
       championShip: require('../championShipRoutes'),
       clanMatch: require('../clanMatchRoutes'),
+      auth: require('../discordAuthRoutes'),
     };
 
     if (!routers[type]) {

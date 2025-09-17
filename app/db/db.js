@@ -81,8 +81,17 @@ const queryOne = async (text, params = []) => {
   return results[0];
 };
 
+/**
+ * 트랜잭션을 위해 클라이언트 연결을 가져오는 함수 
+ * @returns {Promise<Client>} - 클라이언트 객체
+ */
+const getClient = async () => {
+  return pool.connect();
+};
+
 module.exports = {
   query,
   queryOne,
   testConnection,
+  getClient,
 };
