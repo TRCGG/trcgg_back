@@ -269,10 +269,10 @@ const getRecordByGame = async (game_id, guild_id) => {
         FROM Player_game AS pg  
         JOIN Player AS p ON pg.player_id = p.player_id
         JOIN Champion c ON pg.champion_id = c.champion_id
-        JOIN Summoner_spell AS sp1 ON pg.summoner_spell_1 = sp1.id
-		    JOIN Summoner_spell AS sp2 ON pg.summoner_spell_2 = sp2.id
-        JOIN Perks AS keystone ON pg.keystone_id = keystone.id
-		    JOIN Perks AS substyle ON pg.perk_sub_style = substyle.id
+        LEFT JOIN Summoner_spell AS sp1 ON pg.summoner_spell_1 = sp1.id
+		    LEFT JOIN Summoner_spell AS sp2 ON pg.summoner_spell_2 = sp2.id
+        LEFT JOIN Perks AS keystone ON pg.keystone_id = keystone.id
+		    LEFT JOIN Perks AS substyle ON pg.perk_sub_style = substyle.id
        WHERE LOWER(pg.game_id) = LOWER($1)
          AND p.guild_id = $2
          AND p.delete_yn = 'N'         
@@ -340,10 +340,10 @@ const getRecentGamesByRiotName = async (riot_name, riot_name_tag, guild_id) => {
         FROM Player_game AS pg  
         JOIN Player AS p ON pg.player_id = p.player_id
         JOIN Champion c ON pg.champion_id = c.champion_id
-        JOIN Summoner_spell AS sp1 ON pg.summoner_spell_1 = sp1.id
-		    JOIN Summoner_spell AS sp2 ON pg.summoner_spell_2 = sp2.id
-        JOIN Perks AS keystone ON pg.keystone_id = keystone.id
-		    JOIN Perks AS substyle ON pg.perk_sub_style = substyle.id
+        LEFT JOIN Summoner_spell AS sp1 ON pg.summoner_spell_1 = sp1.id
+		    LEFT JOIN Summoner_spell AS sp2 ON pg.summoner_spell_2 = sp2.id
+        LEFT JOIN Perks AS keystone ON pg.keystone_id = keystone.id
+		    LEFT JOIN Perks AS substyle ON pg.perk_sub_style = substyle.id
        WHERE p.riot_name = $1
     `;
   const params = [riot_name, guild_id];
