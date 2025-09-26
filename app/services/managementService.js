@@ -33,8 +33,8 @@ class managementService extends AccountService {
     // 관리자 명령어
     const field_three_value =
       ":star: #태그 필요 \n" +
-      ":star: 관리자 권한 필요(TRC관리자 역할이름)\n" +
-      ":star: 닉네임 띄어쓰기, 대소문자 구분 필수!! \n" +
+      ":star: 관리자 권한: 디스코드 서버관리 권한 OR 내전봇관리자 이름의 역할 소유\n" +
+      ":star: 닉네임 띄어쓰기, 대소문자 구분 필수! \n" +
       "`!탈퇴 [닉네임#태그]` 계정 탈퇴, 전적 검색 제외 \n" +
       "`!복귀 [닉네임#태그]` 계정 복구, 전적 검색 포함 \n" +
       "`!부캐목록` 등록된 모든 부계정 목록 \n" +
