@@ -74,7 +74,7 @@ class AuthService {
       });
 
       // 프론트에 redirect 주소
-      res.redirect("http://localhost:24001/");
+      res.redirect("http://localhost:3000/");
     } catch (err) {
       console.error("[OAuth2 callback error]", err.response?.data || err);
       res.status(500).send("OAuth2 Callback Failed");
