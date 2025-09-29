@@ -7,10 +7,10 @@
   },
   "servers": [
     { 
-      "url": "http://13.124.155.65:24002"
+      "url": "http://13.124.155.65:19901"
     },   
     {
-      "url": "http://localhost:24002"
+      "url": "http://localhost:19901"
     }
   ],
   "tags": [
