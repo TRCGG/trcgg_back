@@ -72,9 +72,14 @@ class AuthService {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
       });
-
+      
       // 프론트에 redirect 주소
-      res.redirect("http://localhost:3000/");
+      if(process.env.NODE_ENV === "development") {
+        res.redirect("http://localhost:3000/");
+      } else {
+        res.redirect("https://gtrix.pages.dev/");
+      }
+
     } catch (err) {
       console.error("[OAuth2 callback error]", err.response?.data || err);
       res.status(500).send("OAuth2 Callback Failed");

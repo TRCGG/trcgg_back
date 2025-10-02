@@ -134,7 +134,6 @@ const postAuthSession = async (params) => {
       RETURNING session_uid
     `, params
   );
-  console.log('result', result);
   return result[0];
 }
 
