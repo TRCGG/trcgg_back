@@ -66,18 +66,21 @@ class AuthService {
       // 2. 새로운 세션 생성 및 DB에 저장
       const sessionParams = [user.id, req.headers["user-agent"], req.ip || req.connection.remoteAddress, "Web"];
       const session = await mapper.postAuthSession(sessionParams);
-
+      
       // 3. 세션 UID를 쿠키에 저장
       res.cookie("session_uid", session.session_uid, {
+        domain: ".gmok.kr",
+        path: "/",
+        secure: true,
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        sameSite: "None",
       });
       
       // 프론트에 redirect 주소
       if(process.env.NODE_ENV === "development") {
-        res.redirect("http://localhost:3000/");
+        res.redirect("https://dev.gmok.kr/");
       } else {
-        res.redirect("https://gtrix.pages.dev/");
+        res.redirect("https://gmok.kr");
       }
 
     } catch (err) {
